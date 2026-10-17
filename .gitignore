@@ -6,3 +6,5 @@ playwright-report/
 asset-contact-sheet.jpg
 docs/inspection/
 *.log
+__pycache__/
+*.pyc
