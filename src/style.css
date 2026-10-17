@@ -193,3 +193,8 @@
 .zbtn svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round}
 .zbtn:active{transform:scale(.92)}
 .zval{color:#ffe08a;font-weight:900;font-size:.95cqw}
+
+.tile.boss{position:relative;background:linear-gradient(#c0392b,#7a1d12);border-color:#5a120a;box-shadow:inset 0 .3cqw 0 #ff7a5c,0 .35cqw 0 #4a0f08,0 0 1.2cqw #ff5a2a88}
+.tile.boss img{width:24%;filter:drop-shadow(0 .1cqw .1cqw #0008)}
+.tile.boss small{color:#ffe08a;font-weight:900;font-size:1.25cqw;letter-spacing:.1em}
+.tile.boss em{font-style:normal;color:#fff;font-size:.78cqw;font-weight:800}

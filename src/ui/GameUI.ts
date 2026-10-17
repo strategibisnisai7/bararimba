@@ -78,6 +78,7 @@ export class GameUI {
       case 'region': v === 'jawa' ? this.show('levels') : this.toast('Wilayah ini segera hadir. Selesaikan Jawa dulu!'); break;
       case 'select': {
         const id = Number(v);
+        if (id === REGION.boss) { this.toast('Lawan Bos Jawa — segera hadir!'); break; }
         if (!store.unlocked(id) || id > LEVELS.length) { this.toast(id > LEVELS.length ? 'Level ini segera hadir.' : 'Selesaikan level sebelumnya untuk membuka.'); break; }
         this.selected = id; this.show('levels'); break;
       }
@@ -155,6 +156,7 @@ export class GameUI {
   private levelsHtml() {
     const tiles = Array.from({ length: REGION.total }, (_, i) => {
       const id = i + 1, exists = id <= LEVELS.length, open = exists && store.unlocked(id), s = store.progress.stars[id] ?? 0;
+      if (id === REGION.boss) return `<button class="tile boss" data-a="select" data-v="${id}" aria-label="Lawan bos, segera hadir"><img src="${A('alert')}" alt=""/><small>BOS</small><em>Segera hadir</em></button>`;
       if (!open) return `<button class="tile locked" data-a="select" data-v="${id}" aria-label="Level ${id} terkunci"><img src="${A('lock')}" alt=""/></button>`;
       return `<button class="tile ${id === this.selected ? 'sel' : ''}" data-a="select" data-v="${id}" aria-label="Level ${id}"><b>${id}</b><span class="tile-stars">${[0, 1, 2].map(k => `<i class="${k < s ? 'on' : ''}"></i>`).join('')}</span></button>`;
     }).join('');

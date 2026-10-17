@@ -322,7 +322,14 @@ export class LevelScene extends Phaser.Scene {
     for (const p of w.props) {
       if (p.gone || p.floating) continue;
       const b = p.body.bounds;
-      if (p.body.position.x > x && b.max.y > w.groundAt(p.body.position.x) - 50) front(b.min.x - 8 - half, 'prop');
+      if (p.body.position.x <= x || b.max.y < w.groundAt(p.body.position.x) - 50) continue;
+      // Light crates and logs are shoved by the bumper; boulders are too heavy and block the road.
+      const touching = b.min.x - 8 - half - x < 4;
+      if (p.kind !== 'boulder' && touching && drive > 0) {
+        this.matter.body.setVelocity(p.body, { x: Math.max(p.body.velocity.x, .5 * this.truck.v / 60 + .4), y: p.body.velocity.y });
+        continue;
+      }
+      front(b.min.x - 8 - half, p.kind === 'boulder' ? 'boulder' : 'prop');
     }
     if (w.seesaw) front(w.seesaw.x - 140 - half, 'mechanism');
     max = Math.max(max, x - .01); min = Math.min(min, x + .01);
@@ -333,6 +340,7 @@ export class LevelScene extends Phaser.Scene {
         fire: 'Hindari api! Padamkan dulu sebelum lewat.',
         river: this.def.floatGap && !w.bridged ? 'Jalan terputus! Semprot benda kayu ke celah supaya mengapung jadi pijakan.' : 'Ada sungai di depan. Semprot dari sini!',
         prop: 'Jalan terhalang! Dorong dengan semprotan air.',
+        boulder: 'Batu terlalu berat untuk truk. Dorong dengan semprotan air!',
         wall: 'Tebing terlalu tinggi. Semprot dari sini!',
         mechanism: 'Ada mekanisme di depan. Gunakan semprotan air!',
       };

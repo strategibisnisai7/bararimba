@@ -95,7 +95,11 @@ export class WaterSystem {
     for (const f of fires) if (f.contains(nx, top - 4)) { this.onFire(f, nx, top - 4); this.kill(p); return; }
     // Wall ahead below the current water surface: the drop is held back, so the pool fills up.
     const wall = firstHit({ x: p.x, y: top - 1 }, { x: nx + Math.sign(p.vx) * 2, y: top - 1 }, this.surfaces);
-    if (wall && wall.surface.kind !== 'river') { p.vx = -p.vx * .3; p.y = top; return; }
+    if (wall && wall.surface.kind !== 'river') {
+      // Running water carries momentum: it shoves loose objects it piles against.
+      if (wall.surface.kind === 'prop') this.onHit(wall, { vx: p.vx * 2.5, vy: 0 });
+      p.vx = -p.vx * .3; p.y = top; return;
+    }
     p.x = nx;
     if (this.absorb?.(p.x, top)) { this.kill(p); return; }
     // Follow the ground; with nothing beneath, pour over the edge as a falling drop again.

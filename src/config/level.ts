@@ -30,5 +30,5 @@ export const ASSETS: Record<string, string> = {
   'barrel-blue': 'props/barrel-blue', gear: 'props/gear', trough: 'props/trough', seesaw: 'props/seesaw', button: 'props/button', fence: 'props/fence', plank: 'props/plank', stump: 'props/stump', 'water-tower': 'props/water-tower',
   'sign-water': 'ui/sign-water',
   orangutan: 'animals/orangutan', bekantan: 'animals/bekantan', rangkong: 'animals/rangkong', beruang: 'animals/beruang',
-  rusa: 'animals/rusa', trenggiling: 'animals/trenggiling', 'raja-udang': 'animals/raja-udang', 'kura-kura': 'animals/kura-kura', gajah: 'animals/gajah', pivot: 'props/pivot', bucket: 'props/bucket', pulley: 'props/pulley',
+  rusa: 'animals/rusa', trenggiling: 'animals/trenggiling', 'raja-udang': 'animals/raja-udang', 'kura-kura': 'animals/kura-kura', gajah: 'animals/gajah', 'babi-hutan': 'animals/babi-hutan', buaya: 'animals/buaya', komodo: 'animals/komodo', ular: 'animals/ular', berang: 'animals/berang', pivot: 'props/pivot', bucket: 'props/bucket', pulley: 'props/pulley',
 };

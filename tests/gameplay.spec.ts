@@ -20,6 +20,8 @@ test('menu shows all Game Board entries and every screen opens', async ({ page }
   await expect(page.locator('.region')).toHaveCount(5);
   await page.locator('.region.open').click();
   await expect(page.locator('.tile')).toHaveCount(15);
+  await expect(page.locator('.tile.boss')).toHaveCount(1);
+  await expect(page.locator('.tile.boss')).toContainText('Segera hadir');
   await page.locator('[data-a=menu]').click();
   await page.locator('[data-a=collection]').click();
   await expect(page.locator('.animal-card')).toHaveCount(14);
