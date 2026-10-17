@@ -113,9 +113,15 @@ export class LevelScene extends Phaser.Scene {
     this.water = new WaterSystem(this, this.world.surfaces, () => this.fires.burning,
       (hit, d) => this.onWaterHit(hit, d), (f, x, y) => this.onWaterFire(f, x, y), (x, y) => this.effects.mist(x, y), this.def.supply);
     if (this.def.boss) this.boss = new Boss(this, this.def.boss, this.effects);
-    this.water.absorb = (x, y) => (!!this.world.basin && this.world.absorb(x, y)) || this.world.catchBucket(x, y);
+    this.water.absorb = (x, y) => (!!this.world.basin && this.world.absorb(x, y)) || this.world.catchBucket(x, y) || this.world.puzzles.absorb(x, y);
+    this.world.onPour = (x, y, vx, vy) => this.water.pour(x, y, vx, vy);
+    this.world.puzzles.onOpen = (_id, sw) => {
+      sound.win();
+      this.ui.toast(sw.kind === 'wheel' ? 'Kincir berputar! Pintu bendungan terbuka.' : sw.kind === 'button' ? 'Tombol tertekan! Pintu terbuka.' : 'Tepat sasaran! Pintu terbuka.', 2200);
+    };
+    this.world.puzzles.onRelease = () => { sound.splash(); this.ui.toast('Bendungan jebol! Air mengalir ke bawah.', 2400); };
     this.truck.update(0, 0, 0, 99999, x => this.world.groundAt(x), true);
-    this.zoom = this.zoomTarget = this.mode === 'attract' ? 1 : .5;
+    this.zoom = this.zoomTarget = this.mode === 'attract' ? 1 : store.settings.zoom / 100;
     this.ui.setZoomLevel(this.zoomTarget);
     this.cam = this.mode === 'attract' ? 600 : this.camX(this.truck.x + 330);
     this.applyCamera();
@@ -173,9 +179,10 @@ export class LevelScene extends Phaser.Scene {
     if (s.kind === 'prop') this.world.push(s.body, hit.point, d.vx, d.vy);
     if (s.kind === 'barrel' && this.world.barrel) {
       const b = this.world.barrel;
-      this.world.push(s.body, hit.point, d.vx * 1.4, d.vy);
+      if (b.load !== 'crate') this.world.push(s.body, hit.point, d.vx * 1.4, d.vy);   // a hanging crate only takes rope damage, so it drops straight
       if (b.rope && --b.hp <= 0) { this.world.breakRope(); this.ui.toast('Tali putus! Tong air jatuh…', 1800); sound.click(); }
     }
+    if (s.kind === 'switch') this.world.puzzles.hit(s);
     const wh = this.world.wheel;
     if (s.kind === 'wheel' && wh) {
       // Torque from the impact offset crossed with the drop velocity.
@@ -245,7 +252,8 @@ export class LevelScene extends Phaser.Scene {
     const lim = this.mode === 'playing' ? this.driveLimits(drive) : { min: this.truck.x, max: this.truck.x };
     this.truck.update(dt, drive, lim.min, lim.max, x => this.world.groundAt(x));
     // Camera: intro flies over all fires and the animal, then settles behind the truck.
-    if (this.ui.zoomRequest) { this.setZoom(this.zoomTarget + this.ui.zoomRequest * .15); this.ui.zoomRequest = 0; }
+    if (this.ui.zoomRequest) { this.setZoom(this.zoomTarget + this.ui.zoomRequest * .1); this.ui.zoomRequest = 0; }
+    if (this.mode !== 'attract' && Math.abs(store.settings.zoom / 100 - this.zoomTarget) > .001) this.zoomTarget = store.settings.zoom / 100;
     this.zoom += (this.zoomTarget - this.zoom) * Math.min(1, dt * 8);
     let goal = this.camX(this.truck.x + 330 / this.zoom);
     if (this.mode === 'attract') goal = 600;
@@ -272,11 +280,12 @@ export class LevelScene extends Phaser.Scene {
     if (wh) {
       wh.w *= 1 - Math.min(1, .7 * dt);
       wh.sprite.rotation += wh.w * dt;
+      wh.spun += Math.max(0, wh.w) * dt;
       const spin = Math.abs(wh.w);
-      if (wh.w > .9) {   // clockwise (driven from the truck side) tips water off the far edge
+      if (wh.out && wh.w > .9) {   // clockwise (driven from the truck side) tips water off the far edge
         if (!this.wheelPouring && this.mode === 'playing') { this.wheelPouring = true; this.ui.toast('Kincir berputar! Air tertuang ke balik tebing.', 2200); }
         this.pourAcc += dt * Math.min(70, spin * 11);
-        while (this.pourAcc >= 1) { this.pourAcc--; this.water.pour(wh.out.x + Math.random() * 6, wh.out.y, wh.out.vx * (.8 + Math.random() * .4), 30); }
+        while (this.pourAcc >= 1) { this.pourAcc--; this.water.pour(wh.out!.x + Math.random() * 6, wh.out!.y, wh.out!.vx * (.8 + Math.random() * .4), 30); }
       } else this.wheelPouring = false;
     }
     if (this.mode === 'playing') this.updateRules(dt);
@@ -288,6 +297,7 @@ export class LevelScene extends Phaser.Scene {
   }
   private setZoom(z: number) {
     this.zoomTarget = clamp(Math.round(z * 100) / 100, .5, 1);
+    store.settings.zoom = Math.round(this.zoomTarget * 100); store.save();
     this.ui.setZoomLevel(this.zoomTarget);
   }
   /** Clamp a camera centre so the view never leaves the world, at the current zoom. */
@@ -331,6 +341,7 @@ export class LevelScene extends Phaser.Scene {
       const top = w.surfaceAt(px);
       if (top === null) return 'river';
       if (top < ref - STEP_UP) return 'wall';
+      if (w.puzzles.gateBlocks(px, top)) return 'gate';
       if (w.ceilingAt(px) > top - CLEARANCE) return 'wall';
       return '';
     };
@@ -376,6 +387,7 @@ export class LevelScene extends Phaser.Scene {
         boulder: 'Batu terlalu berat untuk truk. Dorong dengan semprotan air!',
         wall: 'Tebing terlalu tinggi. Semprot dari sini!',
         mechanism: 'Ada mekanisme di depan. Gunakan semprotan air!',
+        gate: 'Pintu tertutup! Cari sakelar untuk membukanya.',
       };
       this.ui.toast(msg[blocker], 2200);
     }
@@ -417,6 +429,8 @@ export class LevelScene extends Phaser.Scene {
       const { x, y } = b.body.position;
       this.effects.bigSplash(x, y + 20); sound.splash();
       if (b.load === 'barrel') this.fires.douse(x, y, 175, 1.6);
+      const onButton = b.load === 'crate' && (this.def.switches ?? []).some(sw => sw.kind === 'button' && Math.abs(sw.x - x) < 70);
+      if (onButton) { this.matter.body.setStatic(b.body, true); return; }
       this.matter.world.remove(b.body); b.surface.enabled = false;
       this.tweens.add({ targets: b.sprite, alpha: 0, scale: .6, duration: 400 });
     }

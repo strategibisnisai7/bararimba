@@ -2,7 +2,7 @@ import type { Point } from '../config/level';
 
 export interface Surface {
   body: MatterJS.BodyType;
-  kind: 'terrain' | 'bridge' | 'river' | 'prop' | 'barrel' | 'wheel';
+  kind: 'terrain' | 'bridge' | 'river' | 'prop' | 'barrel' | 'wheel' | 'switch';
   enabled: boolean;
 }
 /** `normal` is the unit normal of the struck edge, facing back toward the segment start. */

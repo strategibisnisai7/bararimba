@@ -28,6 +28,7 @@ export class GameUI {
   sprayHeld = false;
   /** Pending zoom steps from the HUD buttons (+1 in, -1 out), consumed by the scene. */
   zoomRequest = 0;
+  private autoFsDone = false;
   private root = document.querySelector<HTMLDivElement>('#ui')!;
   private screen: HTMLDivElement;
   private overlay: HTMLDivElement;
@@ -121,6 +122,9 @@ export class GameUI {
     } catch { this.toast('Layar penuh tidak didukung browser ini. Gunakan "Tambahkan ke layar utama".', 3000); }
   }
   private autoFullscreen() {
+    // Only once per session: the browser shows its own "exit full screen" hint every time fullscreen starts.
+    if (this.autoFsDone) return;
+    this.autoFsDone = true;
     if (!document.fullscreenElement && matchMedia('(pointer: coarse)').matches && document.fullscreenEnabled) void this.toggleFullscreen();
   }
   private closeOverlay() { this.overlay.hidden = true; this.overlay.innerHTML = ''; }
@@ -225,6 +229,7 @@ export class GameUI {
         <button class="hit" style="left:85%;top:4%;width:13%;height:14%" data-a="close-settings" aria-label="Tutup"></button>
         ${[['music', 'Musik', 28], ['sfx', 'Efek Suara', 40.8]].map(([k, label, top]) => `
           <label class="set-row slider" style="top:${top}%"><input type="range" min="0" max="100" value="${s[k as 'music']}" data-k="${k}" aria-label="${label}"/><span class="pct">${s[k as 'music']}%</span></label>`).join('')}
+        <div class="set-zoom"><span>Zoom kamera</span><button data-a="cycle" data-k="zoom" data-v="-1" aria-label="Perkecil">‹</button><span class="pill">${s.zoom}%</span><button data-a="cycle" data-k="zoom" data-v="1" aria-label="Perbesar">›</button></div>
         ${[['quality', s.quality, 55.2], ['control', s.control, 69.1], ['language', s.language, 83]].map(([k, val, top]) => `
           <div class="set-row cycle" style="top:${top}%"><button data-a="cycle" data-k="${k}" data-v="-1" aria-label="Sebelumnya">‹</button><span class="pill">${val}</span><button data-a="cycle" data-k="${k}" data-v="1" aria-label="Berikutnya">›</button></div>`).join('')}
       </div>`;
@@ -237,6 +242,7 @@ export class GameUI {
     this.overlay.querySelectorAll<HTMLInputElement>('input[type=range]').forEach(inp => inp.style.setProperty('--v', `${inp.value}%`));
   }
   private cycle(k: string, dir: number) {
+    if (k === 'zoom') { store.settings.zoom = Math.max(50, Math.min(100, store.settings.zoom + dir * 10)); store.save(); this.openSettings(); return; }
     const opts: Record<string, string[]> = { quality: ['Rendah', 'Sedang', 'Tinggi'], control: ['Sentuh', 'Mouse'], language: ['Indonesia'] };
     const list = opts[k]; const cur = (store.settings as unknown as Record<string, string>)[k];
     const next = list[(list.indexOf(cur) + dir + list.length) % list.length];
@@ -274,11 +280,6 @@ export class GameUI {
         <div class="chip timer" role="timer" aria-label="Waktu standar"><span class="clock"></span><b class="tval">0:00</b><small class="tlabel">WAKTU</small></div>
       </div>
       <div class="hud-objective"><img src="${A('objective-panel')}" alt=""/><b class="count">0/0</b></div>
-      <div class="zoom" role="group" aria-label="Zoom kamera">
-        <button class="zbtn" data-a="zoom-in" aria-label="Perbesar (Z)"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6.5"/><path d="M15 15l5.5 5.5M7 10h6M10 7v6"/></svg></button>
-        <span class="zval">50%</span>
-        <button class="zbtn" data-a="zoom-out" aria-label="Perkecil (X)"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6.5"/><path d="M15 15l5.5 5.5M7 10h6"/></svg></button>
-      </div>
       <div class="hud-actions">
         <button class="round" data-a="help" aria-label="Petunjuk"><img src="${A('gb-hint')}" alt=""/></button>
         <button class="round" data-a="ask-restart" aria-label="Ulang level"><img src="${A('gb-reset')}" alt=""/></button>

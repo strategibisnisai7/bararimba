@@ -1,17 +1,17 @@
 [
  {
-  "key": "theme/p-fill",
-  "source": "Prambanan Temple Ruins Tileset.png",
+  "key": "props/target",
+  "source": "16.png",
   "rect": [
-   44,
-   338,
-   176,
-   46
+   1101,
+   40,
+   115,
+   116
   ],
-  "method": "raw",
+  "method": "main",
   "size": [
-   176,
-   46
+   115,
+   116
   ]
  }
 ]

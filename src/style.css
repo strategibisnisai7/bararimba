@@ -289,3 +289,10 @@
   .hud.boss-mode .bh-pause{width:11cqh}
   .hud.boss-mode .bh-reload,.hud.boss-mode .bh-wait{font-size:2cqh}
 }
+
+.set-zoom{position:absolute;left:6%;right:6%;bottom:-9%;display:flex;align-items:center;gap:.8cqw;padding:.6cqw 1.2cqw;border-radius:1cqw;background:#fde3b3;border:.2cqw solid #b88b52;box-shadow:0 .3cqw .6cqw #0005}
+.set-zoom>span:first-child{flex:1;color:#4a2a0f;font-weight:900;font-size:1.4cqw}
+.set-zoom button{border:0;background:none;color:#1f6fe0;font-size:3cqw;font-weight:900;line-height:1;padding:0 .6cqw}
+.set-zoom .pill{min-width:8cqw;padding:.45cqw 0;text-align:center;border-radius:.9cqw;background:linear-gradient(#3aa0ff,#1667d8);border:.18cqw solid #0d4fb0;color:#fff;font-weight:900;font-size:1.4cqw}
+#ui[data-screen=game] .fs-btn{top:7.5cqw}
+@media (pointer: coarse){#ui[data-screen=game] .fs-btn{top:14cqh}}

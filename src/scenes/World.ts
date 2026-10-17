@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import type { LevelDef } from '../config/levels';
 import type { Surface } from '../physics/collision';
 import type { Fuel } from '../systems/FireSystem';
+import { Puzzles } from './Puzzles';
 
 interface ThemeStyle {
   sky: [number, number]; bed: [number, number]; far: number; mid: number; haze: number;
@@ -19,7 +20,7 @@ const THEMES: Record<string, ThemeStyle> = {
     props: [{ key: 'v-rock', scale: .8 }, { key: 'v-spire', scale: .8 }, { key: 'v-tree', scale: .8 }], particles: 'embers' },
 };
 
-export interface Prop { kind: string; body: MatterJS.BodyType; sprite: Phaser.GameObjects.Image; surface: Surface; gone: boolean; floating?: { x: number; y: number; t: number } }
+export interface Prop { kind: string; body: MatterJS.BodyType; sprite: Phaser.GameObjects.Image; surface: Surface; gone: boolean; floating?: { x: number; y: number; t: number }; plug?: boolean }
 interface Layer { image: Phaser.GameObjects.Image; x: number; factor: number }
 
 /** Builds a level's scenery and collision from data. Every visual comes from a sliced source sprite. */
@@ -47,7 +48,10 @@ export class World {
     button: Phaser.GameObjects.Image; fence: Phaser.GameObjects.Image; roof: Phaser.GameObjects.Image; pressed: boolean; overflow: boolean;
   };
   onButton?: () => void;
-  wheel?: { cx: number; cy: number; r: number; w: number; sprite: Phaser.GameObjects.Image; out: { x: number; y: number; vx: number }; surface: Surface };
+  wheel?: { cx: number; cy: number; r: number; w: number; spun: number; sprite: Phaser.GameObjects.Image; out?: { x: number; y: number; vx: number }; surface: Surface };
+  puzzles!: Puzzles;
+  /** Emits free water (reservoirs, basin overflow); wired to the water system by the scene. */
+  onPour?: (x: number, y: number, vx: number, vy: number) => void;
 
   readonly theme: ThemeStyle;
   private weather?: Phaser.GameObjects.Particles.ParticleEmitter;
@@ -117,11 +121,13 @@ export class World {
       const body = scene.matter.add.circle(wd.x, wd.y, wd.r, { isStatic: true, label: 'wheel' });
       const surface: Surface = { body, kind: 'wheel', enabled: true };
       this.surfaces.push(surface);
-      this.wheel = { cx: wd.x, cy: wd.y, r: wd.r, w: 0, sprite, out: wd.out, surface };
+      this.wheel = { cx: wd.x, cy: wd.y, r: wd.r, w: 0, spun: 0, sprite, out: wd.out, surface };
     }
+    this.puzzles = new Puzzles(scene, this, def);
+    this.puzzles.onPour = (x, y, vx, vy) => this.onPour?.(x, y, vx, vy);
     if (T.props.length) {
       // Scatter themed props along walkable ground, away from fires and mechanisms.
-      const busy = [...def.fires.map(f => f.x), def.animal.x, def.refill?.x ?? -999, def.seesaw?.x ?? -999, def.hang?.anchorX ?? -999, def.wheel?.x ?? -999];
+      const busy = [...def.fires.map(f => f.x), ...(def.gates ?? []).map(g => g.x), ...(def.switches ?? []).map(w => w.x), ...(def.reservoirs ?? []).map(r => r.x1), def.animal.x, def.refill?.x ?? -999, def.seesaw?.x ?? -999, def.hang?.anchorX ?? -999, def.wheel?.x ?? -999];
       let i = 0;
       for (const l of def.lands) for (let x = l.x0 + 90; x < l.x1 - 60; x += 260 + (i * 71) % 120) {
         if (busy.some(b => Math.abs(b - x) < 110) || x < 520) continue;
@@ -339,14 +345,14 @@ export class World {
   /** Drops entering the basin's water join its volume. */
   absorb = (x: number, y: number) => {
     const b = this.def.basin, st = this.basin;
-    if (!b || !st || x <= b.x0 || x >= b.x1 || y < st.level - 3 || y > b.floor) return false;
+    if (!b || !st || x <= b.x0 - 6 || x >= b.x1 + 6 || y < st.level - 3 || y > b.floor) return false;
     st.volume += 1;
     return true;
   };
   private updateBasin(dt: number) {
     const b = this.def.basin!, st = this.basin!;
     const depth = b.floor - b.lip;
-    st.volume = Math.max(0, st.volume - dt * 9);                 // slow seepage
+    st.volume = Math.max(0, st.volume - dt * 3);                 // slow seepage (kept low so partial hits still fill it)
     const maxVol = depth / .3;
     st.overflow = st.volume >= maxVol;
     st.volume = Math.min(st.volume, maxVol + 20);
@@ -362,6 +368,7 @@ export class World {
         x === b.x0 ? g.moveTo(x, y) : g.lineTo(x, y);
       }
       g.strokePath();
+      if (st.overflow && Math.random() < dt * 30) this.onPour?.(b.x1 + 6, b.lip - 6, 70 + Math.random() * 40, 0);
       if (st.overflow) for (let i = 0; i < 3; i++) g.fillStyle(0xd8f5ff, .8).fillCircle(b.x1 + 6 + Math.random() * 20, b.lip - 2 - Math.random() * 6, 2 + Math.random() * 2);
     }
     // Buoyancy (Matter gravity is mass * 0.001 per step at scale 1).
@@ -488,6 +495,7 @@ export class World {
       }
     }
     if (this.basin) this.updateBasin(dt);
+    this.puzzles.update(dt, this.wheel?.spun ?? 0);
     const wf = this.def.boss?.waterfall;
     if (this.fall && wf) {
       // Animated waterfall under the bridge: falling streaks and foam.

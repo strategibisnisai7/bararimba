@@ -120,6 +120,7 @@ A = [
     # --- mechanisms (sheet 8, 9) ---
     ('props/gear', '8.png', [7, 432, 198, 196], 'main'),
     ('props/pivot', '8.png', [893, 918, 86, 66], 'raw'),
+    ('props/target', '16.png', [1101, 40, 115, 116], 'main'),
     ('props/bucket', '9.png', [189, 860, 83, 138], 'main'),
     ('props/button', '8.png', [714, 56, 172, 117], 'main'),
     ('props/fence', '7.png', [1315, 840, 204, 148], 'main'),

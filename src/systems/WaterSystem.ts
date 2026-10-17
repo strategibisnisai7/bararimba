@@ -12,7 +12,7 @@ interface Drop {
 }
 const TINTS = [0x2f9ee8, 0x45b4f5, 0x6cc8ff, 0x9fdcff, 0xd6f2ff, 0x1f8ad6];
 const SOAK = 4.5;          // seconds a drop keeps running over ground before it has soaked away
-const FRICTION = 1.6;      // horizontal damping of running water, 1/s
+const FRICTION = .8;      // horizontal damping of running water, 1/s
 const COL = 6;             // width of a water column used for pooling, px
 const LAYER = 1.7;         // height one running drop adds to its column, px
 
@@ -34,7 +34,7 @@ export class WaterSystem {
     private onMist: (x: number, y: number) => void, readonly capacity: number) {
     this.supply = capacity;
     this.ribbon = scene.add.graphics().setDepth(39);
-    this.pool = Array.from({ length: 720 }, () => ({ x: 0, y: 0, vx: 0, vy: 0, life: 0, age: 0, size: 1, flow: 0, gy: 0,
+    this.pool = Array.from({ length: 900 }, () => ({ x: 0, y: 0, vx: 0, vy: 0, life: 0, age: 0, size: 1, flow: 0, gy: 0,
       img: scene.add.image(0, 0, 'p-drop').setVisible(false).setDepth(40) }));
   }
   step(dt: number, firing: boolean, n: Nozzle, unlimited = false) {
@@ -66,7 +66,7 @@ export class WaterSystem {
   }
   /** Turn an impact into running water, a slide down a wall, or a merge with the river. */
   private land(p: Drop, hit: Hit) {
-    if (hit.surface.kind === 'river') { this.kill(p); return; }
+    if (hit.surface.kind === 'river' || hit.surface.kind === 'switch') { this.kill(p); return; }
     const { normal: nrm, point } = hit;
     if (nrm.y < -.55) {            // floor: keep most of the horizontal momentum and start running
       p.x = point.x; p.y = point.y - 1.5; p.gy = point.y;

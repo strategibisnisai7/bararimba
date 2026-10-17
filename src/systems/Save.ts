@@ -1,10 +1,10 @@
 export type Quality = 'Rendah' | 'Sedang' | 'Tinggi';
-export interface Settings { music: number; sfx: number; quality: Quality; control: 'Sentuh' | 'Mouse'; language: 'Indonesia' }
+export interface Settings { music: number; sfx: number; quality: Quality; control: 'Sentuh' | 'Mouse'; language: 'Indonesia'; zoom: number }
 export interface Progress { stars: Record<number, number>; best: Record<number, number>; animals: string[]; tutorialSeen: boolean }
 
 const KEY = 'bararimba.v2';
 const defaults = (): { settings: Settings; progress: Progress } => ({
-  settings: { music: 40, sfx: 80, quality: 'Tinggi', control: 'Sentuh', language: 'Indonesia' },
+  settings: { music: 40, sfx: 80, quality: 'Tinggi', control: 'Sentuh', language: 'Indonesia', zoom: 80 },
   progress: { stars: {}, best: {}, animals: [], tutorialSeen: false },
 });
 
