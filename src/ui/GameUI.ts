@@ -45,12 +45,16 @@ export class GameUI {
       <div class="hud" hidden></div>
       <div class="screen"></div>
       <div class="overlay" hidden></div>
-      <div class="toast" role="status" aria-live="polite"></div>`;
+      <div class="toast" role="status" aria-live="polite"></div>
+      <button class="fs-btn" data-a="fullscreen" aria-label="Layar penuh"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>`;
     this.hudEl = this.root.querySelector('.hud')!;
     this.screen = this.root.querySelector('.screen')!;
     this.overlay = this.root.querySelector('.overlay')!;
     this.toastEl = this.root.querySelector('.toast')!;
     this.root.addEventListener('click', this.onClick);
+    const fsBtn = this.root.querySelector<HTMLElement>('.fs-btn')!;
+    const syncFs = () => { fsBtn.hidden = !document.fullscreenEnabled; fsBtn.setAttribute('aria-label', document.fullscreenElement ? 'Keluar layar penuh' : 'Layar penuh'); };
+    document.addEventListener('fullscreenchange', syncFs); syncFs();
     this.buildHud();
     this.show('menu');
   }
@@ -70,7 +74,8 @@ export class GameUI {
     this.c.unlockAudio(); this.c.click();
     const a = t.dataset.a!, v = t.dataset.v;
     switch (a) {
-      case 'play': this.show('levels'); break;
+      case 'play': this.autoFullscreen(); this.show('levels'); break;
+      case 'fullscreen': this.toggleFullscreen(); break;
       case 'map': this.show('map'); break;
       case 'collection': this.show('collection'); break;
       case 'settings': this.openSettings(); break;
@@ -106,6 +111,18 @@ export class GameUI {
       case 'cycle': this.cycle(t.dataset.k!, Number(v)); break;
     }
   };
+  /** Fullscreen + landscape lock where the browser allows it (Android Chrome; iOS needs "Add to Home Screen"). */
+  private async toggleFullscreen() {
+    try {
+      if (document.fullscreenElement) { await document.exitFullscreen(); return; }
+      await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
+      const o = screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> };
+      await o.lock?.('landscape').catch(() => {});
+    } catch { this.toast('Layar penuh tidak didukung browser ini. Gunakan "Tambahkan ke layar utama".', 3000); }
+  }
+  private autoFullscreen() {
+    if (!document.fullscreenElement && matchMedia('(pointer: coarse)').matches && document.fullscreenEnabled) void this.toggleFullscreen();
+  }
   private closeOverlay() { this.overlay.hidden = true; this.overlay.innerHTML = ''; }
 
   // ---------- menu (Game Board main menu) ----------

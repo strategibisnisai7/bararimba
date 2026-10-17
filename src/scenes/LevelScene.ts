@@ -291,15 +291,18 @@ export class LevelScene extends Phaser.Scene {
     this.ui.setZoomLevel(this.zoomTarget);
   }
   /** Clamp a camera centre so the view never leaves the world, at the current zoom. */
+  /** Half the visible world width/height at zoom 1 (the view widens on wide screens). */
+  private get viewHalfW() { return this.scale.width / RENDER_SCALE / 2; }
+  private get viewHalfH() { return this.scale.height / RENDER_SCALE / 2; }
   private camX(x: number) {
-    const half = 640 / this.zoom;
+    const half = this.viewHalfW / this.zoom;
     return this.def.width <= half * 2 ? this.def.width / 2 : clamp(x, half, this.def.width - half);
   }
   private applyCamera() {
     const cam = this.cameras.main;
     cam.setZoom(RENDER_SCALE * this.zoom);
     // Zoomed out, lift the view so the ground sits above the bottom HUD instead of under it.
-    cam.centerOn(this.cam, 720 - 360 / this.zoom + (1 - this.zoom) * 300);
+    cam.centerOn(this.cam, 720 - this.viewHalfH / this.zoom + (1 - this.zoom) * 300);
   }
   /** Menu backdrop only: ballistic angle from the nozzle to a point (the player always aims manually). */
   private solveTip(tx: number, ty: number, high = false) {
@@ -446,7 +449,7 @@ export class LevelScene extends Phaser.Scene {
         stars: [burning === 0, this.water.used <= this.def.waterBudget, over < 0],
         firing: this.firing, tip: this.truck.cannon.tipDegrees, boom: this.truck.cannon.boomPercent,
       });
-      this.ui.indicators(this.fires.burning.filter(f => Math.abs(f.def.x - this.cam) > 600 / this.zoom).map(f => ({ side: f.def.x > this.cam ? 1 : -1, y: 720 - (720 - (f.def.y - 60)) * this.zoom })));
+      this.ui.indicators(this.fires.burning.filter(f => Math.abs(f.def.x - this.cam) > (this.viewHalfW - 40) / this.zoom).map(f => ({ side: f.def.x > this.cam ? 1 : -1, y: 720 - (720 - (f.def.y - 60)) * this.zoom })));
     }
     if (this.boss) {
       this.ui.bossHud(this.pressure, this.water.supply / this.water.capacity * 100, this.truckHp, this.boss.hp / this.boss.max * 100, this.boss.fuel, this.boss.reloading, this.pressureLock, this.idleWater >= 10 && this.water.supply < this.water.capacity);

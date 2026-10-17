@@ -1,7 +1,7 @@
 :root{font-family:"Trebuchet MS","Segoe UI",Arial,sans-serif;color:#3b2410;background:#0f2a1f;font-synthesis:none;-webkit-font-smoothing:antialiased}
 *{box-sizing:border-box}body{margin:0}button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:none}button:focus-visible{outline:3px solid #ffd54a;outline-offset:3px}[hidden]{display:none!important}svg{display:block}
 #app{position:fixed;inset:0;display:grid;place-items:center;overflow:hidden;background:radial-gradient(ellipse at 50% 50%,#24503f,#0a211a);padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-#stage{position:relative;width:min(100%,177.7778dvh);aspect-ratio:16/9;max-height:100%;overflow:hidden;container-type:inline-size;box-shadow:0 20px 90px #0007;touch-action:none;user-select:none;-webkit-user-select:none}
+#stage{position:relative;width:100%;height:100%;overflow:hidden;container-type:inline-size;box-shadow:0 20px 90px #0007;touch-action:none;user-select:none;-webkit-user-select:none}
 #game,#ui{position:absolute;inset:0}#game canvas{display:block;touch-action:none}#ui{pointer-events:none}
 #ui .screen:not([hidden]),#ui .overlay:not([hidden]){pointer-events:auto}#ui .hud button{pointer-events:auto}
 .screen,.overlay{position:absolute;inset:0}
@@ -236,3 +236,56 @@
 .bh-fuel.reloading .bh-reload,.bh-reserve.waiting .bh-wait{display:block}
 .bh-fuel.reloading .bh-track span{background:linear-gradient(#9a9a9a,#666)}
 #ui.boss .toast{top:12.6cqw}
+
+.fs-btn{position:absolute;right:1.5cqw;top:1.2cqw;width:4.6cqw;height:4.6cqw;padding:.9cqw;border-radius:1cqw;border:.22cqw solid #4c2a10;background:linear-gradient(#a26b3b,#7b4b25);box-shadow:inset 0 .2cqw 0 #c78d55,0 .3cqw .6cqw #0006;color:#fff6e3;pointer-events:auto;z-index:6}
+.fs-btn svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+#ui[data-screen=game] .fs-btn{top:auto;bottom:auto;right:1.5cqw;top:22.8cqw;width:4cqw;height:4cqw}
+#ui.boss[data-screen=game] .fs-btn{top:23.6cqw}
+.fs-btn[hidden]{display:none}
+
+/* Wide screens: menus and dialogs live in a centred 16:9 box sized by screen height (cqw inside refers to
+   that box), while the game canvas and HUD use the full width. Dim backdrops still cover the whole screen. */
+#stage{container-type:size}
+.screen,.overlay{left:50%;right:auto;width:min(100%,177.7778cqh);transform:translateX(-50%);container-type:inline-size}
+.levels,.map,.scrim{left:-60vw;right:-60vw}
+.map .map-box{left:50%}
+
+/* ---------- Touch landscape: thumb-zone controls ----------
+   Left thumb drives (◀ ▶ bottom-left); right thumb sprays, with boom/nozzle columns beside the spray button.
+   Sizes follow screen height (cqh) so wide phones still get big targets. */
+@media (pointer: coarse){
+  .hud .drive{left:2.2cqw;bottom:4cqh;gap:2.4cqh}
+  .hud .drive .wood-btn{width:17cqh}
+  .hud.boss-mode .drive{left:2.2cqw;bottom:4cqh}
+  .hud .water-ind{left:1.5cqw;bottom:auto;top:23cqh;width:30cqh;height:8cqh}
+  .hud .water-ind>img{height:9cqh;top:-.5cqh}
+  .hud .wtrack{left:4cqh;top:1.4cqh;height:5.2cqh;padding-left:4cqh}
+  .hud .refill{top:-3.4cqh;font-size:2.6cqh}
+  .hud .aim{right:2cqw;bottom:3cqh;gap:1.6cqh;align-items:flex-end}
+  .hud .aim-group{padding:.8cqh .9cqh 1cqh;gap:.6cqh;border-radius:2cqh}
+  .hud .aim-group span{font-size:2.3cqh}
+  .hud .aim-group>div{flex-direction:column;gap:1cqh}
+  .hud .aim-group .wood-btn{width:12.5cqh}
+  .hud .spray{width:27cqh}
+  .hud .spray span{font-size:2.4cqh;padding:.3cqh 1.6cqh}
+  .hud.boss-mode .aim{right:30cqh}
+  .hud.boss-mode .bh-spray{width:28cqh;right:1.5cqw;bottom:3cqh}
+  .hud.boss-mode .bh-mission{display:none}
+  .hud .zoom{gap:.6cqh;padding:.8cqh}
+  .hud .zbtn{width:9cqh;height:9cqh}
+  .hud .zval{font-size:2.2cqh}
+  #ui[data-screen=game] .fs-btn{width:9cqh;height:9cqh;top:auto;bottom:auto;top:43cqh}
+  .hud .round{width:11cqh;height:11cqh}
+  .hud .hud-actions{gap:1.6cqh}
+}
+@media (pointer: coarse){
+  .hud.boss-mode .bh-pressure{width:44cqh}.hud.boss-mode .bh-reserve{width:43cqh;top:12cqh}
+  .hud.boss-mode .bh-life{width:43cqh;height:9.6cqh;top:22.5cqh}
+  .hud.boss-mode .bh-life>img{width:11cqh!important}.hud.boss-mode .bh-life b{left:12.6cqh;top:.6cqh;font-size:2.2cqh}
+  .hud.boss-mode .bh-life .bh-track{left:12.4cqh;top:4.3cqh;height:3.4cqh}
+  .hud.boss-mode .bh-boss{left:50%;transform:translateX(-50%);width:72cqh}
+  .hud.boss-mode .bh-fuel{left:50%;transform:translateX(-46%);top:13.5cqh;width:56cqh;height:6cqh}
+  .hud.boss-mode .bh-fuel b{font-size:1.7cqh}.hud.boss-mode .bh-fuel .bh-track{left:22cqh;top:1.3cqh;bottom:1.3cqh}
+  .hud.boss-mode .bh-pause{width:11cqh}
+  .hud.boss-mode .bh-reload,.hud.boss-mode .bh-wait{font-size:2cqh}
+}

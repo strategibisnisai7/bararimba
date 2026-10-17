@@ -9,7 +9,8 @@ const game = new Phaser.Game({
   parent: 'game', width: WIDTH * RENDER_SCALE, height: HEIGHT * RENDER_SCALE,
   backgroundColor: '#7cc6e0',
   render: { antialias: true, pixelArt: false, roundPixels: false, powerPreference: 'high-performance' },
-  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, width: WIDTH * RENDER_SCALE, height: HEIGHT * RENDER_SCALE },
+  // EXPAND fills any screen ratio: a 20:9 phone simply sees a wider slice of the world (720 tall stays fixed).
+  scale: { mode: Phaser.Scale.EXPAND, autoCenter: Phaser.Scale.CENTER_BOTH, width: WIDTH * RENDER_SCALE, height: HEIGHT * RENDER_SCALE },
   physics: { default: 'matter', matter: { gravity: { x: 0, y: 1 }, enableSleeping: false, debug: false } },
   input: { activePointers: 4 },
   audio: { noAudio: true },
@@ -30,5 +31,10 @@ const controller: Controller = {
 const ui = new GameUI(controller);
 game.registry.set('ui', ui);
 game.scene.add('level', LevelScene, true, { level: 1, mode: 'attract' });
+
+// Keep the canvas matched to the stage after rotation, browser-bar changes or entering fullscreen.
+const stage = document.querySelector<HTMLElement>('#stage')!;
+new ResizeObserver(() => game.scale.refresh()).observe(stage);
+document.addEventListener('fullscreenchange', () => setTimeout(() => game.scale.refresh(), 60));
 
 if (import.meta.hot) import.meta.hot.dispose(() => game.destroy(true));

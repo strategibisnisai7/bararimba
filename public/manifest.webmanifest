@@ -1,0 +1,11 @@
+{
+  "name": "BaraRimba",
+  "short_name": "BaraRimba",
+  "description": "Padamkan api, selamatkan rimba Jawa.",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0f2a1f",
+  "theme_color": "#102f2b",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

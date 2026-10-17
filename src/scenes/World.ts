@@ -57,13 +57,13 @@ export class World {
     const T = this.theme;
     this.ensureDirt();
     const sky = scene.add.graphics().setDepth(0);
-    sky.fillGradientStyle(T.sky[0], T.sky[0], T.sky[1], T.sky[1], 1).fillRect(-1400, -900, W + 2800, 2100);
+    sky.fillGradientStyle(T.sky[0], T.sky[0], T.sky[1], T.sky[1], 1).fillRect(-2400, -1200, W + 4800, 2400);
     sky.fillStyle(0xfff7d6, .25).fillCircle(980, 150, 80);
     for (let i = 0; i * 520 < W + 600; i++) {
       const c = scene.add.image(200 + i * 520, 110 + (i % 3) * 38, 'cloud').setScale(.45 + (i % 2) * .3).setAlpha(.85).setDepth(1);
       this.clouds.push(c); this.layers.push({ image: c, x: c.x, factor: .1 });
     }
-    const span = (f: number) => 1280 + Math.max(0, W - 1280) * f + 1400;   // extra width for zoomed-out views
+    const span = (f: number) => 1280 + Math.max(0, W - 1280) * f + 2400;   // extra width for zoomed-out views
     if (T.parallax === 'volcano') {
       // Volcanic parallax: erupting volcano sky, lava plains, then rock shelves behind the play area.
       for (let x = -700; x < span(.12); x += 1660) this.layer('vp-sky', x + 830, 470, 1, 2, .12);
@@ -75,18 +75,18 @@ export class World {
         const temples = ['p-temple-a', 'p-temple-b', 'p-temple-c', 'p-temple-d'];
         for (let i = 0, x = -400; x < span(.3); i++, x += 330 + (i * 67) % 160) this.layer(temples[i % 4], x, 500, 1.5 + (i % 3) * .3, 3.5, .3, 1, 0xd8c8b0);
       }
-      for (let x = 0; x < span(.2); x += 1400) this.layer('mountains', x + 700, 420, .84, 2, .2, .55);
-      for (let x = 0; x < span(.35); x += 1400) this.layer('hills', x + 700, 520, .84, 3, .35, .7);
+      for (let x = -1400; x < span(.2); x += 1400) this.layer('mountains', x + 700, 420, .84, 2, .2, .55);
+      for (let x = -1400; x < span(.35); x += 1400) this.layer('hills', x + 700, 520, .84, 3, .35, .7);
       // Far and mid jungle canopy rows (board reference shows dense trees behind the play area).
       const far = ['tree-a', 'tree-b', 'tree-c', 'tree-large'], mid = ['tree-b', 'tree-a', 'tree-small', 'tree-c', 'tree-flower'];
-      for (let i = 0, x = -60; x < span(.5); i++, x += 150 + (i * 37) % 70) this.layer(far[i % far.length], x, 590, .62 + (i % 3) * .08, 4, .5, 1, T.far);
-      for (let i = 0, x = -30; x < span(.75); i++, x += 230 + (i * 53) % 90) this.layer(mid[i % mid.length], x, 610, .78 + (i % 2) * .12, 5, .75, 1, T.mid);
+      for (let i = 0, x = -900; x < span(.5); i++, x += 150 + (i * 37) % 70) this.layer(far[i % far.length], x, 590, .62 + (i % 3) * .08, 4, .5, 1, T.far);
+      for (let i = 0, x = -900; x < span(.75); i++, x += 230 + (i * 53) % 90) this.layer(mid[i % mid.length], x, 610, .78 + (i % 2) * .12, 5, .75, 1, T.mid);
     }
     const haze = scene.add.graphics().setDepth(5.5);
     haze.fillGradientStyle(T.haze, T.haze, T.haze, T.haze, 0, 0, .4, .4).fillRect(-200, 380, W + 400, 240);
     // River across the world, partly covered by land.
     const bed = scene.add.graphics().setDepth(6);
-    bed.fillGradientStyle(T.bed[0], T.bed[0], T.bed[1], T.bed[1], 1).fillRect(-1400, 586, W + 2800, 520);
+    bed.fillGradientStyle(T.bed[0], T.bed[0], T.bed[1], T.bed[1], 1).fillRect(-2400, 586, W + 4800, 520);
     this.river = scene.add.graphics().setDepth(7);
     this.ropeG = scene.add.graphics().setDepth(38);
     this.add(W / 2, 690, W + 400, 90, 'river');
@@ -138,8 +138,8 @@ export class World {
       scale: { start: .4, end: .1 }, alpha: { start: 1, end: 0 }, tint: [0xffb030, 0xff6a1a, 0xffe08a], frequency: 60, blendMode: Phaser.BlendModes.ADD,
     }).setDepth(47);
     const fgSpan = W + 400;
-    if (T.parallax === 'volcano') for (let x = -200; x < fgSpan; x += 1400) scene.add.image(x + 700, 800, 'vp-front').setOrigin(.5, 1).setScale(.84).setDepth(49);
-    else for (let x = -200; x < fgSpan; x += 1380) scene.add.image(x + 690, 760, 'foreground').setOrigin(.5, 1).setScale(.83).setDepth(49);
+    if (T.parallax === 'volcano') for (let x = -1400; x < fgSpan + 1000; x += 1400) scene.add.image(x + 700, 800, 'vp-front').setOrigin(.5, 1).setScale(.84).setDepth(49);
+    else for (let x = -1400; x < fgSpan + 1000; x += 1380) scene.add.image(x + 690, 760, 'foreground').setOrigin(.5, 1).setScale(.83).setDepth(49);
 
   }
 
@@ -446,7 +446,7 @@ export class World {
     for (const l of this.layers) l.image.x = l.x + shift * (1 - l.factor);
     for (const c of this.clouds) c.x += Math.sin(this.time * .05) * .05;
     this.river.clear();
-    const left = camCenter - 1400, right = camCenter + 1400, lava = this.def.theme === 'volcanic';
+    const left = camCenter - 2200, right = camCenter + 2200, lava = this.def.theme === 'volcanic';
     const crest = lava ? 0xffe08a : 0xe8fbff, glint = lava ? 0xfff2b0 : 0xffffff;
     // Rolling surface: two layered waves along the river's top edge.
     for (const [amp, len, spd, y0, col, al, wdt] of [[3, 90, 1.4, 588, crest, .75, 3], [2, 55, -2.1, 595, glint, .45, 2]] as const) {
