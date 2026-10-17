@@ -1,0 +1,1198 @@
+[
+  {
+    "key": "truck",
+    "source": "1.png",
+    "rect": [
+      17,
+      51,
+      638,
+      318
+    ],
+    "folder": "vehicle",
+    "origin": [
+      0.5,
+      1
+    ],
+    "output": "assets/vehicle/truck.webp",
+    "bytes": 61042,
+    "animation": "transform only; no frame sequence"
+  },
+  {
+    "key": "cannon-base",
+    "source": "2.png",
+    "rect": [
+      27,
+      379,
+      190,
+      117
+    ],
+    "folder": "cannon",
+    "origin": [
+      0.5,
+      0.65
+    ],
+    "output": "assets/cannon/cannon-base.webp",
+    "bytes": 8058,
+    "animation": "transform only; no frame sequence"
+  },
+  {
+    "key": "cannon-arm",
+    "source": "2.png",
+    "rect": [
+      17,
+      504,
+      328,
+      91
+    ],
+    "folder": "cannon",
+    "origin": [
+      0.10060975609756098,
+      0.5164835164835165
+    ],
+    "pivots": [
+      [
+        33,
+        47
+      ],
+      [
+        270,
+        50
+      ]
+    ],
+    "output": "assets/cannon/cannon-arm.webp",
+    "bytes": 11382,
+    "animation": "transform only; no frame sequence"
+  },
+  {
+    "key": "nozzle",
+    "source": "2.png",
+    "rect": [
+      675,
+      761,
+      158,
+      102
+    ],
+    "folder": "cannon",
+    "origin": [
+      0.0759493670886076,
+      0.4215686274509804
+    ],
+    "pivots": [
+      [
+        12,
+        43
+      ],
+      [
+        143,
+        51
+      ]
+    ],
+    "output": "assets/cannon/nozzle.webp",
+    "bytes": 7632,
+    "animation": "transform only; no frame sequence"
+  },
+  {
+    "key": "logo",
+    "source": "15.png",
+    "rect": [
+      0,
+      0,
+      644,
+      300
+    ],
+    "folder": "ui",
+    "origin": [
+      0.5,
+      0.5
+    ],
+    "output": "assets/ui/logo.webp",
+    "bytes": 82256,
+    "animation": "transform only; no frame sequence"
+  },
+  {
+    "key": "mountains",
+    "source": "13.png",
+    "rect": [
+      0,
+      108,
+      1671,
+      153
+    ],
+    "folder": "backgrounds/jawa",
+    "origin": [
+      0.5,
+      1
+    ],
+    "polygon": [
+      [
+        0,
+        105
+      ],
+      [
+        39,
+        48
+      ],
+      [
+        71,
+        32
+      ],
+      [
+        103,
+        72
+      ],
+      [
+        173,
+        111
+      ],
+      [
+        234,
+        75
+      ],
+      [
+        274,
+        107
+      ],
+      [
+        328,
+        108
+      ],
+      [
+        376,
+        73
+      ],
+      [
+        415,
+        70
+      ],
+      [
+        462,
+        104
+      ],
+      [
+        510,
+        93
+      ],
+      [
+        549,
+        65
+      ],
+      [
+        570,
+        92
+      ],
+      [
+        617,
+        64
+      ],
+      [
+        666,
+        7
+      ],
+      [
+        722,
+        3
+      ],
+      [
+        775,
+        60
+      ],
+      [
+        836,
+        91
+      ],
+      [
+        888,
+        42
+      ],
+      [
+        929,
+        92
+      ],
+      [
+        1010,
+        107
+      ],
+      [
+        1088,
+        72
+      ],
+      [
+        1136,
+        84
+      ],
+      [
+        1190,
+        111
+      ],
+      [
+        1235,
+        127
+      ],
+      [
+        1292,
+        99
+      ],
+      [
+        1332,
+        128
+      ],
+      [
+        1376,
+        113
+      ],
+      [
+        1434,
+        91
+      ],
+      [
+        1496,
+        109
+      ],
+      [
+        1574,
+        36
+      ],
+      [
+        1603,
+        51
+      ],
+      [
+        1643,
+        81
+      ],
+      [
+        1671,
+        90
+      ],
+      [
+        1671,
+        153
+      ],
+      [
+        0,
+        153
+      ]
+    ],
+    "output": "assets/backgrounds/jawa/mountains.webp",
+    "bytes": 59310,
+    "animation": "transform only; no frame sequence"
+  },
+  {
+    "key": "hills",
+    "source": "13.png",
+    "rect": [
+      0,
+      254,
+      1671,
+      190
+    ],
+    "folder": "backgrounds/jawa",
+    "origin": [
+      0.5,
+      1
+    ],
+    "polygon": [
+      [
+        0,
+        143
+      ],
+      [
+        30,
+        105
+      ],
+      [
+        80,
+        75
+      ],
+      [
+        115,
+        51
+      ],
+      [
+        149,
+        18
+      ],
+      [
+        197,
+        34
+      ],
+      [
+        258,
+        9
+      ],
+      [
+        299,
+        32
+      ],
+      [
+        338,
+        79
+      ],
+      [
+        369,
+        93
+      ],
+      [
+        419,
+        97
+      ],
+      [
+        463,
+        127
+      ],
+      [
+        530,
+        109
+      ],
+      [
+        579,
+        63
+      ],
+      [
+        625,
+        68
+      ],
+      [
+        661,
+        98
+      ],
+      [
+        692,
+        53
+      ],
+      [
+        704,
+        38
+      ],
+      [
+        736,
+        20
+      ],
+      [
+        789,
+        6
+      ],
+      [
+        816,
+        36
+      ],
+      [
+        865,
+        39
+      ],
+      [
+        893,
+        48
+      ],
+      [
+        939,
+        106
+      ],
+      [
+        1013,
+        120
+      ],
+      [
+        1074,
+        110
+      ],
+      [
+        1108,
+        81
+      ],
+      [
+        1154,
+        85
+      ],
+      [
+        1190,
+        49
+      ],
+      [
+        1240,
+        65
+      ],
+      [
+        1279,
+        20
+      ],
+      [
+        1336,
+        0
+      ],
+      [
+        1368,
+        14
+      ],
+      [
+        1401,
+        55
+      ],
+      [
+        1445,
+        51
+      ],
+      [
+        1502,
+        78
+      ],
+      [
+        1553,
+        90
+      ],
+      [
+        1587,
+        121
+      ],
+      [
+        1671,
+        159
+      ],
+      [
+        1560,
+        166
+      ],
+      [
+        1400,
+        181
+      ],
+      [
+        1200,
+        187
+      ],
+      [
+        1000,
+        190
+      ],
+      [
+        800,
+        190
+      ],
+      [
+        650,
+        179
+      ],
+      [
+        550,
+        173
+      ],
+      [
+        300,
+        169
+      ],
+      [
+        100,
+        162
+      ],
+      [
+        0,
+        155
+      ]
+    ],
+    "output": "assets/backgrounds/jawa/hills.webp",
+    "bytes": 96230,
+    "animation": "transform only; no frame sequence"
+  },
+  {
+    "key": "cloud",
+    "source": "13.png",
+    "rect": [
+      199,
+      0,
+      312,
+      118
+    ],
+    "folder": "backgrounds/jawa",
+    "origin": [
+      0.5,
+      0.5
+    ],
+    "output": "assets/backgrounds/jawa/cloud.webp",
+    "bytes": 10092,
+    "animation": "transform only; no frame sequence"
+  },
+  {
+    "key": "tree-large",
+    "source": "5.png",
+    "rect": [
+      610,
+      8,
+      339,
+      390
+    ],
+    "folder": "backgrounds/jawa",
+    "origin": [
+      0.5,
+      1
+    ],
+    "polygon": [
+      [
+        0,
+        0
+      ],
+      [
+        339,
+        0
+      ],
+      [
+        339,
+        115
+      ],
+      [
+        329,
+        115
+      ],
+      [
+        329,
+        135
+      ],
+      [
+        339,
+        135
+      ],
+      [
+        339,
+        390
+      ],
+      [
+        0,
+        390
+      ],
+      [
+        0,
+        210
+      ],
+      [
+        15,
+        210
+      ],
+      [
+        15,
+        165
+      ],
+      [
+        0,
+        165
+      ]
+    ],
+    "output": "assets/backgrounds/jawa/tree-large.webp",
+    "bytes": 66478,
+    "animation": "transform only; no frame sequence"
+  },
+  {
+    "key": "tree-slender",
+    "source": "5.png",
+    "rect": [
+      994,
+      640,
+      176,
+      201
+    ],
+    "folder": "backgrounds/jawa",
+    "origin": [
+      0.5,
+      1
+    ],
+    "output": "assets/backgrounds/jawa/tree-slender.webp",
+    "bytes": 17376,
+    "animation": "transform only; no frame sequence"
+  },
+  {
+    "key": "tree-small",
+    "source": "5.png",
+    "rect": [
+      452,
+      401,
+      213,
+      235
+    ],
+    "folder": "backgrounds/jawa",
+    "origin": [
+      0.5,
+      1
+    ],
+    "output": "assets/backgrounds/jawa/tree-small.webp",
+    "bytes": 24410,
+    "animation": "transform only; no frame sequence"
+  },
+  {
+    "key": "bank",
+    "source": "13.png",
+    "rect": [
+      0,
+      639,
+      416,
+      160
+    ],
+    "folder": "terrain",
+    "origin": [
+      0,
+      0
+    ],
+    "polygon": [
+      [
+        0,
+        15
+      ],
+      [
+        95,
+        8
+      ],
+      [
+        155,
+        9
+      ],
+      [
+        171,
+        0
+      ],
+      [
+        221,
+        15
+      ],
+      [
+        289,
+        15
+      ],
+      [
+        302,
+        6
+      ],
+      [
+        343,
+        5
+      ],
+      [
+        373,
+        18
+      ],
+      [
+        402,
+        23
+      ],
+      [
+        416,
+        50
+      ],
+      [
+        416,
+        160
+      ],
+      [
+        0,
+        160
+      ]
+    ],
+    "output": "assets/terrain/bank.webp",
+    "bytes": 30458,
+    "animation": "transform only; no frame sequence"
+  },
+  {
+    "key": "right-bank",
+    "source": "13.png",
+    "rect": [
+      1344,
+      635,
+      327,
+      180
+    ],
+    "folder": "terrain",
+    "origin": [
+      0,
+      0
+    ],
+    "polygon": [
+      [
+        0,
+        55
+      ],
+      [
+        30,
+        29
+      ],
+      [
+        68,
+        31
+      ],
+      [
+        113,
+        24
+      ],
+      [
+        154,
+        29
+      ],
+      [
+        198,
+        12
+      ],
+      [
+        220,
+        20
+      ],
+      [
+        250,
+        16
+      ],
+      [
+        280,
+        32
+      ],
+      [
+        327,
+        28
+      ],
+      [
+        327,
+        180
+      ],
+      [
+        0,
+        180
+      ]
+    ],
+    "output": "assets/terrain/right-bank.webp",
+    "bytes": 23248,
+    "animation": "transform only; no frame sequence"
+  },
+  {
+    "key": "bridge",
+    "source": "13.png",
+    "rect": [
+      929,
+      696,
+      417,
+      118
+    ],
+    "folder": "terrain",
+    "origin": [
+      0,
+      0
+    ],
+    "polygon": [
+      [
+        0,
+        16
+      ],
+      [
+        30,
+        13
+      ],
+      [
+        52,
+        6
+      ],
+      [
+        71,
+        7
+      ],
+      [
+        91,
+        15
+      ],
+      [
+        115,
+        16
+      ],
+      [
+        131,
+        8
+      ],
+      [
+        154,
+        10
+      ],
+      [
+        162,
+        15
+      ],
+      [
+        221,
+        16
+      ],
+      [
+        246,
+        10
+      ],
+      [
+        270,
+        16
+      ],
+      [
+        330,
+        15
+      ],
+      [
+        351,
+        10
+      ],
+      [
+        374,
+        15
+      ],
+      [
+        417,
+        5
+      ],
+      [
+        417,
+        118
+      ],
+      [
+        270,
+        118
+      ],
+      [
+        270,
+        112
+      ],
+      [
+        115,
+        112
+      ],
+      [
+        115,
+        118
+      ],
+      [
+        0,
+        118
+      ]
+    ],
+    "output": "assets/terrain/bridge.webp",
+    "bytes": 22078,
+    "animation": "transform only; no frame sequence"
+  },
+  {
+    "key": "cliff",
+    "source": "4.png",
+    "rect": [
+      14,
+      20,
+      595,
+      300
+    ],
+    "folder": "terrain",
+    "origin": [
+      0,
+      0
+    ],
+    "output": "assets/terrain/cliff.webp",
+    "bytes": 81590,
+    "animation": "transform only; no frame sequence"
+  },
+  {
+    "key": "foreground",
+    "source": "13.png",
+    "rect": [
+      0,
+      787,
+      1671,
+      154
+    ],
+    "folder": "backgrounds/jawa",
+    "origin": [
+      0.5,
+      1
+    ],
+    "polygon": [
+      [
+        0,
+        63
+      ],
+      [
+        20,
+        38
+      ],
+      [
+        29,
+        0
+      ],
+      [
+        54,
+        10
+      ],
+      [
+        67,
+        30
+      ],
+      [
+        77,
+        60
+      ],
+      [
+        110,
+        37
+      ],
+      [
+        159,
+        19
+      ],
+      [
+        189,
+        26
+      ],
+      [
+        193,
+        47
+      ],
+      [
+        215,
+        52
+      ],
+      [
+        269,
+        57
+      ],
+      [
+        300,
+        69
+      ],
+      [
+        355,
+        57
+      ],
+      [
+        380,
+        72
+      ],
+      [
+        416,
+        52
+      ],
+      [
+        441,
+        25
+      ],
+      [
+        465,
+        20
+      ],
+      [
+        492,
+        36
+      ],
+      [
+        502,
+        59
+      ],
+      [
+        554,
+        47
+      ],
+      [
+        577,
+        69
+      ],
+      [
+        608,
+        72
+      ],
+      [
+        636,
+        51
+      ],
+      [
+        665,
+        68
+      ],
+      [
+        702,
+        66
+      ],
+      [
+        733,
+        77
+      ],
+      [
+        785,
+        63
+      ],
+      [
+        815,
+        88
+      ],
+      [
+        864,
+        72
+      ],
+      [
+        897,
+        37
+      ],
+      [
+        926,
+        24
+      ],
+      [
+        954,
+        43
+      ],
+      [
+        978,
+        79
+      ],
+      [
+        1000,
+        54
+      ],
+      [
+        1033,
+        73
+      ],
+      [
+        1079,
+        54
+      ],
+      [
+        1098,
+        32
+      ],
+      [
+        1127,
+        22
+      ],
+      [
+        1134,
+        73
+      ],
+      [
+        1153,
+        73
+      ],
+      [
+        1202,
+        68
+      ],
+      [
+        1224,
+        80
+      ],
+      [
+        1274,
+        59
+      ],
+      [
+        1313,
+        45
+      ],
+      [
+        1324,
+        62
+      ],
+      [
+        1353,
+        50
+      ],
+      [
+        1376,
+        79
+      ],
+      [
+        1419,
+        60
+      ],
+      [
+        1443,
+        79
+      ],
+      [
+        1480,
+        52
+      ],
+      [
+        1520,
+        74
+      ],
+      [
+        1551,
+        48
+      ],
+      [
+        1578,
+        20
+      ],
+      [
+        1620,
+        11
+      ],
+      [
+        1626,
+        64
+      ],
+      [
+        1655,
+        60
+      ],
+      [
+        1671,
+        74
+      ],
+      [
+        1671,
+        154
+      ],
+      [
+        0,
+        154
+      ]
+    ],
+    "output": "assets/backgrounds/jawa/foreground.webp",
+    "bytes": 96580,
+    "animation": "transform only; no frame sequence"
+  },
+  {
+    "key": "flame",
+    "source": "11.png",
+    "rect": [
+      648,
+      10,
+      109,
+      187
+    ],
+    "folder": "fire",
+    "origin": [
+      0.5,
+      1
+    ],
+    "output": "assets/fire/flame.webp",
+    "bytes": 9302,
+    "animation": "transform only; no frame sequence"
+  },
+  {
+    "key": "smoke",
+    "source": "11.png",
+    "rect": [
+      567,
+      342,
+      143,
+      174
+    ],
+    "folder": "fire",
+    "origin": [
+      0.5,
+      1
+    ],
+    "output": "assets/fire/smoke.webp",
+    "bytes": 9240,
+    "animation": "transform only; no frame sequence"
+  },
+  {
+    "key": "embers",
+    "source": "11.png",
+    "rect": [
+      13,
+      771,
+      141,
+      85
+    ],
+    "folder": "fire",
+    "origin": [
+      0.5,
+      1
+    ],
+    "output": "assets/fire/embers.webp",
+    "bytes": 8210,
+    "animation": "transform only; no frame sequence"
+  }
+]

@@ -1,0 +1,1682 @@
+[
+ {
+  "key": "ui/logo-board",
+  "source": "Game Board.png",
+  "rect": [
+   108,
+   28,
+   392,
+   160
+  ],
+  "method": "grab",
+  "size": [
+   392,
+   160
+  ]
+ },
+ {
+  "key": "ui/gb-orangutan",
+  "source": "Game Board.png",
+  "rect": [
+   12,
+   86,
+   104,
+   104
+  ],
+  "method": "grab",
+  "size": [
+   104,
+   104
+  ]
+ },
+ {
+  "key": "ui/gb-toucan",
+  "source": "Game Board.png",
+  "rect": [
+   510,
+   70,
+   90,
+   104
+  ],
+  "method": "grab",
+  "size": [
+   90,
+   104
+  ]
+ },
+ {
+  "key": "ui/gb-pause",
+  "source": "Game Board.png",
+  "rect": [
+   1110,
+   901,
+   52,
+   52
+  ],
+  "method": "grab",
+  "size": [
+   52,
+   52
+  ]
+ },
+ {
+  "key": "ui/gb-reset",
+  "source": "Game Board.png",
+  "rect": [
+   1178,
+   901,
+   53,
+   52
+  ],
+  "method": "grab",
+  "size": [
+   53,
+   52
+  ]
+ },
+ {
+  "key": "ui/gb-hint",
+  "source": "Game Board.png",
+  "rect": [
+   1248,
+   901,
+   52,
+   52
+  ],
+  "method": "grab",
+  "size": [
+   52,
+   52
+  ]
+ },
+ {
+  "key": "ui/gb-drop",
+  "source": "Game Board.png",
+  "rect": [
+   954,
+   899,
+   52,
+   56
+  ],
+  "method": "grab",
+  "size": [
+   52,
+   56
+  ]
+ },
+ {
+  "key": "ui/map-board",
+  "source": "Game Board.png",
+  "rect": [
+   604,
+   2,
+   70,
+   80
+  ],
+  "method": "inpaint",
+  "size": [
+   560,
+   432
+  ]
+ },
+ {
+  "key": "ui/gb-pin",
+  "source": "Game Board.png",
+  "rect": [
+   889,
+   75,
+   34,
+   38
+  ],
+  "method": "grab",
+  "size": [
+   34,
+   38
+  ]
+ },
+ {
+  "key": "ui/thumb-1",
+  "source": "Game Board.png",
+  "rect": [
+   0,
+   486,
+   381,
+   186
+  ],
+  "method": "plain",
+  "size": [
+   381,
+   186
+  ]
+ },
+ {
+  "key": "ui/thumb-2",
+  "source": "Game Board.png",
+  "rect": [
+   386,
+   486,
+   380,
+   186
+  ],
+  "method": "plain",
+  "size": [
+   380,
+   186
+  ]
+ },
+ {
+  "key": "ui/thumb-3",
+  "source": "Game Board.png",
+  "rect": [
+   1155,
+   486,
+   381,
+   186
+  ],
+  "method": "plain",
+  "size": [
+   381,
+   186
+  ]
+ },
+ {
+  "key": "ui/pause-panel",
+  "source": "19.png",
+  "rect": [
+   13,
+   12,
+   642,
+   472
+  ],
+  "method": "comp",
+  "size": [
+   642,
+   472
+  ]
+ },
+ {
+  "key": "ui/settings-panel",
+  "source": "19.png",
+  "rect": [
+   661,
+   29,
+   502,
+   453
+  ],
+  "method": "comp",
+  "size": [
+   502,
+   453
+  ]
+ },
+ {
+  "key": "ui/confirm-exit",
+  "source": "19.png",
+  "rect": [
+   1175,
+   35,
+   352,
+   239
+  ],
+  "method": "comp",
+  "size": [
+   352,
+   239
+  ]
+ },
+ {
+  "key": "ui/confirm-restart",
+  "source": "19.png",
+  "rect": [
+   1176,
+   295,
+   351,
+   231
+  ],
+  "method": "comp",
+  "size": [
+   351,
+   231
+  ]
+ },
+ {
+  "key": "ui/wood-left",
+  "source": "19.png",
+  "rect": [
+   1047,
+   660,
+   63,
+   68
+  ],
+  "method": "comp",
+  "size": [
+   63,
+   68
+  ]
+ },
+ {
+  "key": "ui/wood-right",
+  "source": "19.png",
+  "rect": [
+   1116,
+   660,
+   65,
+   68
+  ],
+  "method": "comp",
+  "size": [
+   65,
+   68
+  ]
+ },
+ {
+  "key": "ui/wood-close",
+  "source": "19.png",
+  "rect": [
+   1193,
+   660,
+   73,
+   69
+  ],
+  "method": "comp",
+  "size": [
+   73,
+   69
+  ]
+ },
+ {
+  "key": "ui/wood-home",
+  "source": "19.png",
+  "rect": [
+   1056,
+   546,
+   73,
+   71
+  ],
+  "method": "comp",
+  "size": [
+   73,
+   71
+  ]
+ },
+ {
+  "key": "ui/wood-gear",
+  "source": "19.png",
+  "rect": [
+   1136,
+   545,
+   72,
+   73
+  ],
+  "method": "comp",
+  "size": [
+   72,
+   73
+  ]
+ },
+ {
+  "key": "ui/wood-help",
+  "source": "19.png",
+  "rect": [
+   1449,
+   546,
+   72,
+   71
+  ],
+  "method": "comp",
+  "size": [
+   72,
+   71
+  ]
+ },
+ {
+  "key": "ui/objective-panel",
+  "source": "19.png",
+  "rect": [
+   1180,
+   905,
+   340,
+   95
+  ],
+  "method": "comp",
+  "size": [
+   340,
+   95
+  ]
+ },
+ {
+  "key": "ui/toggle-on",
+  "source": "19.png",
+  "rect": [
+   634,
+   674,
+   80,
+   47
+  ],
+  "method": "comp",
+  "size": [
+   80,
+   47
+  ]
+ },
+ {
+  "key": "ui/toggle-off",
+  "source": "19.png",
+  "rect": [
+   818,
+   675,
+   73,
+   45
+  ],
+  "method": "comp",
+  "size": [
+   73,
+   45
+  ]
+ },
+ {
+  "key": "ui/win-panel",
+  "source": "20.png",
+  "rect": [
+   9,
+   10,
+   547,
+   619
+  ],
+  "method": "comp",
+  "size": [
+   547,
+   619
+  ]
+ },
+ {
+  "key": "ui/fail-panel",
+  "source": "20.png",
+  "rect": [
+   565,
+   10,
+   531,
+   610
+  ],
+  "method": "comp",
+  "size": [
+   531,
+   610
+  ]
+ },
+ {
+  "key": "ui/stars-3",
+  "source": "20.png",
+  "rect": [
+   63,
+   637,
+   215,
+   81
+  ],
+  "method": "comp",
+  "size": [
+   215,
+   81
+  ]
+ },
+ {
+  "key": "ui/stars-2",
+  "source": "20.png",
+  "rect": [
+   319,
+   640,
+   210,
+   77
+  ],
+  "method": "comp",
+  "size": [
+   210,
+   77
+  ]
+ },
+ {
+  "key": "ui/stars-1",
+  "source": "20.png",
+  "rect": [
+   566,
+   641,
+   207,
+   75
+  ],
+  "method": "comp",
+  "size": [
+   207,
+   75
+  ]
+ },
+ {
+  "key": "ui/badge-record",
+  "source": "20.png",
+  "rect": [
+   794,
+   639,
+   184,
+   95
+  ],
+  "method": "comp",
+  "size": [
+   184,
+   95
+  ]
+ },
+ {
+  "key": "ui/round-drop",
+  "source": "14.png",
+  "rect": [
+   750,
+   782,
+   84,
+   84
+  ],
+  "method": "comp",
+  "size": [
+   84,
+   84
+  ]
+ },
+ {
+  "key": "ui/round-fire",
+  "source": "14.png",
+  "rect": [
+   851,
+   782,
+   83,
+   84
+  ],
+  "method": "comp",
+  "size": [
+   83,
+   84
+  ]
+ },
+ {
+  "key": "ui/round-check",
+  "source": "14.png",
+  "rect": [
+   332,
+   782,
+   85,
+   84
+  ],
+  "method": "comp",
+  "size": [
+   85,
+   84
+  ]
+ },
+ {
+  "key": "ui/round-x",
+  "source": "14.png",
+  "rect": [
+   434,
+   782,
+   84,
+   84
+  ],
+  "method": "comp",
+  "size": [
+   84,
+   84
+  ]
+ },
+ {
+  "key": "ui/round-lock",
+  "source": "14.png",
+  "rect": [
+   635,
+   781,
+   86,
+   85
+  ],
+  "method": "comp",
+  "size": [
+   86,
+   85
+  ]
+ },
+ {
+  "key": "ui/round-leaf",
+  "source": "14.png",
+  "rect": [
+   1156,
+   782,
+   85,
+   84
+  ],
+  "method": "comp",
+  "size": [
+   85,
+   84
+  ]
+ },
+ {
+  "key": "ui/btn-mulai",
+  "source": "14.png",
+  "rect": [
+   327,
+   658,
+   261,
+   96
+  ],
+  "method": "comp",
+  "size": [
+   261,
+   96
+  ]
+ },
+ {
+  "key": "ui/goal-panel",
+  "source": "14.png",
+  "rect": [
+   18,
+   254,
+   418,
+   251
+  ],
+  "method": "comp",
+  "size": [
+   418,
+   251
+  ]
+ },
+ {
+  "key": "ui/ribbon-win",
+  "source": "14.png",
+  "rect": [
+   803,
+   253,
+   426,
+   211
+  ],
+  "method": "comp",
+  "size": [
+   426,
+   211
+  ]
+ },
+ {
+  "key": "ui/ribbon-fail",
+  "source": "14.png",
+  "rect": [
+   1235,
+   272,
+   287,
+   188
+  ],
+  "method": "comp",
+  "size": [
+   287,
+   188
+  ]
+ },
+ {
+  "key": "ui/menu-logo",
+  "source": "15.png",
+  "rect": [
+   11,
+   15,
+   629,
+   296
+  ],
+  "method": "comp",
+  "size": [
+   629,
+   296
+  ]
+ },
+ {
+  "key": "ui/btn-main",
+  "source": "15.png",
+  "rect": [
+   641,
+   52,
+   351,
+   194
+  ],
+  "method": "comp",
+  "size": [
+   351,
+   194
+  ]
+ },
+ {
+  "key": "ui/btn-peta",
+  "source": "15.png",
+  "rect": [
+   986,
+   19,
+   316,
+   100
+  ],
+  "method": "comp",
+  "size": [
+   316,
+   100
+  ]
+ },
+ {
+  "key": "ui/btn-koleksi",
+  "source": "15.png",
+  "rect": [
+   996,
+   128,
+   300,
+   95
+  ],
+  "method": "comp",
+  "size": [
+   300,
+   95
+  ]
+ },
+ {
+  "key": "ui/btn-pengaturan",
+  "source": "15.png",
+  "rect": [
+   987,
+   226,
+   307,
+   90
+  ],
+  "method": "comp",
+  "size": [
+   307,
+   90
+  ]
+ },
+ {
+  "key": "ui/btn-back",
+  "source": "15.png",
+  "rect": [
+   940,
+   880,
+   108,
+   86
+  ],
+  "method": "comp",
+  "size": [
+   108,
+   86
+  ]
+ },
+ {
+  "key": "ui/star-gold",
+  "source": "15.png",
+  "rect": [
+   1451,
+   336,
+   62,
+   62
+  ],
+  "method": "comp",
+  "size": [
+   62,
+   62
+  ]
+ },
+ {
+  "key": "ui/star-silver",
+  "source": "15.png",
+  "rect": [
+   1446,
+   398,
+   72,
+   70
+  ],
+  "method": "comp",
+  "size": [
+   72,
+   70
+  ]
+ },
+ {
+  "key": "ui/lock",
+  "source": "15.png",
+  "rect": [
+   1442,
+   542,
+   78,
+   87
+  ],
+  "method": "comp",
+  "size": [
+   78,
+   87
+  ]
+ },
+ {
+  "key": "ui/sound-on",
+  "source": "15.png",
+  "rect": [
+   1311,
+   20,
+   99,
+   103
+  ],
+  "method": "comp",
+  "size": [
+   99,
+   103
+  ]
+ },
+ {
+  "key": "ui/sound-off",
+  "source": "15.png",
+  "rect": [
+   1417,
+   20,
+   104,
+   101
+  ],
+  "method": "comp",
+  "size": [
+   104,
+   101
+  ]
+ },
+ {
+  "key": "ui/music-on",
+  "source": "15.png",
+  "rect": [
+   1308,
+   126,
+   102,
+   100
+  ],
+  "method": "comp",
+  "size": [
+   102,
+   100
+  ]
+ },
+ {
+  "key": "ui/music-off",
+  "source": "15.png",
+  "rect": [
+   1418,
+   126,
+   96,
+   99
+  ],
+  "method": "comp",
+  "size": [
+   96,
+   99
+  ]
+ },
+ {
+  "key": "ui/tutorial-1",
+  "source": "16.png",
+  "rect": [
+   11,
+   633,
+   238,
+   265
+  ],
+  "method": "comp",
+  "size": [
+   238,
+   265
+  ]
+ },
+ {
+  "key": "ui/tutorial-2",
+  "source": "16.png",
+  "rect": [
+   255,
+   633,
+   215,
+   265
+  ],
+  "method": "comp",
+  "size": [
+   215,
+   265
+  ]
+ },
+ {
+  "key": "ui/tutorial-3",
+  "source": "16.png",
+  "rect": [
+   476,
+   633,
+   263,
+   265
+  ],
+  "method": "comp",
+  "size": [
+   263,
+   265
+  ]
+ },
+ {
+  "key": "ui/tutorial-4",
+  "source": "16.png",
+  "rect": [
+   743,
+   633,
+   247,
+   265
+  ],
+  "method": "comp",
+  "size": [
+   247,
+   265
+  ]
+ },
+ {
+  "key": "ui/tutorial-5",
+  "source": "16.png",
+  "rect": [
+   995,
+   633,
+   261,
+   265
+  ],
+  "method": "comp",
+  "size": [
+   261,
+   265
+  ]
+ },
+ {
+  "key": "ui/tutorial-6",
+  "source": "16.png",
+  "rect": [
+   1263,
+   633,
+   261,
+   265
+  ],
+  "method": "comp",
+  "size": [
+   261,
+   265
+  ]
+ },
+ {
+  "key": "ui/sign-water",
+  "source": "16.png",
+  "rect": [
+   1254,
+   904,
+   263,
+   99
+  ],
+  "method": "comp",
+  "size": [
+   263,
+   99
+  ]
+ },
+ {
+  "key": "ui/target-red",
+  "source": "16.png",
+  "rect": [
+   1101,
+   40,
+   115,
+   116
+  ],
+  "method": "comp",
+  "size": [
+   115,
+   116
+  ]
+ },
+ {
+  "key": "ui/alert",
+  "source": "16.png",
+  "rect": [
+   1418,
+   35,
+   50,
+   118
+  ],
+  "method": "comp",
+  "size": [
+   50,
+   118
+  ]
+ },
+ {
+  "key": "ui/hand-drag",
+  "source": "16.png",
+  "rect": [
+   361,
+   20,
+   95,
+   139
+  ],
+  "method": "comp",
+  "size": [
+   95,
+   139
+  ]
+ },
+ {
+  "key": "ui/badge-water",
+  "source": "18.png",
+  "rect": [
+   1362,
+   295,
+   157,
+   159
+  ],
+  "method": "comp",
+  "size": [
+   157,
+   159
+  ]
+ },
+ {
+  "key": "animals/orangutan",
+  "source": "12.png",
+  "rect": [
+   356,
+   41,
+   168,
+   142
+  ],
+  "method": "main",
+  "size": [
+   168,
+   142
+  ]
+ },
+ {
+  "key": "animals/bekantan",
+  "source": "12.png",
+  "rect": [
+   15,
+   199,
+   139,
+   166
+  ],
+  "method": "main",
+  "size": [
+   139,
+   166
+  ]
+ },
+ {
+  "key": "animals/rangkong",
+  "source": "12.png",
+  "rect": [
+   216,
+   343,
+   141,
+   152
+  ],
+  "method": "main",
+  "size": [
+   141,
+   152
+  ]
+ },
+ {
+  "key": "animals/beruang",
+  "source": "12.png",
+  "rect": [
+   1080,
+   493,
+   144,
+   127
+  ],
+  "method": "main",
+  "size": [
+   144,
+   127
+  ]
+ },
+ {
+  "key": "animals/rusa",
+  "source": "12.png",
+  "rect": [
+   160,
+   630,
+   140,
+   125
+  ],
+  "method": "main",
+  "size": [
+   140,
+   125
+  ]
+ },
+ {
+  "key": "animals/trenggiling",
+  "source": "12.png",
+  "rect": [
+   925,
+   776,
+   137,
+   76
+  ],
+  "method": "main",
+  "size": [
+   137,
+   76
+  ]
+ },
+ {
+  "key": "animals/raja-udang",
+  "source": "12.png",
+  "rect": [
+   1146,
+   789,
+   88,
+   89
+  ],
+  "method": "main",
+  "size": [
+   88,
+   89
+  ]
+ },
+ {
+  "key": "animals/kura-kura",
+  "source": "12.png",
+  "rect": [
+   928,
+   954,
+   146,
+   63
+  ],
+  "method": "main",
+  "size": [
+   146,
+   63
+  ]
+ },
+ {
+  "key": "animals/babi-hutan",
+  "source": "12.png",
+  "rect": [
+   815,
+   631,
+   182,
+   116
+  ],
+  "method": "main",
+  "size": [
+   182,
+   116
+  ]
+ },
+ {
+  "key": "animals/gajah",
+  "source": "12.png",
+  "rect": [
+   240,
+   758,
+   190,
+   146
+  ],
+  "method": "main",
+  "size": [
+   190,
+   146
+  ]
+ },
+ {
+  "key": "animals/buaya",
+  "source": "12.png",
+  "rect": [
+   9,
+   939,
+   273,
+   72
+  ],
+  "method": "main",
+  "size": [
+   273,
+   72
+  ]
+ },
+ {
+  "key": "animals/komodo",
+  "source": "12.png",
+  "rect": [
+   564,
+   918,
+   303,
+   90
+  ],
+  "method": "main",
+  "size": [
+   303,
+   90
+  ]
+ },
+ {
+  "key": "animals/ular",
+  "source": "12.png",
+  "rect": [
+   1303,
+   872,
+   110,
+   90
+  ],
+  "method": "main",
+  "size": [
+   110,
+   90
+  ]
+ },
+ {
+  "key": "animals/berang",
+  "source": "12.png",
+  "rect": [
+   1172,
+   896,
+   110,
+   108
+  ],
+  "method": "main",
+  "size": [
+   110,
+   108
+  ]
+ },
+ {
+  "key": "animals/orangutan-sit",
+  "source": "12.png",
+  "rect": [
+   842,
+   34,
+   134,
+   144
+  ],
+  "method": "main",
+  "size": [
+   134,
+   144
+  ]
+ },
+ {
+  "key": "animals/rangkong-perch",
+  "source": "12.png",
+  "rect": [
+   86,
+   351,
+   149,
+   132
+  ],
+  "method": "main",
+  "size": [
+   149,
+   132
+  ]
+ },
+ {
+  "key": "props/gear",
+  "source": "8.png",
+  "rect": [
+   7,
+   432,
+   198,
+   196
+  ],
+  "method": "main",
+  "size": [
+   198,
+   196
+  ]
+ },
+ {
+  "key": "props/seesaw",
+  "source": "8.png",
+  "rect": [
+   811,
+   850,
+   262,
+   133
+  ],
+  "method": "main",
+  "size": [
+   262,
+   133
+  ]
+ },
+ {
+  "key": "props/trough",
+  "source": "9.png",
+  "rect": [
+   824,
+   12,
+   177,
+   152
+  ],
+  "method": "main",
+  "size": [
+   177,
+   152
+  ]
+ },
+ {
+  "key": "props/pivot",
+  "source": "8.png",
+  "rect": [
+   893,
+   918,
+   86,
+   66
+  ],
+  "method": "raw",
+  "size": [
+   86,
+   66
+  ]
+ },
+ {
+  "key": "props/pulley",
+  "source": "8.png",
+  "rect": [
+   12,
+   192,
+   190,
+   230
+  ],
+  "method": "main",
+  "size": [
+   190,
+   230
+  ]
+ },
+ {
+  "key": "props/bucket",
+  "source": "9.png",
+  "rect": [
+   189,
+   860,
+   83,
+   138
+  ],
+  "method": "main",
+  "size": [
+   83,
+   138
+  ]
+ },
+ {
+  "key": "props/button",
+  "source": "8.png",
+  "rect": [
+   714,
+   56,
+   172,
+   117
+  ],
+  "method": "main",
+  "size": [
+   172,
+   117
+  ]
+ },
+ {
+  "key": "props/fence",
+  "source": "7.png",
+  "rect": [
+   1315,
+   840,
+   204,
+   148
+  ],
+  "method": "main",
+  "size": [
+   204,
+   148
+  ]
+ },
+ {
+  "key": "fire/coal-hot",
+  "source": "11.png",
+  "rect": [
+   13,
+   777,
+   153,
+   75
+  ],
+  "method": "comp",
+  "size": [
+   153,
+   75
+  ]
+ },
+ {
+  "key": "fire/coal-cold",
+  "source": "11.png",
+  "rect": [
+   680,
+   796,
+   161,
+   65
+  ],
+  "method": "comp",
+  "size": [
+   161,
+   65
+  ]
+ },
+ {
+  "key": "fire/tongue-a",
+  "source": "11.png",
+  "rect": [
+   269,
+   49,
+   49,
+   105
+  ],
+  "method": "comp",
+  "size": [
+   49,
+   105
+  ]
+ },
+ {
+  "key": "fire/tongue-b",
+  "source": "11.png",
+  "rect": [
+   334,
+   50,
+   43,
+   107
+  ],
+  "method": "comp",
+  "size": [
+   43,
+   107
+  ]
+ },
+ {
+  "key": "fire/tongue-c",
+  "source": "11.png",
+  "rect": [
+   187,
+   58,
+   60,
+   96
+  ],
+  "method": "comp",
+  "size": [
+   60,
+   96
+  ]
+ },
+ {
+  "key": "props/crate",
+  "source": "7.png",
+  "rect": [
+   21,
+   386,
+   133,
+   128
+  ],
+  "method": "main",
+  "size": [
+   133,
+   128
+  ]
+ },
+ {
+  "key": "props/crate-plain",
+  "source": "7.png",
+  "rect": [
+   310,
+   389,
+   131,
+   124
+  ],
+  "method": "main",
+  "size": [
+   131,
+   124
+  ]
+ },
+ {
+  "key": "props/boulder",
+  "source": "7.png",
+  "rect": [
+   17,
+   20,
+   241,
+   219
+  ],
+  "method": "main",
+  "size": [
+   241,
+   219
+  ]
+ },
+ {
+  "key": "props/log",
+  "source": "7.png",
+  "rect": [
+   197,
+   246,
+   204,
+   121
+  ],
+  "method": "main",
+  "size": [
+   204,
+   121
+  ]
+ },
+ {
+  "key": "props/barrel-blue",
+  "source": "7.png",
+  "rect": [
+   1036,
+   384,
+   107,
+   137
+  ],
+  "method": "comp",
+  "size": [
+   107,
+   137
+  ]
+ },
+ {
+  "key": "props/plank",
+  "source": "7.png",
+  "rect": [
+   899,
+   627,
+   251,
+   71
+  ],
+  "method": "comp",
+  "size": [
+   251,
+   71
+  ]
+ },
+ {
+  "key": "props/stump",
+  "source": "7.png",
+  "rect": [
+   664,
+   672,
+   148,
+   131
+  ],
+  "method": "main",
+  "size": [
+   148,
+   131
+  ]
+ },
+ {
+  "key": "props/water-tower",
+  "source": "9.png",
+  "rect": [
+   11,
+   507,
+   180,
+   342
+  ],
+  "method": "main",
+  "size": [
+   180,
+   342
+  ]
+ },
+ {
+  "key": "vehicle/wheel",
+  "source": "1.png",
+  "rect": [
+   521,
+   378,
+   138,
+   136
+  ],
+  "method": "comp",
+  "size": [
+   138,
+   136
+  ]
+ },
+ {
+  "key": "terrain/top-a",
+  "source": "3.png",
+  "rect": [
+   14,
+   754,
+   305,
+   113
+  ],
+  "method": "comp",
+  "size": [
+   305,
+   113
+  ]
+ },
+ {
+  "key": "terrain/top-b",
+  "source": "3.png",
+  "rect": [
+   328,
+   753,
+   284,
+   114
+  ],
+  "method": "comp",
+  "size": [
+   284,
+   114
+  ]
+ },
+ {
+  "key": "terrain/pillar",
+  "source": "3.png",
+  "rect": [
+   781,
+   329,
+   101,
+   206
+  ],
+  "method": "comp",
+  "size": [
+   101,
+   206
+  ]
+ },
+ {
+  "key": "terrain/ledge",
+  "source": "3.png",
+  "rect": [
+   13,
+   324,
+   231,
+   191
+  ],
+  "method": "comp",
+  "size": [
+   231,
+   191
+  ]
+ },
+ {
+  "key": "terrain/float",
+  "source": "3.png",
+  "rect": [
+   1121,
+   362,
+   178,
+   92
+  ],
+  "method": "comp",
+  "size": [
+   178,
+   92
+  ]
+ },
+ {
+  "key": "backgrounds/jawa/tree-a",
+  "source": "5.png",
+  "rect": [
+   13,
+   10,
+   333,
+   383
+  ],
+  "method": "main",
+  "size": [
+   333,
+   383
+  ]
+ },
+ {
+  "key": "backgrounds/jawa/tree-b",
+  "source": "5.png",
+  "rect": [
+   336,
+   13,
+   288,
+   379
+  ],
+  "method": "main",
+  "size": [
+   288,
+   379
+  ]
+ },
+ {
+  "key": "backgrounds/jawa/tree-c",
+  "source": "5.png",
+  "rect": [
+   1115,
+   33,
+   399,
+   346
+  ],
+  "method": "main",
+  "size": [
+   399,
+   346
+  ]
+ },
+ {
+  "key": "backgrounds/jawa/tree-flower",
+  "source": "5.png",
+  "rect": [
+   15,
+   399,
+   203,
+   231
+  ],
+  "method": "main",
+  "size": [
+   203,
+   231
+  ]
+ }
+]

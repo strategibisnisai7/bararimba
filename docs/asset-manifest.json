@@ -1,0 +1,1636 @@
+{
+  "sourcePolicy": "Originals remain unchanged. Crop rectangles measured on inspected sheets. Existing alpha preserved; explicit polygon masks recorded. No chroma-key.",
+  "files": [
+    {
+      "path": "referensiasset/1.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 2192046,
+      "sha256": "562cf54aaf883793dd5cd807364aebbc643adc886db61d1f4a849326a13a688b",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "transparentPixels": 643153,
+        "semitransparentPixels": 929711,
+        "opaquePixels": 0
+      },
+      "visual": "Truk merah hadap kanan, tampak depan/belakang, roda dan komponen kendaraan.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "full image and composite"
+    },
+    {
+      "path": "referensiasset/2.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 2396119,
+      "sha256": "4e5e988c3182432ec49183f5012a1bfe1c28a138da0cfdee3d441bf099546e15",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "transparentPixels": 617445,
+        "semitransparentPixels": 955419,
+        "opaquePixels": 0
+      },
+      "visual": "Referensi rig meriam, segmen/pivot terpisah, dudukan, nozzle, selang dan semprotan.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "full image and composite"
+    },
+    {
+      "path": "referensiasset/3.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 2648745,
+      "sha256": "39f59c88a94015670ddbe54b8b34a7ff6353cb141b370a2d807ecc7ce4de7957",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "transparentPixels": 308703,
+        "semitransparentPixels": 1264161,
+        "opaquePixels": 0
+      },
+      "visual": "Terrain rumput/tanah, platform, jembatan kecil, air dan waterfall.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "full image and composite"
+    },
+    {
+      "path": "referensiasset/4.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 3055296,
+      "sha256": "6ce1a37f9f05d9fea0c37225ca83232c1d533662d2ee712eaa1fee7b401c8cfc",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "transparentPixels": 233127,
+        "semitransparentPixels": 1339737,
+        "opaquePixels": 0
+      },
+      "visual": "Tebing tinggi, batu, akar dan gua.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "full image and composite"
+    },
+    {
+      "path": "referensiasset/5.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 2988674,
+      "sha256": "6c535f950085c74d7868852805d42255b428857d9f690c83c525c9a99f874d97",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "transparentPixels": 408850,
+        "semitransparentPixels": 1164014,
+        "opaquePixels": 0
+      },
+      "visual": "Pohon hutan berbagai bentuk, pohon kecil, akar dan batang.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "full image and composite"
+    },
+    {
+      "path": "referensiasset/6.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 3900616,
+      "sha256": "ef2621c2a7645ab39a1f89aecacb8be0a2adf991ec50e66258927656e2f83d0a",
+      "alpha": {
+        "extrema": [
+          4,
+          252
+        ],
+        "transparentPixels": 0,
+        "semitransparentPixels": 1572864,
+        "opaquePixels": 0
+      },
+      "visual": "Semak, rumput, pakis, daun dan tanaman; alpha minimum 4, bukan latar sepenuhnya transparan.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "contact sheet; not production-sliced"
+    },
+    {
+      "path": "referensiasset/7.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 2567627,
+      "sha256": "7fa2cfe479008a9dd88d1fae33ea7da7d13a6ea962caca6b543e6725a6f79207",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "transparentPixels": 310046,
+        "semitransparentPixels": 1262818,
+        "opaquePixels": 0
+      },
+      "visual": "Batu, kayu, peti, tong dan props interaktif.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "contact sheet; not production-sliced"
+    },
+    {
+      "path": "referensiasset/8.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 2591301,
+      "sha256": "589fd6849d9aead65fe903cda7af8a834d2df86fa62f007853c8449114cda658",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "transparentPixels": 486299,
+        "semitransparentPixels": 1086565,
+        "opaquePixels": 0
+      },
+      "visual": "Tuas, katrol, engsel, platform dan mekanisme puzzle.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "contact sheet; not production-sliced"
+    },
+    {
+      "path": "referensiasset/9.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 3051561,
+      "sha256": "051f4fe900d3d341623732fca68bdff09664fd361ffa837c86cbe37964f69fab",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "transparentPixels": 138129,
+        "semitransparentPixels": 1434735,
+        "opaquePixels": 0
+      },
+      "visual": "Saluran air, pipa, wadah, tangki, kanal dan kincir.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "contact sheet; not production-sliced"
+    },
+    {
+      "path": "referensiasset/10.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 2719335,
+      "sha256": "871e562398838da80b1944aaf63873dd21bb6f56dc5cfff605897ba624082ab7",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "transparentPixels": 229206,
+        "semitransparentPixels": 1343658,
+        "opaquePixels": 0
+      },
+      "visual": "Semprotan, tetesan, splash, riak, air dan waterfall.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "contact sheet; not production-sliced"
+    },
+    {
+      "path": "referensiasset/11.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 2619321,
+      "sha256": "0e1cda251dcfa9386dc01cd44fd66d829ccc1ebf3c8f38753100272e2df68a30",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "transparentPixels": 297112,
+        "semitransparentPixels": 1275752,
+        "opaquePixels": 0
+      },
+      "visual": "Api berbagai ukuran, kayu terbakar, asap, bara dan uap.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "full image and composite"
+    },
+    {
+      "path": "referensiasset/12.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 2749574,
+      "sha256": "089fc1832b147836117bd06046de5e03a3a2f75717bb2c27d8c021fd9f7deb80",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "transparentPixels": 274166,
+        "semitransparentPixels": 1298698,
+        "opaquePixels": 0
+      },
+      "visual": "Satwa Indonesia dengan beberapa pose; tidak dipakai sebagai objektif.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "contact sheet; not production-sliced"
+    },
+    {
+      "path": "referensiasset/13.png",
+      "width": 1671,
+      "height": 941,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 2422245,
+      "sha256": "83a174a4480b60cf31c01e45f78a5343b075e6db5028051bc5d96a0a8b7a0f9d",
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "transparentPixels": 443449,
+        "semitransparentPixels": 1127833,
+        "opaquePixels": 1129
+      },
+      "visual": "Layer lanskap Jawa: awan/gunung, bukit, sungai/hutan, desa/candi, terrain/jembatan, foreground.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "full image and composite"
+    },
+    {
+      "path": "referensiasset/14.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 2443729,
+      "sha256": "24232d65078ddec1a5806aaaf8d1aad1ea297934b7743097fb69faf050f8e463",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "transparentPixels": 431294,
+        "semitransparentPixels": 1141570,
+        "opaquePixels": 0
+      },
+      "visual": "HUD, tombol, indikator air, progres, ikon dan target.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "contact sheet; not production-sliced"
+    },
+    {
+      "path": "referensiasset/15.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 2885802,
+      "sha256": "b5b4e2eb5eced41d36d444731b20a0ab6302493e1392e69aab80a903912eab1b",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "transparentPixels": 278359,
+        "semitransparentPixels": 1294505,
+        "opaquePixels": 0
+      },
+      "visual": "Logo BaraRimba, tombol/menu, panel dan pengaturan.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "full image and composite"
+    },
+    {
+      "path": "referensiasset/16.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 2686396,
+      "sha256": "b1c8605f66e6582a6a3a033b74991c023eb172472541fd4cfb70ae2158822262",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "transparentPixels": 515322,
+        "semitransparentPixels": 1057542,
+        "opaquePixels": 0
+      },
+      "visual": "Petunjuk drag, arah, target dan contoh instruksi gameplay.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "contact sheet; not production-sliced"
+    },
+    {
+      "path": "referensiasset/17.png",
+      "width": 1672,
+      "height": 941,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 3564970,
+      "sha256": "5173400c5129950126f31e5a76e4a5f1aae2fbd7602aa7f11251c1e36aaafb2b",
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "transparentPixels": 1531,
+        "semitransparentPixels": 1569388,
+        "opaquePixels": 2433
+      },
+      "visual": "Peta Indonesia dan contoh level select.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "contact sheet; not production-sliced"
+    },
+    {
+      "path": "referensiasset/18.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 2717105,
+      "sha256": "deae54e75aaa23482059d32af7a783e551196c7079e19700ad41f55acddb03fa",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "transparentPixels": 287601,
+        "semitransparentPixels": 1285263,
+        "opaquePixels": 0
+      },
+      "visual": "Komponen misi, progress, objektif dan panel level.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "contact sheet; not production-sliced"
+    },
+    {
+      "path": "referensiasset/19.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 2343722,
+      "sha256": "dd1113acbd764925dd556a7f1e7c4f77946cd5a995f1db03ad39afec7d3aaeae",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "transparentPixels": 237112,
+        "semitransparentPixels": 1335752,
+        "opaquePixels": 0
+      },
+      "visual": "Pause, pengaturan, konfirmasi, tombol dan slider.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "contact sheet; not production-sliced"
+    },
+    {
+      "path": "referensiasset/20.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 2795355,
+      "sha256": "1ed13216fc82c2f936eee529697a0cf7ff0c94ecb12403a1b8ec2dd253090735",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "transparentPixels": 250693,
+        "semitransparentPixels": 1322171,
+        "opaquePixels": 0
+      },
+      "visual": "Panel hasil/reward, menang/kalah, bintang, retry dan menu.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "contact sheet; not production-sliced"
+    },
+    {
+      "path": "referensiasset/Game Board.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGB",
+      "bytes": 2316964,
+      "sha256": "cac8d3b1c52e044b4d3d9ea104544e71bf4fb6f15934e6bfab27f52dd7ed4338",
+      "alpha": null,
+      "visual": "Gameboard: menu, peta, level select, empat panel gameplay dan referensi sprite.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "full image and composite"
+    }
+  ],
+  "sprites": [
+    {
+      "key": "truck",
+      "source": "1.png",
+      "rect": [
+        17,
+        51,
+        638,
+        318
+      ],
+      "folder": "vehicle",
+      "origin": [
+        0.5,
+        1
+      ],
+      "output": "assets/vehicle/truck.webp",
+      "bytes": 61042,
+      "animation": "transform only; no frame sequence"
+    },
+    {
+      "key": "cannon-base",
+      "source": "2.png",
+      "rect": [
+        27,
+        379,
+        190,
+        117
+      ],
+      "folder": "cannon",
+      "origin": [
+        0.5,
+        0.65
+      ],
+      "output": "assets/cannon/cannon-base.webp",
+      "bytes": 8058,
+      "animation": "transform only; no frame sequence"
+    },
+    {
+      "key": "cannon-arm",
+      "source": "2.png",
+      "rect": [
+        17,
+        504,
+        328,
+        91
+      ],
+      "folder": "cannon",
+      "origin": [
+        0.10060975609756098,
+        0.5164835164835165
+      ],
+      "pivots": [
+        [
+          33,
+          47
+        ],
+        [
+          270,
+          50
+        ]
+      ],
+      "output": "assets/cannon/cannon-arm.webp",
+      "bytes": 11382,
+      "animation": "transform only; no frame sequence"
+    },
+    {
+      "key": "nozzle",
+      "source": "2.png",
+      "rect": [
+        675,
+        761,
+        158,
+        102
+      ],
+      "folder": "cannon",
+      "origin": [
+        0.0759493670886076,
+        0.4215686274509804
+      ],
+      "pivots": [
+        [
+          12,
+          43
+        ],
+        [
+          143,
+          51
+        ]
+      ],
+      "output": "assets/cannon/nozzle.webp",
+      "bytes": 7632,
+      "animation": "transform only; no frame sequence"
+    },
+    {
+      "key": "logo",
+      "source": "15.png",
+      "rect": [
+        0,
+        0,
+        644,
+        300
+      ],
+      "folder": "ui",
+      "origin": [
+        0.5,
+        0.5
+      ],
+      "output": "assets/ui/logo.webp",
+      "bytes": 82256,
+      "animation": "transform only; no frame sequence"
+    },
+    {
+      "key": "mountains",
+      "source": "13.png",
+      "rect": [
+        0,
+        108,
+        1671,
+        153
+      ],
+      "folder": "backgrounds/jawa",
+      "origin": [
+        0.5,
+        1
+      ],
+      "polygon": [
+        [
+          0,
+          105
+        ],
+        [
+          39,
+          48
+        ],
+        [
+          71,
+          32
+        ],
+        [
+          103,
+          72
+        ],
+        [
+          173,
+          111
+        ],
+        [
+          234,
+          75
+        ],
+        [
+          274,
+          107
+        ],
+        [
+          328,
+          108
+        ],
+        [
+          376,
+          73
+        ],
+        [
+          415,
+          70
+        ],
+        [
+          462,
+          104
+        ],
+        [
+          510,
+          93
+        ],
+        [
+          549,
+          65
+        ],
+        [
+          570,
+          92
+        ],
+        [
+          617,
+          64
+        ],
+        [
+          666,
+          7
+        ],
+        [
+          722,
+          3
+        ],
+        [
+          775,
+          60
+        ],
+        [
+          836,
+          91
+        ],
+        [
+          888,
+          42
+        ],
+        [
+          929,
+          92
+        ],
+        [
+          1010,
+          107
+        ],
+        [
+          1088,
+          72
+        ],
+        [
+          1136,
+          84
+        ],
+        [
+          1190,
+          111
+        ],
+        [
+          1235,
+          127
+        ],
+        [
+          1292,
+          99
+        ],
+        [
+          1332,
+          128
+        ],
+        [
+          1376,
+          113
+        ],
+        [
+          1434,
+          91
+        ],
+        [
+          1496,
+          109
+        ],
+        [
+          1574,
+          36
+        ],
+        [
+          1603,
+          51
+        ],
+        [
+          1643,
+          81
+        ],
+        [
+          1671,
+          90
+        ],
+        [
+          1671,
+          153
+        ],
+        [
+          0,
+          153
+        ]
+      ],
+      "output": "assets/backgrounds/jawa/mountains.webp",
+      "bytes": 59310,
+      "animation": "transform only; no frame sequence"
+    },
+    {
+      "key": "hills",
+      "source": "13.png",
+      "rect": [
+        0,
+        254,
+        1671,
+        190
+      ],
+      "folder": "backgrounds/jawa",
+      "origin": [
+        0.5,
+        1
+      ],
+      "polygon": [
+        [
+          0,
+          143
+        ],
+        [
+          30,
+          105
+        ],
+        [
+          80,
+          75
+        ],
+        [
+          115,
+          51
+        ],
+        [
+          149,
+          18
+        ],
+        [
+          197,
+          34
+        ],
+        [
+          258,
+          9
+        ],
+        [
+          299,
+          32
+        ],
+        [
+          338,
+          79
+        ],
+        [
+          369,
+          93
+        ],
+        [
+          419,
+          97
+        ],
+        [
+          463,
+          127
+        ],
+        [
+          530,
+          109
+        ],
+        [
+          579,
+          63
+        ],
+        [
+          625,
+          68
+        ],
+        [
+          661,
+          98
+        ],
+        [
+          692,
+          53
+        ],
+        [
+          704,
+          38
+        ],
+        [
+          736,
+          20
+        ],
+        [
+          789,
+          6
+        ],
+        [
+          816,
+          36
+        ],
+        [
+          865,
+          39
+        ],
+        [
+          893,
+          48
+        ],
+        [
+          939,
+          106
+        ],
+        [
+          1013,
+          120
+        ],
+        [
+          1074,
+          110
+        ],
+        [
+          1108,
+          81
+        ],
+        [
+          1154,
+          85
+        ],
+        [
+          1190,
+          49
+        ],
+        [
+          1240,
+          65
+        ],
+        [
+          1279,
+          20
+        ],
+        [
+          1336,
+          0
+        ],
+        [
+          1368,
+          14
+        ],
+        [
+          1401,
+          55
+        ],
+        [
+          1445,
+          51
+        ],
+        [
+          1502,
+          78
+        ],
+        [
+          1553,
+          90
+        ],
+        [
+          1587,
+          121
+        ],
+        [
+          1671,
+          159
+        ],
+        [
+          1560,
+          166
+        ],
+        [
+          1400,
+          181
+        ],
+        [
+          1200,
+          187
+        ],
+        [
+          1000,
+          190
+        ],
+        [
+          800,
+          190
+        ],
+        [
+          650,
+          179
+        ],
+        [
+          550,
+          173
+        ],
+        [
+          300,
+          169
+        ],
+        [
+          100,
+          162
+        ],
+        [
+          0,
+          155
+        ]
+      ],
+      "output": "assets/backgrounds/jawa/hills.webp",
+      "bytes": 96230,
+      "animation": "transform only; no frame sequence"
+    },
+    {
+      "key": "cloud",
+      "source": "13.png",
+      "rect": [
+        199,
+        0,
+        312,
+        118
+      ],
+      "folder": "backgrounds/jawa",
+      "origin": [
+        0.5,
+        0.5
+      ],
+      "output": "assets/backgrounds/jawa/cloud.webp",
+      "bytes": 10092,
+      "animation": "transform only; no frame sequence"
+    },
+    {
+      "key": "tree-large",
+      "source": "5.png",
+      "rect": [
+        610,
+        8,
+        339,
+        390
+      ],
+      "folder": "backgrounds/jawa",
+      "origin": [
+        0.5,
+        1
+      ],
+      "polygon": [
+        [
+          0,
+          0
+        ],
+        [
+          339,
+          0
+        ],
+        [
+          339,
+          115
+        ],
+        [
+          329,
+          115
+        ],
+        [
+          329,
+          135
+        ],
+        [
+          339,
+          135
+        ],
+        [
+          339,
+          390
+        ],
+        [
+          0,
+          390
+        ],
+        [
+          0,
+          210
+        ],
+        [
+          15,
+          210
+        ],
+        [
+          15,
+          165
+        ],
+        [
+          0,
+          165
+        ]
+      ],
+      "output": "assets/backgrounds/jawa/tree-large.webp",
+      "bytes": 66478,
+      "animation": "transform only; no frame sequence"
+    },
+    {
+      "key": "tree-slender",
+      "source": "5.png",
+      "rect": [
+        994,
+        640,
+        176,
+        201
+      ],
+      "folder": "backgrounds/jawa",
+      "origin": [
+        0.5,
+        1
+      ],
+      "output": "assets/backgrounds/jawa/tree-slender.webp",
+      "bytes": 17376,
+      "animation": "transform only; no frame sequence"
+    },
+    {
+      "key": "tree-small",
+      "source": "5.png",
+      "rect": [
+        452,
+        401,
+        213,
+        235
+      ],
+      "folder": "backgrounds/jawa",
+      "origin": [
+        0.5,
+        1
+      ],
+      "output": "assets/backgrounds/jawa/tree-small.webp",
+      "bytes": 24410,
+      "animation": "transform only; no frame sequence"
+    },
+    {
+      "key": "bank",
+      "source": "13.png",
+      "rect": [
+        0,
+        639,
+        416,
+        160
+      ],
+      "folder": "terrain",
+      "origin": [
+        0,
+        0
+      ],
+      "polygon": [
+        [
+          0,
+          15
+        ],
+        [
+          95,
+          8
+        ],
+        [
+          155,
+          9
+        ],
+        [
+          171,
+          0
+        ],
+        [
+          221,
+          15
+        ],
+        [
+          289,
+          15
+        ],
+        [
+          302,
+          6
+        ],
+        [
+          343,
+          5
+        ],
+        [
+          373,
+          18
+        ],
+        [
+          402,
+          23
+        ],
+        [
+          416,
+          50
+        ],
+        [
+          416,
+          160
+        ],
+        [
+          0,
+          160
+        ]
+      ],
+      "output": "assets/terrain/bank.webp",
+      "bytes": 30458,
+      "animation": "transform only; no frame sequence"
+    },
+    {
+      "key": "right-bank",
+      "source": "13.png",
+      "rect": [
+        1344,
+        635,
+        327,
+        180
+      ],
+      "folder": "terrain",
+      "origin": [
+        0,
+        0
+      ],
+      "polygon": [
+        [
+          0,
+          55
+        ],
+        [
+          30,
+          29
+        ],
+        [
+          68,
+          31
+        ],
+        [
+          113,
+          24
+        ],
+        [
+          154,
+          29
+        ],
+        [
+          198,
+          12
+        ],
+        [
+          220,
+          20
+        ],
+        [
+          250,
+          16
+        ],
+        [
+          280,
+          32
+        ],
+        [
+          327,
+          28
+        ],
+        [
+          327,
+          180
+        ],
+        [
+          0,
+          180
+        ]
+      ],
+      "output": "assets/terrain/right-bank.webp",
+      "bytes": 23248,
+      "animation": "transform only; no frame sequence"
+    },
+    {
+      "key": "bridge",
+      "source": "13.png",
+      "rect": [
+        929,
+        696,
+        417,
+        118
+      ],
+      "folder": "terrain",
+      "origin": [
+        0,
+        0
+      ],
+      "polygon": [
+        [
+          0,
+          16
+        ],
+        [
+          30,
+          13
+        ],
+        [
+          52,
+          6
+        ],
+        [
+          71,
+          7
+        ],
+        [
+          91,
+          15
+        ],
+        [
+          115,
+          16
+        ],
+        [
+          131,
+          8
+        ],
+        [
+          154,
+          10
+        ],
+        [
+          162,
+          15
+        ],
+        [
+          221,
+          16
+        ],
+        [
+          246,
+          10
+        ],
+        [
+          270,
+          16
+        ],
+        [
+          330,
+          15
+        ],
+        [
+          351,
+          10
+        ],
+        [
+          374,
+          15
+        ],
+        [
+          417,
+          5
+        ],
+        [
+          417,
+          118
+        ],
+        [
+          270,
+          118
+        ],
+        [
+          270,
+          112
+        ],
+        [
+          115,
+          112
+        ],
+        [
+          115,
+          118
+        ],
+        [
+          0,
+          118
+        ]
+      ],
+      "output": "assets/terrain/bridge.webp",
+      "bytes": 22078,
+      "animation": "transform only; no frame sequence"
+    },
+    {
+      "key": "cliff",
+      "source": "4.png",
+      "rect": [
+        14,
+        20,
+        595,
+        300
+      ],
+      "folder": "terrain",
+      "origin": [
+        0,
+        0
+      ],
+      "output": "assets/terrain/cliff.webp",
+      "bytes": 81590,
+      "animation": "transform only; no frame sequence"
+    },
+    {
+      "key": "foreground",
+      "source": "13.png",
+      "rect": [
+        0,
+        787,
+        1671,
+        154
+      ],
+      "folder": "backgrounds/jawa",
+      "origin": [
+        0.5,
+        1
+      ],
+      "polygon": [
+        [
+          0,
+          63
+        ],
+        [
+          20,
+          38
+        ],
+        [
+          29,
+          0
+        ],
+        [
+          54,
+          10
+        ],
+        [
+          67,
+          30
+        ],
+        [
+          77,
+          60
+        ],
+        [
+          110,
+          37
+        ],
+        [
+          159,
+          19
+        ],
+        [
+          189,
+          26
+        ],
+        [
+          193,
+          47
+        ],
+        [
+          215,
+          52
+        ],
+        [
+          269,
+          57
+        ],
+        [
+          300,
+          69
+        ],
+        [
+          355,
+          57
+        ],
+        [
+          380,
+          72
+        ],
+        [
+          416,
+          52
+        ],
+        [
+          441,
+          25
+        ],
+        [
+          465,
+          20
+        ],
+        [
+          492,
+          36
+        ],
+        [
+          502,
+          59
+        ],
+        [
+          554,
+          47
+        ],
+        [
+          577,
+          69
+        ],
+        [
+          608,
+          72
+        ],
+        [
+          636,
+          51
+        ],
+        [
+          665,
+          68
+        ],
+        [
+          702,
+          66
+        ],
+        [
+          733,
+          77
+        ],
+        [
+          785,
+          63
+        ],
+        [
+          815,
+          88
+        ],
+        [
+          864,
+          72
+        ],
+        [
+          897,
+          37
+        ],
+        [
+          926,
+          24
+        ],
+        [
+          954,
+          43
+        ],
+        [
+          978,
+          79
+        ],
+        [
+          1000,
+          54
+        ],
+        [
+          1033,
+          73
+        ],
+        [
+          1079,
+          54
+        ],
+        [
+          1098,
+          32
+        ],
+        [
+          1127,
+          22
+        ],
+        [
+          1134,
+          73
+        ],
+        [
+          1153,
+          73
+        ],
+        [
+          1202,
+          68
+        ],
+        [
+          1224,
+          80
+        ],
+        [
+          1274,
+          59
+        ],
+        [
+          1313,
+          45
+        ],
+        [
+          1324,
+          62
+        ],
+        [
+          1353,
+          50
+        ],
+        [
+          1376,
+          79
+        ],
+        [
+          1419,
+          60
+        ],
+        [
+          1443,
+          79
+        ],
+        [
+          1480,
+          52
+        ],
+        [
+          1520,
+          74
+        ],
+        [
+          1551,
+          48
+        ],
+        [
+          1578,
+          20
+        ],
+        [
+          1620,
+          11
+        ],
+        [
+          1626,
+          64
+        ],
+        [
+          1655,
+          60
+        ],
+        [
+          1671,
+          74
+        ],
+        [
+          1671,
+          154
+        ],
+        [
+          0,
+          154
+        ]
+      ],
+      "output": "assets/backgrounds/jawa/foreground.webp",
+      "bytes": 96580,
+      "animation": "transform only; no frame sequence"
+    },
+    {
+      "key": "flame",
+      "source": "11.png",
+      "rect": [
+        648,
+        10,
+        109,
+        187
+      ],
+      "folder": "fire",
+      "origin": [
+        0.5,
+        1
+      ],
+      "output": "assets/fire/flame.webp",
+      "bytes": 9302,
+      "animation": "transform only; no frame sequence"
+    },
+    {
+      "key": "smoke",
+      "source": "11.png",
+      "rect": [
+        567,
+        342,
+        143,
+        174
+      ],
+      "folder": "fire",
+      "origin": [
+        0.5,
+        1
+      ],
+      "output": "assets/fire/smoke.webp",
+      "bytes": 9240,
+      "animation": "transform only; no frame sequence"
+    },
+    {
+      "key": "embers",
+      "source": "11.png",
+      "rect": [
+        13,
+        771,
+        141,
+        85
+      ],
+      "folder": "fire",
+      "origin": [
+        0.5,
+        1
+      ],
+      "output": "assets/fire/embers.webp",
+      "bytes": 8210,
+      "animation": "transform only; no frame sequence"
+    }
+  ]
+}
