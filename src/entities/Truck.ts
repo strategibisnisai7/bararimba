@@ -66,5 +66,10 @@ export class Truck {
     }
     this.cannon.update(dt, this.local(MOUNT.x, MOUNT.y), instant);
   }
+  /** Red damage flash. */
+  flash() {
+    this.body.setTint(0xff7a6a);
+    this.body.scene.time.delayedCall(140, () => this.body.clearTint());
+  }
   get front() { return this.x + this.halfLength; }
 }

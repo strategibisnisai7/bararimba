@@ -9,7 +9,7 @@ async function startLevel(page: Page, level = 1) {
   await page.locator('[data-a=play]').click();
   await page.locator(`[data-a=select][data-v="${level}"]`).click();
   await page.locator('[data-a=start]').click();
-  await page.locator('[data-a=go]').click({ force: true });
+  await page.locator('[data-a=go]').dispatchEvent('click');
   await expect.poll(async () => (await snap(page)).mode, { timeout: 9000 }).toBe('playing');
 }
 
@@ -21,7 +21,7 @@ test('menu shows all Game Board entries and every screen opens', async ({ page }
   await page.locator('.region.open').click();
   await expect(page.locator('.tile')).toHaveCount(15);
   await expect(page.locator('.tile.boss')).toHaveCount(1);
-  await expect(page.locator('.tile.boss')).toContainText('Segera hadir');
+  await expect(page.locator('.tile.boss')).toContainText('BOSS');
   await page.locator('[data-a=menu]').click();
   await page.locator('[data-a=collection]').click();
   await expect(page.locator('.animal-card')).toHaveCount(14);

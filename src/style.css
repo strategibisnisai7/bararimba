@@ -198,3 +198,41 @@
 .tile.boss img{width:24%;filter:drop-shadow(0 .1cqw .1cqw #0008)}
 .tile.boss small{color:#ffe08a;font-weight:900;font-size:1.25cqw;letter-spacing:.1em}
 .tile.boss em{font-style:normal;color:#fff;font-size:.78cqw;font-weight:800}
+
+/* ---------- boss battle HUD (Forest Fire Boss Battle reference) ---------- */
+.boss-hud{display:none}
+.hud.boss-mode .boss-hud{display:block}
+.hud.boss-mode .hud-banner,.hud.boss-mode .hud-status,.hud.boss-mode .hud-objective,.hud.boss-mode .hud-actions,.hud.boss-mode .water-ind,.hud.boss-mode .spray{display:none}
+.bh-bar{position:absolute}.bh-bar>img{display:block;width:100%}
+.bh-pressure{left:1.4cqw;top:1.2cqw;width:24.3cqw}.bh-reserve{left:1.4cqw;top:6.8cqw;width:23.7cqw}
+.bh-boss{left:29.6cqw;top:.7cqw;width:41.9cqw}
+.bh-track{position:absolute;border-radius:2cqw;background:#1c1d22;overflow:hidden;box-shadow:inset 0 .15cqw .3cqw #000}
+.bh-track span{display:block;height:100%;width:100%;border-radius:2cqw;background:linear-gradient(#7fdcff,#2fa8ec 50%,#1786d6);box-shadow:inset 0 .25cqw 0 #ffffff90;transition:width .1s linear}
+.bh-track.red span{background:linear-gradient(#ff6a5a,#e8221a 55%,#b8120c)}
+.bh-track.low span{background:linear-gradient(#ffd27a,#e8952e)}
+.bh-track.locked span{background:linear-gradient(#b8c4cc,#7d8a94);animation:pulse .5s ease-in-out infinite}
+.bh-pause{position:absolute;right:1.3cqw;top:1.2cqw;width:5.9cqw;padding:0;border:0;background:none}.bh-pause img{display:block;width:100%}
+.hud.boss-mode .zoom{top:8.4cqw}
+.bh-mission{position:absolute;left:1.3cqw;bottom:1.8cqw;width:36cqw;pointer-events:none}
+.bh-spray{position:absolute;right:1.4cqw;bottom:1.6cqw;width:13.3cqw;padding:0;border:0;background:none;transition:transform .08s}.bh-spray img{display:block;width:100%}
+.bh-spray.held,.bh-spray.firing{transform:scale(.94)}.bh-spray.firing img{filter:brightness(1.15) drop-shadow(0 0 1.2cqw #7fe0ff)}
+.hud.boss-mode .drive{left:39cqw;bottom:1.6cqw}
+.hud.boss-mode .aim{right:16cqw;bottom:1.6cqw}
+.tile.boss img{width:62%;filter:drop-shadow(0 .15cqw .2cqw #0008)}
+.tile.boss.locked img{filter:grayscale(1) brightness(.7)}
+
+.bh-life{left:1.4cqw;top:6.8cqw;width:23.7cqw;height:5.4cqw;border-radius:1cqw;border:.28cqw solid #4c2a10;background:linear-gradient(#a26b3b,#7b4b25);box-shadow:inset 0 .22cqw 0 #c78d55,0 .4cqw 1cqw #0006}
+.bh-life>img{position:absolute;left:.3cqw;top:50%;width:6.2cqw!important;transform:translateY(-50%);filter:drop-shadow(0 .15cqw .2cqw #0008)}
+.bh-life b{position:absolute;left:7.2cqw;top:.35cqw;color:#fff6e3;font-size:1.25cqw;font-weight:900;letter-spacing:.02em;text-shadow:0 .14cqw 0 #3a1f0a}
+.bh-life .bh-track{left:7.1cqw;right:.9cqw;top:2.45cqw;height:1.9cqw}
+.bh-track.green span{background:linear-gradient(#a5ea72,#4caa2b 55%,#2f8a1c)}
+.bh-track.green.low span{background:linear-gradient(#ff8a7a,#e8221a);animation:pulse .5s ease-in-out infinite}
+.bh-life{top:12.4cqw}
+.bh-fuel{left:39.4cqw;top:7.6cqw;width:31.4cqw;height:3.4cqw;border-radius:.8cqw;border:.24cqw solid #4c2a10;background:linear-gradient(#8a5530,#5e3618);box-shadow:0 .3cqw .8cqw #0006}
+.bh-fuel b{position:absolute;left:.9cqw;top:50%;transform:translateY(-50%);color:#ffe08a;font-size:.95cqw;font-weight:900;text-shadow:0 .12cqw 0 #3a1f0a}
+.bh-fuel .bh-track{left:12.6cqw;right:.7cqw;top:.75cqw;bottom:.75cqw}
+.bh-track.fire span{background:linear-gradient(#ffd24a,#ff7a1a 55%,#d8380c)}
+.bh-reload,.bh-wait{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin-top:.25cqw;white-space:nowrap;color:#fff;font-weight:900;font-size:1cqw;text-shadow:0 .1cqw .3cqw #000;display:none;animation:pulse .7s ease-in-out infinite}
+.bh-fuel.reloading .bh-reload,.bh-reserve.waiting .bh-wait{display:block}
+.bh-fuel.reloading .bh-track span{background:linear-gradient(#9a9a9a,#666)}
+#ui.boss .toast{top:12.6cqw}

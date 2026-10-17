@@ -1,8 +1,9 @@
 import Phaser from 'phaser';
-import { ASSETS, STEP, RENDER_SCALE, WATER_GRAVITY, WATER_SPEED, clamp } from '../config/level';
+import { ASSETS, assetsFor, STEP, RENDER_SCALE, WATER_GRAVITY, WATER_SPEED, clamp } from '../config/level';
 import { LEVELS, type LevelDef } from '../config/levels';
 import { Truck } from '../entities/Truck';
 import { Animal } from '../entities/Animal';
+import { Boss } from '../entities/Boss';
 import { firstHit } from '../physics/collision';
 import { World } from './World';
 import { Effects } from '../systems/Effects';
@@ -18,7 +19,7 @@ export interface SceneData { level?: number; mode?: 'attract' | 'play' }
 export interface ResultInfo {
   won: boolean; level: LevelDef; stars: number; score: number; record: boolean;
   water: { ok: boolean; used: number; budget: number }; animal: { ok: boolean; name: string; key: string; hp: number };
-  fires: { out: number; total: number }; time: number; par: number; reason?: 'animal' | 'water';
+  fires: { out: number; total: number }; time: number; par: number; reason?: 'animal' | 'water' | 'burn' | 'truck'; boss?: boolean; truckHp?: number;
 }
 
 export const sound = new Sound();
@@ -50,10 +51,20 @@ export class LevelScene extends Phaser.Scene {
   private frameAvg = 16;
   private detach: (() => void)[] = [];
   private firing = false;
-  /** Player-controlled view scale: 1 = normal, down to 0.55 to see far-away fires. */
+  /** Player-controlled view scale: 1 = close-up, 0.5 (default) shows the wide battlefield. */
   private zoom = 1;
   private zoomTarget = 1;
   private critical = false;
+  private boss?: Boss;
+  private burnWarned = false;
+  private pressure = 100;
+  private pressureLock = false;
+  private hitCool = 0;
+  /** Seconds since the pump last ran (boss level auto-refill after 10 s). */
+  private idleWater = 0;
+  /** Truck health in the boss duel. */
+  private truckHp = 100;
+  private refillToast = false;
   private wheelPouring = false;
   private respawnT = 3;
   private pourAcc = 0;
@@ -61,8 +72,11 @@ export class LevelScene extends Phaser.Scene {
 
   constructor() { super('level'); }
   preload() {
-    for (const [key, path] of Object.entries({ ...ASSETS, alert: 'ui/alert' }))
-      if (!this.textures.exists(key)) this.load.image(key, `/assets/${path}.webp`);
+    // Load only what this level uses: core sprites plus its theme and boss assets (cached across restarts).
+    const data = this.sys.settings.data as SceneData | undefined;
+    const def = LEVELS[(data?.level ?? 1) - 1];
+    for (const key of [...assetsFor(def.theme, !!def.boss), 'alert'])
+      if (!this.textures.exists(key)) this.load.image(key, `/assets/${key === 'alert' ? 'ui/alert' : ASSETS[key]}.webp`);
     this.load.on('progress', (v: number) => { const el = document.querySelector('#load-progress'); if (el) el.textContent = `${Math.round(v * 100)}% · Hutan Jawa`; });
     this.load.on('loaderror', () => {
       const s = document.querySelector('#loading strong'); if (s) s.textContent = 'Aset belum berhasil dimuat';
@@ -73,7 +87,7 @@ export class LevelScene extends Phaser.Scene {
     this.ui = this.registry.get('ui');
     this.def = LEVELS[(data.level ?? 1) - 1];
     this.mode = data.mode === 'play' ? 'intro' : 'attract';
-    Object.assign(this, { respawnT: 3, critical: false, alarmT: 0, acc: 0, matterAcc: 0, burn: 0, elapsed: 0, hudT: 0, endT: 0, result: undefined, introT: 0, pointerHeld: false, firing: false });
+    Object.assign(this, { truckHp: 100, idleWater: 0, refillToast: false, burnWarned: false, boss: undefined, pressure: 100, pressureLock: false, hitCool: 0, respawnT: 3, critical: false, alarmT: 0, acc: 0, matterAcc: 0, burn: 0, elapsed: 0, hudT: 0, endT: 0, result: undefined, introT: 0, pointerHeld: false, firing: false });
     this.keys.clear();
     createParticleTextures(this);
     this.cameras.main.setZoom(RENDER_SCALE);
@@ -98,9 +112,11 @@ export class LevelScene extends Phaser.Scene {
     this.fires.attract = this.mode === 'attract';
     this.water = new WaterSystem(this, this.world.surfaces, () => this.fires.burning,
       (hit, d) => this.onWaterHit(hit, d), (f, x, y) => this.onWaterFire(f, x, y), (x, y) => this.effects.mist(x, y), this.def.supply);
+    if (this.def.boss) this.boss = new Boss(this, this.def.boss, this.effects);
     this.water.absorb = (x, y) => (!!this.world.basin && this.world.absorb(x, y)) || this.world.catchBucket(x, y);
     this.truck.update(0, 0, 0, 99999, x => this.world.groundAt(x), true);
-    this.zoom = this.zoomTarget = 1;
+    this.zoom = this.zoomTarget = this.mode === 'attract' ? 1 : .5;
+    this.ui.setZoomLevel(this.zoomTarget);
     this.cam = this.mode === 'attract' ? 600 : this.camX(this.truck.x + 330);
     this.applyCamera();
     this.bindInput();
@@ -204,6 +220,19 @@ export class LevelScene extends Phaser.Scene {
       if (tip) c.setTip(c.tip + tip * dt * .7);
       if (boom) c.setBoom(c.boom + boom * dt * 1.1);
       firing = (this.pointerHeld || this.keys.has('Space') || this.ui.sprayHeld) && this.water.supply > 0;
+      if (this.boss) {
+        // Water pressure: drains while spraying, recovers when released; an empty tank locks the pump briefly.
+        if (this.pressureLock && this.pressure >= 35) this.pressureLock = false;
+        if (this.pressureLock) firing = false;
+        this.pressure = clamp(this.pressure + (firing ? -8 : 24) * dt, 0, 100);
+        if (this.pressure <= 0 && !this.pressureLock) { this.pressureLock = true; this.ui.toast('Tekanan air habis! Lepas sebentar untuk memompa lagi.', 1800); }
+        // Reserve refills on its own after 10 s without spraying.
+        this.idleWater = firing ? 0 : this.idleWater + dt;
+        if (this.idleWater >= 10 && this.water.supply < this.water.capacity) {
+          this.water.refill(30 * dt);
+          if (!this.refillToast) { this.refillToast = true; this.ui.toast('Cadangan air terisi otomatis…', 1800); }
+        } else if (firing) this.refillToast = false;
+      }
     }
     if (this.mode === 'attract') {
       this.attractT += dt;
@@ -238,6 +267,7 @@ export class LevelScene extends Phaser.Scene {
     this.fires.update(dt, reduced);
     this.animal.update(dt);
     this.updateBarrel();
+    if (this.boss && this.mode !== 'attract') this.updateBoss(dt);
     const wh = this.world.wheel;
     if (wh) {
       wh.w *= 1 - Math.min(1, .7 * dt);
@@ -257,7 +287,7 @@ export class LevelScene extends Phaser.Scene {
     if (this.mode !== 'attract') { sound.spray(firing); sound.fire(this.fires.burning.filter(f => Math.abs(f.def.x - this.cam) < 700).reduce((s, f) => s + f.intensity, 0)); }
   }
   private setZoom(z: number) {
-    this.zoomTarget = clamp(Math.round(z * 100) / 100, .55, 1);
+    this.zoomTarget = clamp(Math.round(z * 100) / 100, .5, 1);
     this.ui.setZoomLevel(this.zoomTarget);
   }
   /** Clamp a camera centre so the view never leaves the world, at the current zoom. */
@@ -268,8 +298,8 @@ export class LevelScene extends Phaser.Scene {
   private applyCamera() {
     const cam = this.cameras.main;
     cam.setZoom(RENDER_SCALE * this.zoom);
-    // Keep the ground anchored to the bottom edge when zoomed out.
-    cam.centerOn(this.cam, 720 - 360 / this.zoom);
+    // Zoomed out, lift the view so the ground sits above the bottom HUD instead of under it.
+    cam.centerOn(this.cam, 720 - 360 / this.zoom + (1 - this.zoom) * 300);
   }
   /** Menu backdrop only: ballistic angle from the nozzle to a point (the player always aims manually). */
   private solveTip(tx: number, ty: number, high = false) {
@@ -348,6 +378,32 @@ export class LevelScene extends Phaser.Scene {
     }
     return { min, max };
   }
+  private updateBoss(dt: number) {
+    const b = this.boss!;
+    this.hitCool -= dt;
+    const playing = this.mode === 'playing';
+    b.update(dt, {
+      truck: { x: this.truck.x, y: this.truck.y, half: this.truck.halfLength },
+      surfaces: this.world.surfaces,
+      hitWater: (x, y, r) => this.water.hitTest(x, y, r),
+      ignite: (x, y) => { if (playing && this.fires.spawn(x, y)) sound.alarm(); },
+      incoming: (x, y, r, h) => this.water.incoming(x, y, r, h),
+      truckHit: kind => {
+        // Brief invulnerability after each hit so a flame stream cannot shred the truck in one burst.
+        if (!playing || this.hitCool > 0) return;
+        this.hitCool = .6;
+        this.truckHp = Math.max(0, this.truckHp - (kind === 'ball' ? 14 : 6));
+        this.pressure = Math.max(0, this.pressure - (kind === 'ball' ? 25 : 8));
+        this.cameras.main.shake(180, .006); sound.splash();
+        this.truck.flash();
+        if (kind === 'ball') this.ui.toast('Truk terkena bola api!', 1200);
+      },
+    });
+    if (playing && b.defeated) {
+      // Rain of relief: every remaining fire dies down after the boss falls.
+      for (const f of this.fires.burning) f.intensity = Math.min(f.intensity, .2);
+    }
+  }
   private updateBarrel() {
     const b = this.world.barrel;
     if (!b || b.landed || b.rope || !b.armed) return;
@@ -386,11 +442,19 @@ export class LevelScene extends Phaser.Scene {
       this.ui.hud({
         water: this.water.supply / this.water.capacity * 100, burn: this.burn, out, total: out + burning,
         animalHp: this.animal.hp, animalDanger: this.animal.mood === 'danger', refilling,
-        timeLeft: over < 0 ? -over : this.def.critical - over, critical: over >= 0,
+        timeLeft: over < 0 ? -over : this.def.critical - over, critical: over >= 0 && !this.boss,
         stars: [burning === 0, this.water.used <= this.def.waterBudget, over < 0],
         firing: this.firing, tip: this.truck.cannon.tipDegrees, boom: this.truck.cannon.boomPercent,
       });
       this.ui.indicators(this.fires.burning.filter(f => Math.abs(f.def.x - this.cam) > 600 / this.zoom).map(f => ({ side: f.def.x > this.cam ? 1 : -1, y: 720 - (720 - (f.def.y - 60)) * this.zoom })));
+    }
+    if (this.boss) {
+      this.ui.bossHud(this.pressure, this.water.supply / this.water.capacity * 100, this.truckHp, this.boss.hp / this.boss.max * 100, this.boss.fuel, this.boss.reloading, this.pressureLock, this.idleWater >= 10 && this.water.supply < this.water.capacity);
+      if (this.boss.defeated) { for (const f of this.fires.burning) { f.extinguish(); } return this.finish(true); }
+      if (this.burn >= 70 && !this.burnWarned) { this.burnWarned = true; this.ui.toast('Hutan hampir habis terbakar! Padamkan api yang dilempar boss!', 2600); }
+      if (this.truckHp <= 0) return this.finish(false, 'truck');
+      if (this.burn >= 100) return this.finish(false, 'burn');
+      return;   // no water loss here: the reserve refills itself after 10 s idle
     }
     if (this.fires.burning.length === 0 && this.world.cageOpen) return this.finish(true);
     if (this.critical && this.animal.hp <= 0) return this.finish(false, 'animal');
@@ -406,15 +470,15 @@ export class LevelScene extends Phaser.Scene {
     this.tweens.addCounter({ from: this.cam, to: this.camX(this.def.animal.x - 200), duration: 900, ease: 'sine.inOut',
       onUpdate: tw => { this.cam = tw.getValue() ?? this.cam; } });
     won ? sound.win() : sound.fail();
-    const waterOk = this.water.used <= this.def.waterBudget;
-    const timeOk = this.elapsed <= this.def.time;
+    const waterOk = this.boss ? this.truckHp >= 50 : this.water.used <= this.def.waterBudget;
+    const timeOk = this.boss ? this.burn < 50 : this.elapsed <= this.def.time;
     const stars = won ? 1 + Number(waterOk) + Number(timeOk) : 0;
     const score = won
       ? Math.round(3000 + this.water.supply * 15 + this.animal.hp * 20 + Math.max(0, this.def.time - this.elapsed) * 25 + (100 - this.burn) * 10)
       : this.fires.outCount * 450;
     const record = won ? store.record(this.def.id, stars, score, this.def.animal.key) : false;
     this.result = {
-      won, level: this.def, stars, score, record, reason, time: this.elapsed, par: this.def.time,
+      won, level: this.def, stars, score, record, reason, time: this.elapsed, par: this.def.time, boss: !!this.boss, truckHp: Math.round(this.truckHp),
       water: { ok: waterOk, used: this.water.used, budget: this.def.waterBudget },
       animal: { ok: won, name: this.def.animal.name, key: this.def.animal.key, hp: this.animal.hp },
       fires: { out: this.fires.outCount, total: this.fires.outCount + this.fires.burning.length },

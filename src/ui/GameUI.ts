@@ -78,7 +78,6 @@ export class GameUI {
       case 'region': v === 'jawa' ? this.show('levels') : this.toast('Wilayah ini segera hadir. Selesaikan Jawa dulu!'); break;
       case 'select': {
         const id = Number(v);
-        if (id === REGION.boss) { this.toast('Lawan Bos Jawa — segera hadir!'); break; }
         if (!store.unlocked(id) || id > LEVELS.length) { this.toast(id > LEVELS.length ? 'Level ini segera hadir.' : 'Selesaikan level sebelumnya untuk membuka.'); break; }
         this.selected = id; this.show('levels'); break;
       }
@@ -156,7 +155,8 @@ export class GameUI {
   private levelsHtml() {
     const tiles = Array.from({ length: REGION.total }, (_, i) => {
       const id = i + 1, exists = id <= LEVELS.length, open = exists && store.unlocked(id), s = store.progress.stars[id] ?? 0;
-      if (id === REGION.boss) return `<button class="tile boss" data-a="select" data-v="${id}" aria-label="Lawan bos, segera hadir"><img src="${A('alert')}" alt=""/><small>BOS</small><em>Segera hadir</em></button>`;
+      if (id === REGION.boss) return open ? `<button class="tile boss ${id === this.selected ? 'sel' : ''}" data-a="select" data-v="${id}" aria-label="Level boss"><img src="/assets/boss/boss.webp" alt=""/><small>BOSS</small><span class="tile-stars">${[0, 1, 2].map(k => `<i class="${k < s ? 'on' : ''}"></i>`).join('')}</span></button>`
+        : `<button class="tile boss locked" data-a="select" data-v="${id}" aria-label="Level boss terkunci"><img src="/assets/boss/boss.webp" alt=""/><small>BOSS</small><em>Terkunci</em></button>`;
       if (!open) return `<button class="tile locked" data-a="select" data-v="${id}" aria-label="Level ${id} terkunci"><img src="${A('lock')}" alt=""/></button>`;
       return `<button class="tile ${id === this.selected ? 'sel' : ''}" data-a="select" data-v="${id}" aria-label="Level ${id}"><b>${id}</b><span class="tile-stars">${[0, 1, 2].map(k => `<i class="${k < s ? 'on' : ''}"></i>`).join('')}</span></button>`;
     }).join('');
@@ -170,7 +170,7 @@ export class GameUI {
           <img class="thumb" src="${A(`thumb-${l.id}`)}" alt="Pratinjau ${l.name}"/>
           <div class="info">
             <b>Level ${l.id}</b><strong>${l.name}</strong>
-            <ul><li>${star(true)}Padamkan api &amp; selamatkan satwa</li><li>${star(true)}Hemat penggunaan air</li><li>${star(true)}Selesai dalam ${l.time} detik</li></ul>
+            <ul>${l.boss ? `<li>${star(true)}Kalahkan Pembakar Hutan</li><li>${star(true)}Nyawa truk tetap ≥ 50%</li><li>${star(true)}Jaga hutan terbakar &lt; 50%</li>` : `<li>${star(true)}Padamkan api &amp; selamatkan satwa</li><li>${star(true)}Hemat penggunaan air</li><li>${star(true)}Selesai dalam ${l.time} detik</li>`}</ul>
             <button class="green-btn" data-a="start">${ico.play}<span>Main</span></button>
           </div>
         </div>
@@ -259,7 +259,7 @@ export class GameUI {
       <div class="hud-objective"><img src="${A('objective-panel')}" alt=""/><b class="count">0/0</b></div>
       <div class="zoom" role="group" aria-label="Zoom kamera">
         <button class="zbtn" data-a="zoom-in" aria-label="Perbesar (Z)"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6.5"/><path d="M15 15l5.5 5.5M7 10h6M10 7v6"/></svg></button>
-        <span class="zval">100%</span>
+        <span class="zval">50%</span>
         <button class="zbtn" data-a="zoom-out" aria-label="Perkecil (X)"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6.5"/><path d="M15 15l5.5 5.5M7 10h6"/></svg></button>
       </div>
       <div class="hud-actions">
@@ -279,13 +279,23 @@ export class GameUI {
           <div><button class="wood-btn up" data-ctl="tip" ${hold(-1)} aria-label="Naikkan nozzle"><img src="${A('wood-left')}" alt=""/></button><button class="wood-btn down" data-ctl="tip" ${hold(1)} aria-label="Turunkan nozzle"><img src="${A('wood-left')}" alt=""/></button></div></div>
         <button class="spray" data-ctl="spray" ${hold(1)} aria-label="Tahan untuk menyemprot"><img src="${A('round-drop')}" alt=""/><span>SEMPROT</span></button>
       </div>
+      <div class="boss-hud">
+        <div class="bh-bar bh-pressure"><img loading="lazy" src="/assets/boss/hud-pressure.webp" alt=""/><div class="bh-track" style="left:24.9%;width:69.4%;top:45.5%;height:34.4%"><span></span></div></div>
+        <div class="bh-bar bh-reserve"><img loading="lazy" src="/assets/boss/hud-reserve.webp" alt=""/><div class="bh-track" style="left:25.5%;width:68.4%;top:45.6%;height:34.8%"><span></span></div><small class="bh-wait">Mengisi…</small></div>
+        <div class="bh-bar bh-life"><img loading="lazy" src="/assets/vehicle/truck.webp" alt=""/><b>NYAWA TRUK</b><div class="bh-track green"><span></span></div></div>
+        <div class="bh-bar bh-fuel"><b>CADANGAN API BOSS</b><div class="bh-track fire"><span></span></div><small class="bh-reload">Boss mengisi api… serang!</small></div>
+        <div class="bh-bar bh-boss"><img loading="lazy" src="/assets/boss/hud-bossbar.webp" alt=""/><div class="bh-track red" style="left:17.7%;width:77.1%;top:56.5%;height:27.4%"><span></span></div></div>
+        <button class="bh-pause" data-a="pause" aria-label="Jeda"><img loading="lazy" src="/assets/boss/hud-pause.webp" alt=""/></button>
+        <img class="bh-mission" loading="lazy" src="/assets/boss/hud-mission.webp" alt="Misi boss: Kalahkan Pembakar Hutan, tahan semprotan air dan tekan balik, hindari bola api"/>
+        <button class="bh-spray" data-ctl="spray" data-hold="1" aria-label="Tahan untuk menyemprot"><img loading="lazy" src="/assets/boss/hud-spray.webp" alt=""/></button>
+      </div>
       <div class="ind left"><img src="${A('round-fire')}" alt="Api di kiri"/></div>
       <div class="ind right"><img src="${A('round-fire')}" alt="Api di kanan"/></div>`;
     const q = (s: string) => this.hudEl.querySelector<HTMLElement>(s)!;
     this.els = {
       code: q('.code'), name: q('.name'), hstars: q('.hstars'), aniImg: q('.ani'), aniBar: q('.animal .bar span'), aniChip: q('.chip.animal'),
       timer: q('.chip.timer'), tval: q('.tval'), tlabel: q('.tlabel'), count: q('.count'), wfill: q('.wtrack span'), refill: q('.refill'), tipV: q('.tip-v'), boomV: q('.boom-v'),
-      spray: q('.spray'), indL: q('.ind.left'), indR: q('.ind.right'), wtrack: q('.wtrack'),
+      spray: q('.spray'), bossSpray: q('.bh-spray'), pres: q('.bh-pressure span'), resv: q('.bh-reserve span'), life: q('.bh-life span'), fuel: q('.bh-fuel span'), fuelWrap: q('.bh-fuel'), waitWrap: q('.bh-reserve'), bhp: q('.bh-boss span'), indL: q('.ind.left'), indR: q('.ind.right'), wtrack: q('.wtrack'),
     };
     this.hudEl.querySelectorAll<HTMLElement>('[data-hold]').forEach(b => {
       const ctl = b.dataset.ctl!, dir = Number(b.dataset.hold);
@@ -308,6 +318,8 @@ export class GameUI {
     this.els.code.textContent = def.code; this.els.name.textContent = def.name;
     (this.els.aniImg as HTMLImageElement).src = `/assets/animals/${def.animal.key}.webp`;
     this.els.refill.hidden = true;
+    this.hudEl.classList.toggle('boss-mode', !!def.boss);
+    this.root.classList.toggle('boss', !!def.boss);
     this.releaseControls();
   }
   setZoomLevel(z: number) { const v = this.hudEl.querySelector('.zval'); if (v) v.textContent = `${Math.round(z * 100)}%`; }
@@ -330,6 +342,16 @@ export class GameUI {
     e.refill.hidden = !d.refilling;
     e.tipV.textContent = `${d.tip}°`; e.boomV.textContent = `${d.boom}%`;
     e.spray.classList.toggle('firing', d.firing);
+  }
+  bossHud(pressure: number, reserve: number, truckHp: number, bossHp: number, bossFuel: number, bossReload: boolean, locked: boolean, refilling: boolean) {
+    const e = this.els;
+    e.pres.style.width = `${pressure}%`; e.pres.parentElement!.classList.toggle('locked', locked);
+    e.resv.style.width = `${reserve}%`; e.resv.parentElement!.classList.toggle('low', reserve < 25);
+    e.waitWrap.classList.toggle('waiting', refilling);
+    e.life.style.width = `${truckHp}%`; e.life.parentElement!.classList.toggle('low', truckHp < 30);
+    e.fuel.style.width = `${bossFuel}%`; e.fuelWrap.classList.toggle('reloading', bossReload);
+    e.bhp.style.width = `${bossHp}%`;
+    e.bossSpray.classList.toggle('firing', this.els.spray.classList.contains('firing'));
   }
   indicators(list: { side: number; y: number }[]) {
     const l = list.find(i => i.side < 0), r = list.find(i => i.side > 0);
@@ -374,12 +396,14 @@ export class GameUI {
     this.overlay.hidden = false;
     const won = r.won;
     const mark = (ok: boolean) => `<img class="mark" src="${A(ok ? 'round-check' : 'round-x')}" alt="${ok ? 'berhasil' : 'gagal'}"/>`;
-    const reason = r.reason === 'animal' ? `Terlambat! ${r.animal.name} terbakar api.` : r.reason === 'water' ? 'Air habis sebelum api padam.' : '';
+    const reason = r.reason === 'animal' ? `Terlambat! ${r.animal.name} terbakar api.` : r.reason === 'water' ? 'Air habis sebelum api padam.' : r.reason === 'burn' ? 'Hutan habis terbakar oleh Pembakar Hutan!' : r.reason === 'truck' ? 'Truk rusak parah terkena serangan boss!' : '';
     const clock = (sec: number) => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
     const rows = `
-      <div class="rrow"><span>Hemat air (maks ${r.water.budget} L)</span><em>${Math.round(r.water.used)} L</em>${mark(won && r.water.ok)}</div>
+      ${r.boss ? `<div class="rrow"><span>Nyawa truk ≥ 50%</span><em>${r.truckHp ?? 0}%</em>${mark(won && r.water.ok)}</div>`
+        : `<div class="rrow"><span>Hemat air (maks ${r.water.budget} L)</span><em>${Math.round(r.water.used)} L</em>${mark(won && r.water.ok)}</div>`}
       <div class="rrow"><span>Selamatkan ${r.animal.name}</span><em>${won ? '1/1' : '0/1'}</em>${mark(won)}</div>
-      <div class="rrow"><span>Selesaikan dalam ${r.par} detik</span><em>${clock(r.time)}</em>${mark(won && r.time <= r.par)}</div>`;
+      ${r.boss ? `<div class="rrow"><span>Hutan terbakar &lt; 50%</span><em>${won ? (r.stars === 3 || (r.stars === 2 && !r.water.ok) ? 'Ya' : 'Tidak') : '-'}</em>${mark(won && (r.stars === 3 || (r.stars === 2 && !r.water.ok)))}</div>`
+        : `<div class="rrow"><span>Selesaikan dalam ${r.par} detik</span><em>${clock(r.time)}</em>${mark(won && r.time <= r.par)}</div>`}`;
     const starsDim = won ? [0, 1, 2].filter(i => i >= r.stars).map(i => `<img class="dim s${i}" src="${A('star-silver')}" alt=""/>`).join('') : '';
     const btn = (a: string, b: number[], label: string) => `<button class="hit" data-a="${a}" aria-label="${label}" style="left:${b[0]}%;top:${b[1]}%;width:${b[2]}%;height:${b[3]}%"></button>`;
     this.overlay.innerHTML = `<div class="scrim ${won ? 'win' : 'lose'}"></div>
@@ -389,7 +413,7 @@ export class GameUI {
         <div class="rrows">${rows}</div>
         <div class="rscore"><span>Skor</span><b>${r.score.toLocaleString('id-ID')}</b>${r.record ? `<img src="${A('badge-record')}" alt="Rekor baru"/>` : ''}</div>
         <div class="animal-badge ${won ? 'happy' : 'sad'}"><img src="/assets/animals/${r.animal.key}.webp" alt="${r.animal.name} ${won ? 'senang' : 'menangis'}"/>${won ? '<i class="h1">♥</i><i class="h2">♥</i><i class="h3">♥</i>' : '<i class="t1"></i><i class="t2"></i>'}</div>
-        <p class="rnote">${won ? `${r.animal.name} senang dan masuk Koleksi Satwa!` : reason}</p>
+        <p class="rnote">${won ? (r.boss ? 'Pembakar Hutan dikalahkan! Hutan Jawa selamat!' : `${r.animal.name} senang dan masuk Koleksi Satwa!`) : reason}</p>
         ${won ? btn('to-map', [6.4, 85.3, 28.4, 11.2], 'Kembali ke peta') + btn('retry', [35.1, 85.3, 28.3, 11.2], 'Ulangi') + btn('next', [64.4, 85.3, 31.4, 11.2], 'Lanjut')
           : btn('to-map', [5.6, 86.6, 29.8, 11], 'Kembali ke peta') + btn('retry', [36.7, 86.6, 27.3, 11], 'Ulangi') + btn('retry', [65, 86.6, 30.7, 11], 'Coba lagi')}
       </div>`;

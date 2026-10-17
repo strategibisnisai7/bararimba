@@ -153,7 +153,7 @@ export interface Fuel { image: Phaser.GameObjects.Image; burn: number }
 export class FireSystem {
   readonly fires: Fire[];
   attract = false;
-  constructor(scene: Phaser.Scene, defs: FireDef[], private effects: Effects, private spreadDelay: number,
+  constructor(private scene: Phaser.Scene, defs: FireDef[], private effects: Effects, private spreadDelay: number,
     private fuel: Map<number, Fuel>, private onOut: (f: Fire) => void, private onSpread: (f: Fire) => void) {
     this.fires = defs.map((d, i) => new Fire(scene, d, i));
   }
@@ -197,6 +197,14 @@ export class FireSystem {
       if (d < bestD) { bestD = d; best = f; }
     }
     if (best) { best.ignite(best.def.start); this.onSpread(best); }
+  }
+  /** Start a new fire at runtime (boss fireballs). Returns false if one already burns nearby. */
+  spawn(x: number, y: number) {
+    if (this.fires.some(f => f.lit && Math.hypot(f.def.x - x, f.def.y - y) < 70)) return false;
+    if (this.burning.length >= 10) return false;
+    const f = new Fire(this.scene, { x, y, start: .35, growth: .006, lit: true, max: 1.1 }, this.fires.length);
+    this.fires.push(f);
+    return true;
   }
   get burning() { return this.fires.filter(f => f.lit); }
   get outCount() { return this.fires.filter(f => f.everLit && !f.lit).length; }

@@ -7,8 +7,12 @@ export interface PropDef { kind: 'crate' | 'crate-plain' | 'boulder' | 'log'; x:
 export interface Decor { key: string; x: number; y: number; scale: number; flip?: boolean; fuel?: number }
 export interface HangDef { anchorX: number; anchorY: number; rope: number; postX: number; groundY: number; load?: 'barrel' | 'crate' }
 export interface AnimalDef { key: string; name: string; x: number; y: number; scale: number; flip?: boolean }
+import type { BossDef } from '../entities/Boss';
+export type Theme = 'forest' | 'ruins' | 'volcanic';
 export interface LevelDef {
   id: number; code: string; name: string; width: number;
+  /** Visual tile set; gameplay is unchanged. */
+  theme?: Theme;
   supply: number; waterBudget: number; burnRate: number; spreadDelay: number;
   /** Standard time (s): the animal is safe until it runs out, then becomes critical for `critical` seconds. */
   time: number; critical: number;
@@ -28,11 +32,13 @@ export interface LevelDef {
   rocks?: { x0: number; x1: number; y0: number; y1: number }[];
   /** Pressure switch: a pushed boulder resting on the button opens the cage. */
   lever?: { button: { x: number; y: number }; cage: { x: number; y: number } };
-  wheel?: { x: number; y: number; r: number; trough?: { x: number; y: number }; out: { x: number; y: number; vx: number } };
+  /** Region boss: throws fireballs and a flame stream; defeat it to win. */
+  boss?: BossDef & { waterfall?: { x: number; y: number; w: number } };
+  wheel?: { x: number; y: number; r: number; out: { x: number; y: number; vx: number } };
   animal: AnimalDef; tutorial: number[]; brief: string;
 }
 
-/** Tile `total` is the region boss, shown as "Segera hadir" until it is built. */
+/** Tile `boss` is the region boss level. */
 export const REGION = { name: 'JAWA', subtitle: 'Hutan Pegunungan', total: 15, boss: 15 };
 
 export const LEVELS: LevelDef[] = [
@@ -210,7 +216,7 @@ export const LEVELS: LevelDef[] = [
     tutorial: [3, 5, 6], brief: 'Trenggiling terjebak di gua. Putuskan tali derek agar peti penutup gua jatuh, lalu semprot mendatar masuk celah sempit.',
   },
   {
-    id: 7, code: '1-7', name: 'Puncak Rimba', width: 3000,
+    id: 7, code: '1-7', name: 'Puncak Rimba', width: 3000, theme: 'ruins',
     supply: 100, waterBudget: 65, burnRate: .45, spreadDelay: 14, time: 220, critical: 40,
     truckX: 230, driveMin: 160,
     lands: [
@@ -241,14 +247,15 @@ export const LEVELS: LevelDef[] = [
     tutorial: [4, 5, 6], brief: 'Ujian terakhir: buat pijakan peti, lempar tong dengan jungkat-jungkit, lalu dorong batu ke tombol untuk membuka kandang gajah.',
   },
   {
-    id: 8, code: '1-8', name: 'Gua Rendah', width: 2500,
+    id: 8, code: '1-8', name: 'Gua Rendah', width: 2500, theme: 'ruins',
     supply: 100, waterBudget: 50, burnRate: .4, spreadDelay: 15, time: 170, critical: 35,
     truckX: 230, driveMin: 160,
     lands: [{ x0: -80, x1: 760, top: 548 }, { x0: 980, x1: 2600, top: 548 }],
     bridges: [],
     floatGap: { x0: 760, x1: 980, need: 2 },
-    rocks: [{ x0: 1520, x1: 2000, y0: 280, y1: 400 }],
+    rocks: [{ x0: 1520, x1: 2000, y0: 270, y1: 380 }, { x0: 1140, x1: 1300, y0: 330, y1: 372 }],
     fires: [
+      { x: 1220, y: 330, start: .45, growth: .0045, lit: true },
       { x: 1150, y: 548, start: .5, growth: .0055, lit: true },
       { x: 1380, y: 548, start: .55, growth: .0060, lit: true },
       { x: 1640, y: 548, start: .4, growth: .0040, lit: true, max: .5 },
@@ -257,6 +264,7 @@ export const LEVELS: LevelDef[] = [
     ],
     props: [{ kind: 'log', x: 640, y: 514 }, { kind: 'log', x: 640, y: 450 }],
     decor: [
+      { key: 'tree-small', x: 1180, y: 336, scale: .42 },
       { key: 'tree-a', x: 60, y: 560, scale: 1 },
       { key: 'tree-small', x: 2130, y: 556, scale: .7, fuel: 4 },
       { key: 'tree-c', x: 2440, y: 560, scale: .85 },
@@ -266,7 +274,7 @@ export const LEVELS: LevelDef[] = [
     tutorial: [4, 6], brief: 'Jadikan dua batang kayu rakit untuk menyeberang. Api di bawah tebing rendah hanya bisa dicapai semprotan mendatar.',
   },
   {
-    id: 9, code: '1-9', name: 'Kolam Raja Udang', width: 2800,
+    id: 9, code: '1-9', name: 'Kolam Raja Udang', width: 2800, theme: 'ruins',
     supply: 80, waterBudget: 60, burnRate: .4, spreadDelay: 15, time: 190, critical: 35,
     truckX: 230, driveMin: 160,
     lands: [
@@ -279,7 +287,9 @@ export const LEVELS: LevelDef[] = [
     bridges: [],
     refill: { x: 700, half: 80 },
     basin: { x0: 1402, x1: 1600, floor: 640, lip: 392, boulder: { x: 1495, r: 32 }, button: { x: 1716, y: 392 }, cage: { x: 2450, y: 520 } },
+    rocks: [{ x0: 980, x1: 1140, y0: 320, y1: 362 }],
     fires: [
+      { x: 1060, y: 320, start: .45, growth: .0045, lit: true },
       { x: 950, y: 548, start: .5, growth: .0055, lit: true },
       { x: 1180, y: 548, start: .55, growth: .0060, lit: true },
       { x: 1900, y: 520, start: .6, growth: .0060, lit: true },
@@ -288,6 +298,7 @@ export const LEVELS: LevelDef[] = [
     ],
     props: [],
     decor: [
+      { key: 'tree-flower', x: 1010, y: 326, scale: .45 },
       { key: 'tree-b', x: 70, y: 560, scale: 1 },
       { key: 'tree-small', x: 2300, y: 528, scale: .7, fuel: 4 },
       { key: 'tree-a', x: 2720, y: 532, scale: .85 },
@@ -297,7 +308,7 @@ export const LEVELS: LevelDef[] = [
     tutorial: [5, 6], brief: 'Padamkan api di jalan, isi ulang air di menara, lalu penuhi kolam sampai batu mengapung ke tombol merah.',
   },
   {
-    id: 10, code: '1-10', name: 'Tong di Atas Api', width: 2600,
+    id: 10, code: '1-10', name: 'Tong di Atas Api', width: 2600, theme: 'ruins',
     supply: 100, waterBudget: 55, burnRate: .42, spreadDelay: 14, time: 180, critical: 35,
     truckX: 230, driveMin: 160,
     lands: [
@@ -309,7 +320,9 @@ export const LEVELS: LevelDef[] = [
     bridges: [],
     floatGap: { x0: 700, x1: 800, need: 1 },
     hang: { anchorX: 1850, anchorY: 220, rope: 50, postX: 1940, groundY: 470 },
+    rocks: [{ x0: 1140, x1: 1320, y0: 300, y1: 345 }],
     fires: [
+      { x: 1230, y: 300, start: .45, growth: .0045, lit: true },
       { x: 1050, y: 548, start: .5, growth: .0055, lit: true },
       { x: 1350, y: 548, start: .55, growth: .0060, lit: true },
       { x: 1700, y: 470, start: .6, growth: .0060, lit: true },
@@ -318,6 +331,7 @@ export const LEVELS: LevelDef[] = [
     ],
     props: [{ kind: 'crate', x: 640, y: 504 }],
     decor: [
+      { key: 'tree-small', x: 1290, y: 306, scale: .42 },
       { key: 'tree-c', x: 80, y: 560, scale: .9 },
       { key: 'tree-flower', x: 2060, y: 478, scale: .8, fuel: 4 },
       { key: 'tree-b', x: 2540, y: 482, scale: .9 },
@@ -327,7 +341,7 @@ export const LEVELS: LevelDef[] = [
     tutorial: [4, 5, 6], brief: 'Buat pijakan peti, padamkan api di jalan, lalu putus tali tong air tepat di atas api terbesar.',
   },
   {
-    id: 11, code: '1-11', name: 'Lembah Kincir', width: 2500,
+    id: 11, code: '1-11', name: 'Lembah Kincir', width: 2500, theme: 'volcanic',
     supply: 100, waterBudget: 55, burnRate: .42, spreadDelay: 14, time: 190, critical: 35,
     truckX: 230, driveMin: 160,
     lands: [
@@ -340,7 +354,9 @@ export const LEVELS: LevelDef[] = [
     bridges: [],
     floatGap: { x0: 640, x1: 760, need: 1 },
     wheel: { x: 1190, y: 240, r: 48, out: { x: 1245, y: 262, vx: 95 } },
+    rocks: [{ x0: 860, x1: 1040, y0: 330, y1: 372 }],
     fires: [
+      { x: 950, y: 330, start: .45, growth: .0045, lit: true },
       { x: 1330, y: 520, start: .55, growth: .0055, lit: true },
       { x: 1480, y: 520, start: .55, growth: .0060, lit: true },
       { x: 1640, y: 520, start: .55, growth: .0060, lit: true },
@@ -350,6 +366,7 @@ export const LEVELS: LevelDef[] = [
     ],
     props: [{ kind: 'log', x: 560, y: 514 }],
     decor: [
+      { key: 'tree-small', x: 890, y: 336, scale: .42 },
       { key: 'tree-a', x: 60, y: 560, scale: 1 },
       { key: 'tree-small', x: 2150, y: 438, scale: .7, fuel: 5 },
       { key: 'tree-c', x: 2450, y: 442, scale: .85 },
@@ -359,15 +376,16 @@ export const LEVELS: LevelDef[] = [
     tutorial: [3, 4, 6], brief: 'Seberangi sungai dengan rakit kayu. Putar kincir di puncak tebing supaya air membanjiri lembah, lalu lob air ke dataran tinggi.',
   },
   {
-    id: 12, code: '1-12', name: 'Gua Komodo', width: 2600,
+    id: 12, code: '1-12', name: 'Gua Komodo', width: 2600, theme: 'volcanic',
     supply: 100, waterBudget: 55, burnRate: .42, spreadDelay: 14, time: 200, critical: 35,
     truckX: 230, driveMin: 160,
     lands: [{ x0: -80, x1: 820, top: 548 }, { x0: 1100, x1: 2700, top: 470, style: 'pillar' }],
     bridges: [],
-    rocks: [{ x0: 1190, x1: 1560, y0: 200, y1: 330 }],
+    rocks: [{ x0: 1190, x1: 1560, y0: 200, y1: 330 }, { x0: 520, x1: 680, y0: 320, y1: 362 }],
     hang: { anchorX: 965, anchorY: 300, rope: 50, postX: 1110, groundY: 470, load: 'crate' },
     lever: { button: { x: 1500, y: 470 }, cage: { x: 2060, y: 470 } },
     fires: [
+      { x: 600, y: 320, start: .4, growth: .0040, lit: true },
       { x: 1310, y: 470, start: .4, growth: .0040, lit: true, max: .5 },
       { x: 1440, y: 470, start: .4, growth: .0040, lit: true, max: .5 },
       { x: 1740, y: 470, start: .55, growth: .0055, lit: true },
@@ -375,12 +393,12 @@ export const LEVELS: LevelDef[] = [
       { x: 1960, y: 470, start: .3, growth: .0030, lit: false, max: .75 },
     ],
     props: [{ kind: 'boulder', x: 1250, y: 430 }],
-    decor: [{ key: 'tree-a', x: 60, y: 560, scale: 1 }, { key: 'tree-small', x: 1960, y: 478, scale: .7, fuel: 4 }, { key: 'tree-c', x: 2350, y: 482, scale: .85 }, { key: 'boulder', x: 2220, y: 482, scale: .26 }],
+    decor: [{ key: 'tree-flower', x: 650, y: 326, scale: .42 }, { key: 'tree-a', x: 60, y: 560, scale: 1 }, { key: 'tree-small', x: 1960, y: 478, scale: .7, fuel: 4 }, { key: 'tree-c', x: 2350, y: 482, scale: .85 }, { key: 'boulder', x: 2220, y: 482, scale: .26 }],
     animal: { key: 'komodo', name: 'Komodo', x: 2060, y: 470, scale: .45, flip: true },
     tutorial: [3, 5, 6], brief: 'Jatuhkan peti penutup gua, semprot batu di lorong sampai menekan tombol, padamkan api di gua dan lob air ke balik bukit.',
   },
   {
-    id: 13, code: '1-13', name: 'Jembatan Patah', width: 2800,
+    id: 13, code: '1-13', name: 'Jembatan Patah', width: 2800, theme: 'volcanic',
     supply: 100, waterBudget: 60, burnRate: .45, spreadDelay: 14, time: 210, critical: 40,
     truckX: 230, driveMin: 160,
     lands: [
@@ -392,7 +410,9 @@ export const LEVELS: LevelDef[] = [
     bridges: [],
     floatGap: { x0: 700, x1: 920, need: 2 },
     seesaw: { x: 1520, y: 518, target: { x: 1960, y: 480 } },
+    rocks: [{ x0: 1040, x1: 1220, y0: 320, y1: 365 }],
     fires: [
+      { x: 1130, y: 320, start: .45, growth: .0045, lit: true },
       { x: 1100, y: 548, start: .5, growth: .0055, lit: true },
       { x: 1300, y: 548, start: .55, growth: .0060, lit: true },
       { x: 2020, y: 500, start: .7, growth: .0070, lit: true },
@@ -402,6 +422,7 @@ export const LEVELS: LevelDef[] = [
     ],
     props: [{ kind: 'log', x: 640, y: 514 }, { kind: 'crate', x: 545, y: 504 }],
     decor: [
+      { key: 'tree-small', x: 1080, y: 326, scale: .42 },
       { key: 'tree-b', x: 70, y: 560, scale: 1 },
       { key: 'tree-small', x: 2440, y: 508, scale: .7, fuel: 5 },
       { key: 'tree-a', x: 2740, y: 512, scale: .85 },
@@ -411,7 +432,7 @@ export const LEVELS: LevelDef[] = [
     tutorial: [4, 6], brief: 'Jembatan putus! Dorong kayu dan peti jadi pijakan, lalu isi ember jungkat-jungkit untuk melempar tong ke balik tebing.',
   },
   {
-    id: 14, code: '1-14', name: 'Lereng Merapi', width: 3000,
+    id: 14, code: '1-14', name: 'Lereng Merapi', width: 3000, theme: 'volcanic',
     supply: 80, waterBudget: 70, burnRate: .45, spreadDelay: 13, time: 230, critical: 40,
     truckX: 230, driveMin: 160,
     lands: [
@@ -427,7 +448,9 @@ export const LEVELS: LevelDef[] = [
     refill: { x: 1000, half: 80 },
     wheel: { x: 1671, y: 314, r: 40, out: { x: 1716, y: 332, vx: 70 } },
     basin: { x0: 1702, x1: 1900, floor: 640, lip: 392, boulder: { x: 1800, r: 32 }, button: { x: 2016, y: 392 }, cage: { x: 2720, y: 520 } },
+    rocks: [{ x0: 1150, x1: 1320, y0: 320, y1: 362 }],
     fires: [
+      { x: 1235, y: 320, start: .45, growth: .0045, lit: true },
       { x: 880, y: 548, start: .5, growth: .0055, lit: true },
       { x: 1200, y: 548, start: .55, growth: .0060, lit: true },
       { x: 1420, y: 548, start: .55, growth: .0060, lit: true },
@@ -437,6 +460,7 @@ export const LEVELS: LevelDef[] = [
     ],
     props: [{ kind: 'crate', x: 560, y: 504 }],
     decor: [
+      { key: 'tree-small', x: 1290, y: 326, scale: .42 },
       { key: 'tree-c', x: 80, y: 560, scale: .9 },
       { key: 'tree-flower', x: 2580, y: 528, scale: .8, fuel: 5 },
       { key: 'tree-b', x: 2920, y: 532, scale: .9 },
@@ -444,6 +468,40 @@ export const LEVELS: LevelDef[] = [
     ],
     animal: { key: 'berang', name: 'Berang-berang', x: 2720, y: 520, scale: .75, flip: true },
     tutorial: [4, 5, 6], brief: 'Ujian sebelum bos: buat pijakan, isi ulang air, putar kincir agar kolam penuh dan batu menekan tombol kandang.',
+  },
+  {
+    id: 15, code: '1-15', name: 'Boss Pembakar Hutan', width: 3000,
+    supply: 200, waterBudget: 150, burnRate: .3, spreadDelay: 16, time: 9999, critical: 60,
+    truckX: 230, driveMin: 160,
+    // A wide river splits the map: the truck keeps its own bank to dodge on; the boss leaps between ledges across it.
+    lands: [
+      { x0: -80, x1: 900, top: 548 },
+      { x0: 1240, x1: 1650, top: 520 },
+      { x0: 1900, x1: 2150, top: 470, style: 'pillar' },
+      { x0: 2140, x1: 2380, top: 395, style: 'pillar' },
+      { x0: 2370, x1: 2560, top: 330, style: 'pillar' },
+      { x0: 2550, x1: 3100, top: 430, style: 'pillar' },
+    ],
+    bridges: [{ x0: 888, x1: 1252, y: 540 }],
+    rocks: [{ x0: 1300, x1: 1440, y0: 300, y1: 342 }],
+    boss: { x: 2265, y: 395, hp: 100, arena: 1650, perches: [{ x: 2020, y: 470 }, { x: 2265, y: 395 }, { x: 2470, y: 330 }, { x: 2650, y: 430 }],
+      waterfall: { x: 1070, y: 552, w: 230 } },
+    fires: [
+      { x: 1360, y: 300, start: .45, growth: .0045, lit: true },
+      { x: 1500, y: 520, start: .55, growth: .0050, lit: true },
+      { x: 600, y: 548, start: .45, growth: .0045, lit: true },
+    ],
+    props: [],
+    decor: [
+      { key: 'tree-a', x: 60, y: 560, scale: 1 },
+      { key: 'tree-small', x: 1400, y: 306, scale: .42 },
+      { key: 'boss-tower', x: 2900, y: 436, scale: 1 },
+      { key: 'crate-plain', x: 2720, y: 436, scale: .4 },
+      { key: 'barrel-blue', x: 2770, y: 436, scale: .36 },
+      { key: 'boulder', x: 1300, y: 528, scale: .26 },
+    ],
+    animal: { key: 'orangutan-sit', name: 'Keluarga Orangutan', x: 2820, y: 430, scale: .62, flip: true },
+    tutorial: [6], brief: 'Kalahkan Pembakar Hutan di seberang sungai! Ia melompat-lompat menghindar. Padamkan api dari bola api, tembak jatuh serangannya, dan berhenti menyemprot 10 detik untuk mengisi ulang cadangan air.',
   },
 ];
 

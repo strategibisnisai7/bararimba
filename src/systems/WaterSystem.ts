@@ -159,6 +159,23 @@ export class WaterSystem {
         .setScale(s * (1 + speed / 900), s * .85).setAlpha(Math.max(.25, .95 - p.age * .45));
     }
   }
+  /** Airborne drops that will pass within r of (x, y) during the next `horizon` seconds (dodge sense). */
+  incoming(x: number, y: number, r: number, horizon: number) {
+    let n = 0;
+    for (const p of this.pool) {
+      if (p.life <= 0 || p.flow > 0 || Math.abs(p.vx) < 1) continue;
+      const t = (x - p.x) / p.vx;
+      if (t <= 0 || t > horizon) continue;
+      if (Math.abs(p.y + p.vy * t + .5 * WATER_GRAVITY * t * t - y) < r) n++;
+    }
+    return n;
+  }
+  /** Remove airborne drops within r of (x, y) (they struck something); returns the count. */
+  hitTest(x: number, y: number, r: number) {
+    let n = 0; const r2 = r * r;
+    for (const p of this.pool) if (p.life > 0 && p.flow === 0 && (p.x - x) ** 2 + (p.y - y) ** 2 < r2) { this.kill(p); n++; }
+    return n;
+  }
   /** Sum of lever arms (x - pivotX) of running drops resting within [x0,x1] near height y. */
   leverOn(x0: number, x1: number, yTop: number, yBot: number, pivotX: number) {
     let t = 0;

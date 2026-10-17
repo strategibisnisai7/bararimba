@@ -19,12 +19,13 @@ ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / 'referensiasset'
 OUT = ROOT / 'public/assets'
 GB = 'Game Board.png'
+BOSS = 'Forest Fire Boss Battle.png'
+TILE = 'Volcanic, Ice, and Ruins Tileset Sheet.png'
+VPAR = 'Volcanic Parallax Game Asset Sheet.png'
+PRAMB = 'Prambanan Temple Ruins Tileset.png'
 
 A = [
     # --- Game Board (RGB) ---
-    ('ui/logo-board', GB, [108, 28, 392, 160], 'grab'),
-    ('ui/gb-orangutan', GB, [12, 86, 104, 104], 'grab'),
-    ('ui/gb-toucan', GB, [510, 70, 90, 104], 'grab'),
     ('ui/gb-pause', GB, [1110, 901, 52, 52], 'grab'),
     ('ui/gb-reset', GB, [1178, 901, 53, 52], 'grab'),
     ('ui/gb-hint', GB, [1248, 901, 52, 52], 'grab'),
@@ -32,6 +33,38 @@ A = [
     ('ui/map-board', GB, [604, 2, 560, 432], 'inpaint'),
     ('ui/gb-pin', GB, [889, 75, 34, 38], 'grab'),
     ('ui/thumb-1', GB, [0, 486, 381, 186], 'plain'),
+    # --- boss battle reference (RGB) ---
+    ('boss/boss', BOSS, [1268, 268, 290, 262], 'grabboss'),
+    ('boss/fireball', BOSS, [500, 178, 170, 105], 'grab'),
+    ('boss/hud-pressure', BOSS, [20, 20, 406, 90], 'grabfill'),
+    ('boss/hud-reserve', BOSS, [20, 112, 396, 92], 'grabfill'),
+    ('boss/hud-bossbar', BOSS, [495, 12, 700, 124], 'grabfill'),
+    ('boss/hud-pause', BOSS, [1554, 20, 98, 94], 'grabfill'),
+    ('boss/hud-mission', BOSS, [22, 690, 782, 222], 'grabfill'),
+    ('boss/hud-spray', BOSS, [1428, 668, 222, 222], 'grabfill'),
+    ('boss/tower', BOSS, [1325, 70, 150, 215], 'grab'),
+    # --- Prambanan temple ruins (ancient Java theme) ---
+    ('theme/p-temple-a', PRAMB, [247, 12, 210, 252], 'main'),
+    ('theme/p-temple-b', PRAMB, [82, 37, 165, 218], 'main'),
+    ('theme/p-temple-c', PRAMB, [547, 37, 165, 225], 'main'),
+    ('theme/p-temple-d', PRAMB, [2040, 12, 132, 225], 'main'),
+    ('theme/p-top', PRAMB, [15, 282, 196, 106], 'main'),
+    ('theme/p-fill', PRAMB, [44, 338, 176, 46], 'raw'),
+    ('theme/p-pillar', PRAMB, [457, 480, 105, 213], 'main'),
+    ('theme/p-stupa', PRAMB, [1852, 487, 113, 158], 'main'),
+    ('theme/p-gate', PRAMB, [1155, 457, 180, 236], 'main'),
+    ('theme/p-guardian', PRAMB, [1462, 262, 150, 158], 'main'),
+    # --- volcanic parallax layers (real alpha; red matte fringe removed) ---
+    ('theme/vp-sky', VPAR, [0, 0, 1671, 384], 'defringe'),
+    ('theme/vp-plain', VPAR, [0, 384, 1671, 240], 'defringe'),
+    ('theme/vp-rocks', VPAR, [0, 624, 1671, 171], 'defringe'),
+    ('theme/vp-front', VPAR, [0, 795, 1671, 146], 'defringe'),
+    # --- themed tiles: volcanic / ice / ruins (Java variants) ---
+    ('theme/v-top', TILE, [660, 66, 152, 98], 'main'),
+    ('theme/v-fill', TILE, [398, 48, 104, 64], 'raw'),
+    ('theme/v-rock', TILE, [668, 258, 92, 76], 'main'),
+    ('theme/v-tree', TILE, [655, 160, 110, 95], 'main'),
+    ('theme/v-spire', TILE, [12, 312, 78, 100], 'main'),
     # --- sheet 19: pause / settings / confirm ---
     ('ui/pause-panel', '19.png', [13, 12, 642, 472], 'comp'),
     ('ui/settings-panel', '19.png', [661, 29, 502, 453], 'comp'),
@@ -39,56 +72,34 @@ A = [
     ('ui/confirm-restart', '19.png', [1176, 295, 351, 231], 'comp'),
     ('ui/wood-left', '19.png', [1047, 660, 63, 68], 'comp'),
     ('ui/wood-right', '19.png', [1116, 660, 65, 68], 'comp'),
-    ('ui/wood-close', '19.png', [1193, 660, 73, 69], 'comp'),
-    ('ui/wood-home', '19.png', [1056, 546, 73, 71], 'comp'),
-    ('ui/wood-gear', '19.png', [1136, 545, 72, 73], 'comp'),
-    ('ui/wood-help', '19.png', [1449, 546, 72, 71], 'comp'),
     ('ui/objective-panel', '19.png', [1180, 905, 340, 95], 'comp'),
-    ('ui/toggle-on', '19.png', [634, 674, 80, 47], 'comp'),
-    ('ui/toggle-off', '19.png', [818, 675, 73, 45], 'comp'),
     # --- sheet 20: results ---
     ('ui/win-panel', '20.png', [9, 10, 547, 619], 'comp'),
     ('ui/fail-panel', '20.png', [565, 10, 531, 610], 'comp'),
-    ('ui/stars-3', '20.png', [63, 637, 215, 81], 'comp'),
-    ('ui/stars-2', '20.png', [319, 640, 210, 77], 'comp'),
-    ('ui/stars-1', '20.png', [566, 641, 207, 75], 'comp'),
     ('ui/badge-record', '20.png', [794, 639, 184, 95], 'comp'),
     # --- sheet 14: HUD pieces ---
     ('ui/round-drop', '14.png', [750, 782, 84, 84], 'comp'),
     ('ui/round-fire', '14.png', [851, 782, 83, 84], 'comp'),
     ('ui/round-check', '14.png', [332, 782, 85, 84], 'comp'),
     ('ui/round-x', '14.png', [434, 782, 84, 84], 'comp'),
-    ('ui/round-lock', '14.png', [635, 781, 86, 85], 'comp'),
-    ('ui/round-leaf', '14.png', [1156, 782, 85, 84], 'comp'),
     ('ui/btn-mulai', '14.png', [327, 658, 261, 96], 'comp'),
-    ('ui/goal-panel', '14.png', [18, 254, 418, 251], 'comp'),
-    ('ui/ribbon-win', '14.png', [803, 253, 426, 211], 'comp'),
-    ('ui/ribbon-fail', '14.png', [1235, 272, 287, 188], 'comp'),
     # --- sheet 15: main menu set (full resolution) ---
     ('ui/menu-logo', '15.png', [11, 15, 629, 296], 'comp'),
     ('ui/btn-main', '15.png', [641, 52, 351, 194], 'comp'),
     ('ui/btn-peta', '15.png', [986, 19, 316, 100], 'comp'),
     ('ui/btn-koleksi', '15.png', [996, 128, 300, 95], 'comp'),
     ('ui/btn-pengaturan', '15.png', [987, 226, 307, 90], 'comp'),
-    ('ui/btn-back', '15.png', [940, 880, 108, 86], 'comp'),
     # --- sheet 15: stars, lock, audio ---
     ('ui/star-gold', '15.png', [1451, 336, 62, 62], 'comp'),
     ('ui/star-silver', '15.png', [1446, 398, 72, 70], 'comp'),
     ('ui/lock', '15.png', [1442, 542, 78, 87], 'comp'),
-    ('ui/sound-on', '15.png', [1311, 20, 99, 103], 'comp'),
-    ('ui/sound-off', '15.png', [1417, 20, 104, 101], 'comp'),
-    ('ui/music-on', '15.png', [1308, 126, 102, 100], 'comp'),
-    ('ui/music-off', '15.png', [1418, 126, 96, 99], 'comp'),
     # --- sheet 16: tutorial cards and markers ---
     *[(f'ui/tutorial-{i+1}', '16.png', r, 'comp') for i, r in enumerate([
         [11, 633, 238, 265], [255, 633, 215, 265], [476, 633, 263, 265],
         [743, 633, 247, 265], [995, 633, 261, 265], [1263, 633, 261, 265]])],
     ('ui/sign-water', '16.png', [1254, 904, 263, 99], 'comp'),
-    ('ui/target-red', '16.png', [1101, 40, 115, 116], 'comp'),
     ('ui/alert', '16.png', [1418, 35, 50, 118], 'comp'),
-    ('ui/hand-drag', '16.png', [361, 20, 95, 139], 'comp'),
     # --- sheet 18: badge ---
-    ('ui/badge-water', '18.png', [1362, 295, 157, 159], 'comp'),
     # --- animals (sheet 12) ---
     ('animals/orangutan', '12.png', [356, 41, 168, 142], 'main'),
     ('animals/bekantan', '12.png', [15, 199, 139, 166], 'main'),
@@ -108,10 +119,7 @@ A = [
     ('animals/rangkong-perch', '12.png', [86, 351, 149, 132], 'main'),
     # --- mechanisms (sheet 8, 9) ---
     ('props/gear', '8.png', [7, 432, 198, 196], 'main'),
-    ('props/seesaw', '8.png', [811, 850, 262, 133], 'main'),
-    ('props/trough', '9.png', [824, 12, 177, 152], 'main'),
     ('props/pivot', '8.png', [893, 918, 86, 66], 'raw'),
-    ('props/pulley', '8.png', [12, 192, 190, 230], 'main'),
     ('props/bucket', '9.png', [189, 860, 83, 138], 'main'),
     ('props/button', '8.png', [714, 56, 172, 117], 'main'),
     ('props/fence', '7.png', [1315, 840, 204, 148], 'main'),
@@ -119,8 +127,6 @@ A = [
     ('fire/coal-hot', '11.png', [13, 777, 153, 75], 'comp'),
     ('fire/coal-cold', '11.png', [680, 796, 161, 65], 'comp'),
     ('fire/tongue-a', '11.png', [269, 49, 49, 105], 'comp'),
-    ('fire/tongue-b', '11.png', [334, 50, 43, 107], 'comp'),
-    ('fire/tongue-c', '11.png', [187, 58, 60, 96], 'comp'),
     # --- props (sheet 7, 9, 1) ---
     ('props/crate', '7.png', [21, 386, 133, 128], 'main'),
     ('props/crate-plain', '7.png', [310, 389, 131, 124], 'main'),
@@ -134,9 +140,6 @@ A = [
     # --- terrain (sheet 3) ---
     ('terrain/top-a', '3.png', [14, 754, 305, 113], 'comp'),
     ('terrain/top-b', '3.png', [328, 753, 284, 114], 'comp'),
-    ('terrain/pillar', '3.png', [781, 329, 101, 206], 'comp'),
-    ('terrain/ledge', '3.png', [13, 324, 231, 191], 'comp'),
-    ('terrain/float', '3.png', [1121, 362, 178, 92], 'comp'),
     # --- trees (sheet 5) ---
     ('backgrounds/jawa/tree-a', '5.png', [13, 10, 333, 383], 'main'),
     ('backgrounds/jawa/tree-b', '5.png', [336, 13, 288, 379], 'main'),
@@ -165,7 +168,7 @@ _sheets = {}
 def sheet(name: str) -> Image.Image:
     if name not in _sheets:
         im = Image.open(SRC / name)
-        _sheets[name] = unchecker(im) if im.mode == 'RGB' and name != GB else im.convert('RGBA')
+        _sheets[name] = unchecker(im) if im.mode == 'RGB' and name not in (GB, BOSS) else im.convert('RGBA')
     return _sheets[name]
 
 
@@ -216,8 +219,30 @@ def main():
             im = comp(im, method == 'main')
         elif method == 'raw':
             pass
-        elif method == 'grab':
+        elif method == 'defringe':
+            a = np.array(im)
+            r, g, b, al = (a[:, :, i].astype(int) for i in range(4))
+            halo = (al < 250) & (r > 150) & (g < 90) & (b < 90)
+            a[:, :, 3] = np.where(halo, 0, a[:, :, 3])
+            im = Image.fromarray(a)
+        elif method in ('grab', 'grabfill', 'grabboss'):
             im = grab(im)
+            a = np.array(im)
+            if method in ('grabfill', 'grabboss'):
+                # GrabCut drops enclosed text/details; fill interior holes of the silhouette.
+                a[:, :, 3] = np.where(ndimage.binary_fill_holes(a[:, :, 3] > 60), np.maximum(a[:, :, 3], 255), 0)
+            if method == 'grabboss':
+                # Remove the background flames burning behind the boss's legs (below the gun line).
+                r, g, b = a[:, :, 0].astype(int), a[:, :, 1].astype(int), a[:, :, 2].astype(int)
+                fire = (r > 170) & (g > 70) & (b < 110) & (r - b > 110)
+                yy = np.arange(a.shape[0])[:, None] + np.zeros(a.shape[1], int)[None, :]
+                xx = np.arange(a.shape[1])[None, :] + np.zeros(a.shape[0], int)[:, None]
+                a[:, :, 3] = np.where(fire & (yy > 160) & (xx < 150), 0, a[:, :, 3])
+                lab, n = ndimage.label(a[:, :, 3] > 60)
+                if n > 1:
+                    sizes = ndimage.sum(np.ones_like(lab), lab, range(1, n + 1))
+                    a[:, :, 3] = np.where(lab == int(np.argmax(sizes)) + 1, a[:, :, 3], 0)
+            im = Image.fromarray(a)
         elif method == 'inpaint':
             # Remove the baked Kalimantan pin/truck marker so the live marker can move regions.
             import cv2
@@ -234,7 +259,8 @@ def main():
             im = im.convert('RGB')
         dest = OUT / f'{key}.webp'
         dest.parent.mkdir(parents=True, exist_ok=True)
-        im.save(dest, 'WEBP', quality=92, method=6)
+        # Large full-width parallax layers tolerate stronger compression.
+        im.save(dest, 'WEBP', quality=78 if key.startswith('theme/vp-') else 82, method=6)
         manifest.append(dict(key=key, source=source, rect=[x, y, w, h], method=method, size=list(im.size)))
     (ROOT / 'docs/asset-manifest-ui.json').write_text(json.dumps(manifest, indent=1))
     print(len(manifest), 'assets')

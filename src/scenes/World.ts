@@ -3,6 +3,22 @@ import type { LevelDef } from '../config/levels';
 import type { Surface } from '../physics/collision';
 import type { Fuel } from '../systems/FireSystem';
 
+interface ThemeStyle {
+  sky: [number, number]; bed: [number, number]; far: number; mid: number; haze: number;
+  top: string[]; fill: string; fillTint?: number; topScale: number; topLift: number;
+  props: { key: string; scale: number; lift?: number }[]; particles?: 'embers' | 'snow';
+  /** Replace the jungle backdrop with the volcanic parallax sheet layers. */
+  parallax?: 'volcano' | 'temple';
+}
+const THEMES: Record<string, ThemeStyle> = {
+  forest: { sky: [0x5fb8e6, 0xcdeee6], bed: [0x5cc8d6, 0x1a7fa0], far: 0x86bfa8, mid: 0xbfe0bc, haze: 0xd6efe0, top: ['top-a', 'top-b'], fill: 'dirt', topScale: .86, topLift: 16, props: [] },
+  // Ancient Java: Prambanan temple ruins.
+  ruins: { sky: [0x86c4e6, 0xf6e2b8], bed: [0x5cc8d6, 0x1a7fa0], far: 0xa8b892, mid: 0xc8d4a8, haze: 0xf4e6c4, top: ['p-top'], fill: 'p-fill', topScale: .8, topLift: 14,
+    props: [{ key: 'p-pillar', scale: .55 }, { key: 'p-stupa', scale: .6 }, { key: 'p-gate', scale: .6 }, { key: 'p-guardian', scale: .6 }], parallax: 'temple' },
+  volcanic: { sky: [0x6a5a6e, 0xf0a070], bed: [0xff8a2a, 0x9a2a0a], far: 0x8a6a5a, mid: 0xb08a70, haze: 0xd89070, top: ['v-top'], fill: 'v-fill', topScale: .9, topLift: 12, parallax: 'volcano',
+    props: [{ key: 'v-rock', scale: .8 }, { key: 'v-spire', scale: .8 }, { key: 'v-tree', scale: .8 }], particles: 'embers' },
+};
+
 export interface Prop { kind: string; body: MatterJS.BodyType; sprite: Phaser.GameObjects.Image; surface: Surface; gone: boolean; floating?: { x: number; y: number; t: number } }
 interface Layer { image: Phaser.GameObjects.Image; x: number; factor: number }
 
@@ -21,6 +37,7 @@ export class World {
   private ropeG: Phaser.GameObjects.Graphics;
   private clouds: Phaser.GameObjects.Image[] = [];
   private sign?: Phaser.GameObjects.Image;
+  private fall?: Phaser.GameObjects.Graphics;
   private time = 0;
   onSink?: (x: number, y: number) => void;
   onFloat?: (x: number, y: number, bridged: boolean) => void;
@@ -32,28 +49,44 @@ export class World {
   onButton?: () => void;
   wheel?: { cx: number; cy: number; r: number; w: number; sprite: Phaser.GameObjects.Image; out: { x: number; y: number; vx: number }; surface: Surface };
 
+  readonly theme: ThemeStyle;
+  private weather?: Phaser.GameObjects.Particles.ParticleEmitter;
   constructor(private scene: Phaser.Scene, readonly def: LevelDef) {
     const W = def.width;
+    this.theme = THEMES[def.theme ?? 'forest'];
+    const T = this.theme;
     this.ensureDirt();
     const sky = scene.add.graphics().setDepth(0);
-    sky.fillGradientStyle(0x5fb8e6, 0x5fb8e6, 0xcdeee6, 0xcdeee6, 1).fillRect(-1400, -900, W + 2800, 1620);
+    sky.fillGradientStyle(T.sky[0], T.sky[0], T.sky[1], T.sky[1], 1).fillRect(-1400, -900, W + 2800, 2100);
     sky.fillStyle(0xfff7d6, .25).fillCircle(980, 150, 80);
     for (let i = 0; i * 520 < W + 600; i++) {
       const c = scene.add.image(200 + i * 520, 110 + (i % 3) * 38, 'cloud').setScale(.45 + (i % 2) * .3).setAlpha(.85).setDepth(1);
       this.clouds.push(c); this.layers.push({ image: c, x: c.x, factor: .1 });
     }
     const span = (f: number) => 1280 + Math.max(0, W - 1280) * f + 1400;   // extra width for zoomed-out views
-    for (let x = 0; x < span(.2); x += 1400) this.layer('mountains', x + 700, 420, .84, 2, .2, .55);
-    for (let x = 0; x < span(.35); x += 1400) this.layer('hills', x + 700, 520, .84, 3, .35, .7);
-    // Far and mid jungle canopy rows (board reference shows dense trees behind the play area).
-    const far = ['tree-a', 'tree-b', 'tree-c', 'tree-large'], mid = ['tree-b', 'tree-a', 'tree-small', 'tree-c', 'tree-flower'];
-    for (let i = 0, x = -60; x < span(.5); i++, x += 150 + (i * 37) % 70) this.layer(far[i % far.length], x, 590, .62 + (i % 3) * .08, 4, .5, 1, 0x86bfa8);
-    for (let i = 0, x = -30; x < span(.75); i++, x += 230 + (i * 53) % 90) this.layer(mid[i % mid.length], x, 610, .78 + (i % 2) * .12, 5, .75, 1, 0xbfe0bc);
+    if (T.parallax === 'volcano') {
+      // Volcanic parallax: erupting volcano sky, lava plains, then rock shelves behind the play area.
+      for (let x = -700; x < span(.12); x += 1660) this.layer('vp-sky', x + 830, 470, 1, 2, .12);
+      for (let x = -700; x < span(.35); x += 1500) this.layer('vp-plain', x + 750, 596, .9, 3, .35);
+      for (let x = -700; x < span(.6); x += 1330) this.layer('vp-rocks', x + 665, 616, .8, 5, .6);
+    } else {
+      if (T.parallax === 'temple') {
+        // Distant Prambanan temple complex silhouetted behind the jungle.
+        const temples = ['p-temple-a', 'p-temple-b', 'p-temple-c', 'p-temple-d'];
+        for (let i = 0, x = -400; x < span(.3); i++, x += 330 + (i * 67) % 160) this.layer(temples[i % 4], x, 500, 1.5 + (i % 3) * .3, 3.5, .3, 1, 0xd8c8b0);
+      }
+      for (let x = 0; x < span(.2); x += 1400) this.layer('mountains', x + 700, 420, .84, 2, .2, .55);
+      for (let x = 0; x < span(.35); x += 1400) this.layer('hills', x + 700, 520, .84, 3, .35, .7);
+      // Far and mid jungle canopy rows (board reference shows dense trees behind the play area).
+      const far = ['tree-a', 'tree-b', 'tree-c', 'tree-large'], mid = ['tree-b', 'tree-a', 'tree-small', 'tree-c', 'tree-flower'];
+      for (let i = 0, x = -60; x < span(.5); i++, x += 150 + (i * 37) % 70) this.layer(far[i % far.length], x, 590, .62 + (i % 3) * .08, 4, .5, 1, T.far);
+      for (let i = 0, x = -30; x < span(.75); i++, x += 230 + (i * 53) % 90) this.layer(mid[i % mid.length], x, 610, .78 + (i % 2) * .12, 5, .75, 1, T.mid);
+    }
     const haze = scene.add.graphics().setDepth(5.5);
-    haze.fillGradientStyle(0xd6efe0, 0xd6efe0, 0xa9d8c0, 0xa9d8c0, 0, 0, .35, .35).fillRect(-200, 380, W + 400, 240);
+    haze.fillGradientStyle(T.haze, T.haze, T.haze, T.haze, 0, 0, .4, .4).fillRect(-200, 380, W + 400, 240);
     // River across the world, partly covered by land.
     const bed = scene.add.graphics().setDepth(6);
-    bed.fillGradientStyle(0x5cc8d6, 0x5cc8d6, 0x1a7fa0, 0x1a7fa0, 1).fillRect(-200, 586, W + 400, 160);
+    bed.fillGradientStyle(T.bed[0], T.bed[0], T.bed[1], T.bed[1], 1).fillRect(-1400, 586, W + 2800, 520);
     this.river = scene.add.graphics().setDepth(7);
     this.ropeG = scene.add.graphics().setDepth(38);
     this.add(W / 2, 690, W + 400, 90, 'river');
@@ -62,6 +95,7 @@ export class World {
     for (const l of def.lands) this.land(l.x0, l.x1, l.top, l.style);
     for (const d of def.decor) {
       const img = scene.add.image(d.x, d.y, d.key).setOrigin(.5, 1).setScale(d.scale).setFlipX(!!d.flip).setDepth(16);
+      if (T.parallax === 'volcano' && d.key.startsWith('tree')) img.setTint(0x7a5444);   // scorched volcanic trees
       if (d.fuel !== undefined) this.fuel.set(d.fuel, { image: img, burn: 0 });
     }
     if (def.refill) {
@@ -75,18 +109,37 @@ export class World {
     if (def.seesaw) this.makeSeesaw(def.seesaw);
     if (def.lever) this.makeLever(def.lever);
     if (def.basin) this.makeBasin(def.basin);
+    if (def.boss?.waterfall) this.fall = scene.add.graphics().setDepth(12.5);
     if (def.wheel) {
       const wd = def.wheel;
       scene.add.image(wd.x, wd.y + wd.r + 8, 'pivot').setOrigin(.5, 1).setScale(.62).setDepth(19);
-      if (wd.trough) scene.add.image(wd.trough.x, wd.trough.y + 4, 'trough').setOrigin(.5, 1).setScale(.62).setDepth(19);
       const sprite = scene.add.image(wd.x, wd.y, 'gear').setScale(wd.r * 2 / 205).setDepth(20);
       const body = scene.matter.add.circle(wd.x, wd.y, wd.r, { isStatic: true, label: 'wheel' });
       const surface: Surface = { body, kind: 'wheel', enabled: true };
       this.surfaces.push(surface);
       this.wheel = { cx: wd.x, cy: wd.y, r: wd.r, w: 0, sprite, out: wd.out, surface };
     }
+    if (T.props.length) {
+      // Scatter themed props along walkable ground, away from fires and mechanisms.
+      const busy = [...def.fires.map(f => f.x), def.animal.x, def.refill?.x ?? -999, def.seesaw?.x ?? -999, def.hang?.anchorX ?? -999, def.wheel?.x ?? -999];
+      let i = 0;
+      for (const l of def.lands) for (let x = l.x0 + 90; x < l.x1 - 60; x += 260 + (i * 71) % 120) {
+        if (busy.some(b => Math.abs(b - x) < 110) || x < 520) continue;
+        const pr = T.props[i++ % T.props.length];
+        scene.add.image(x, l.top + 6, pr.key).setOrigin(.5, 1).setScale(pr.scale).setDepth(16);
+      }
+    }
+    if (T.particles === 'snow') this.weather = scene.add.particles(0, 0, 'p-soft', {
+      x: { min: -200, max: W + 200 }, y: -760, lifespan: 9000, speedY: { min: 40, max: 90 }, speedX: { min: -25, max: 15 },
+      scale: { min: .06, max: .16 }, alpha: { start: .9, end: .4 }, frequency: 40, quantity: 2,
+    }).setDepth(47);
+    if (T.particles === 'embers') this.weather = scene.add.particles(0, 0, 'p-spark', {
+      x: { min: -200, max: W + 200 }, y: 740, lifespan: 7000, speedY: { min: -90, max: -40 }, speedX: { min: -20, max: 30 },
+      scale: { start: .4, end: .1 }, alpha: { start: 1, end: 0 }, tint: [0xffb030, 0xff6a1a, 0xffe08a], frequency: 60, blendMode: Phaser.BlendModes.ADD,
+    }).setDepth(47);
     const fgSpan = W + 400;
-    for (let x = -200; x < fgSpan; x += 1380) scene.add.image(x + 690, 760, 'foreground').setOrigin(.5, 1).setScale(.83).setDepth(49);
+    if (T.parallax === 'volcano') for (let x = -200; x < fgSpan; x += 1400) scene.add.image(x + 700, 800, 'vp-front').setOrigin(.5, 1).setScale(.84).setDepth(49);
+    else for (let x = -200; x < fgSpan; x += 1380) scene.add.image(x + 690, 760, 'foreground').setOrigin(.5, 1).setScale(.83).setDepth(49);
 
   }
 
@@ -112,12 +165,13 @@ export class World {
     const s = this.scene;
     const w = x1 - x0;
     this.add(x0 + w / 2, top + (760 - top) / 2, w, 760 - top, 'terrain');
-    s.add.tileSprite(x0, top + 70, w, 720 - top, 'dirt').setOrigin(0, 0).setTileScale(.9).setDepth(10);
-    const keys = ['top-a', 'top-b'];
-    const sc = .86;
+    const T = this.theme;
+    s.add.tileSprite(x0, top + (T.fill === 'dirt' ? 70 : 34), w, 1100 - top, T.fill).setOrigin(0, 0).setTileScale(T.fill === 'dirt' ? .9 : 1.1).setDepth(10);
+    const keys = T.top;
+    const sc = T.topScale;
     for (let x = x0 - 6, i = 0; x < x1 - 10; i++) {
-      const key = keys[i % 2];
-      const img = s.add.image(x, top - 16 * sc, key).setOrigin(0, 0).setScale(sc).setDepth(11);
+      const key = keys[i % keys.length];
+      const img = s.add.image(x, top - T.topLift, key).setOrigin(0, 0).setScale(sc).setDepth(11);
       const remain = x1 + 6 - x;
       if (img.displayWidth > remain) img.setCrop(0, 0, remain / sc, img.height);
       x += img.displayWidth - 8;
@@ -176,11 +230,12 @@ export class World {
   private rock(r: { x0: number; x1: number; y0: number; y1: number }) {
     const s = this.scene, w = r.x1 - r.x0, h = r.y1 - r.y0;
     this.add(r.x0 + w / 2, r.y0 + h / 2, w, h, 'terrain');
-    s.add.tileSprite(r.x0, r.y0, w, h, 'dirt').setOrigin(0, 0).setTileScale(.9).setDepth(15);
+    const T = this.theme;
+    s.add.tileSprite(r.x0, r.y0, w, h, T.fill).setOrigin(0, 0).setTileScale(T.fill === 'dirt' ? .9 : 1.1).setDepth(15);
     // Grass lip on top and a dark underside so the slab reads as an overhang.
     for (let x = r.x0 - 6, i = 0; x < r.x1 - 10; i++) {
-      const img = s.add.image(x, r.y0 - 14, i % 2 ? 'top-b' : 'top-a').setOrigin(0, 0).setScale(.86).setDepth(15);
-      if (img.displayWidth > r.x1 + 6 - x) img.setCrop(0, 0, (r.x1 + 6 - x) / .86, img.height);
+      const img = s.add.image(x, r.y0 - T.topLift, T.top[i % T.top.length]).setOrigin(0, 0).setScale(T.topScale).setDepth(15);
+      if (img.displayWidth > r.x1 + 6 - x) img.setCrop(0, 0, (r.x1 + 6 - x) / T.topScale, img.height);
       x += img.displayWidth - 8;
     }
     s.add.rectangle(r.x0, r.y1 - 10, w, 10, 0x2b1a0c, .55).setOrigin(0, 0).setDepth(15.5);
@@ -391,11 +446,26 @@ export class World {
     for (const l of this.layers) l.image.x = l.x + shift * (1 - l.factor);
     for (const c of this.clouds) c.x += Math.sin(this.time * .05) * .05;
     this.river.clear();
-    const left = camCenter - 700;
-    for (let i = 0; i < (reduced ? 12 : 28); i++) {
-      const x = left + ((i * 151 + this.time * (10 + i % 3 * 5)) % 1400), y = 596 + (i * 37) % 120;
-      this.river.lineStyle(i % 3 === 0 ? 2 : 1, 0xd3f9ea, .2 + Math.sin(this.time + i) * .08);
-      this.river.lineBetween(x, y, x + 18 + (i % 5) * 12, y);
+    const left = camCenter - 1400, right = camCenter + 1400, lava = this.def.theme === 'volcanic';
+    const crest = lava ? 0xffe08a : 0xe8fbff, glint = lava ? 0xfff2b0 : 0xffffff;
+    // Rolling surface: two layered waves along the river's top edge.
+    for (const [amp, len, spd, y0, col, al, wdt] of [[3, 90, 1.4, 588, crest, .75, 3], [2, 55, -2.1, 595, glint, .45, 2]] as const) {
+      this.river.lineStyle(wdt, col, al).beginPath();
+      for (let x = left; x <= right; x += 10) {
+        const y = y0 + Math.sin(x / len + this.time * spd) * amp + Math.sin(x / (len * 2.7) - this.time * spd * .6) * amp * .6;
+        x === left ? this.river.moveTo(x, y) : this.river.lineTo(x, y);
+      }
+      this.river.strokePath();
+    }
+    // Drifting light streaks and sparkles below the surface.
+    const n = reduced ? 16 : 40;
+    for (let i = 0; i < n; i++) {
+      const row = (i * 37) % 120, speed = 14 + (i % 4) * 8;
+      const x = left + ((i * 211 + this.time * speed) % (right - left)), y = 602 + row;
+      const a = .14 + Math.sin(this.time * 2 + i) * .1;
+      this.river.lineStyle(i % 3 === 0 ? 2 : 1, crest, Math.max(0, a));
+      this.river.lineBetween(x, y + Math.sin(this.time * 3 + i) * 2, x + 22 + (i % 5) * 14, y + Math.sin(this.time * 3 + i + 1) * 2);
+      if (i % 5 === 0) this.river.fillStyle(glint, Math.max(0, Math.sin(this.time * 4 + i * 1.7)) * .7).fillCircle(x + 10, y - 3, 1.8);
     }
     if (this.sign) this.sign.y = this.groundAt(this.def.refill!.x) - 250 + Math.sin(this.time * 2) * 5;
     const fg = this.def.floatGap;
@@ -418,6 +488,17 @@ export class World {
       }
     }
     if (this.basin) this.updateBasin(dt);
+    const wf = this.def.boss?.waterfall;
+    if (this.fall && wf) {
+      // Animated waterfall under the bridge: falling streaks and foam.
+      const g = this.fall.clear();
+      g.fillGradientStyle(0x8fe3ff, 0x8fe3ff, 0x2b9fd8, 0x2b9fd8, .9).fillRect(wf.x - wf.w / 2, wf.y, wf.w, 1000 - wf.y);
+      for (let i = 0; i < 14; i++) {
+        const x = wf.x - wf.w / 2 + 6 + (i * 37) % (wf.w - 12), y = wf.y + ((this.time * 260 + i * 53) % (720 - wf.y));
+        g.lineStyle(3, 0xffffff, .55).lineBetween(x, y, x, y + 24);
+      }
+      for (let i = 0; i < 8; i++) g.fillStyle(0xffffff, .5).fillCircle(wf.x - wf.w / 2 + Math.random() * wf.w, 700 + Math.random() * 16, 6 + Math.random() * 8);
+    }
     if (this.seesaw) this.updateSeesaw();
     if (this.lever) this.updateLever();
     this.ropeG.clear();
