@@ -9,7 +9,7 @@ export interface Controller {
 export type Screen = 'menu' | 'map' | 'levels' | 'collection';
 export interface HudData {
   water: number; burn: number; out: number; total: number; animalHp: number; animalDanger: boolean;
-  refilling: boolean; stars: boolean[]; firing: boolean; tip: number; boom: number; timeLeft: number; critical: boolean;
+  refilling: boolean; stars: boolean[]; firing: boolean; tip: number; boom: number;
 }
 
 const A = (k: string) => `/assets/ui/${k}.webp`;
@@ -28,7 +28,6 @@ export class GameUI {
   sprayHeld = false;
   /** Pending zoom steps from the HUD buttons (+1 in, -1 out), consumed by the scene. */
   zoomRequest = 0;
-  private autoFsDone = false;
   private root = document.querySelector<HTMLDivElement>('#ui')!;
   private screen: HTMLDivElement;
   private overlay: HTMLDivElement;
@@ -46,16 +45,14 @@ export class GameUI {
       <div class="hud" hidden></div>
       <div class="screen"></div>
       <div class="overlay" hidden></div>
-      <div class="toast" role="status" aria-live="polite"></div>
-      <button class="fs-btn" data-a="fullscreen" aria-label="Layar penuh"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>`;
+      <div class="toast" role="status" aria-live="polite"></div>`;
     this.hudEl = this.root.querySelector('.hud')!;
     this.screen = this.root.querySelector('.screen')!;
     this.overlay = this.root.querySelector('.overlay')!;
     this.toastEl = this.root.querySelector('.toast')!;
     this.root.addEventListener('click', this.onClick);
-    const fsBtn = this.root.querySelector<HTMLElement>('.fs-btn')!;
-    const syncFs = () => { fsBtn.hidden = !document.fullscreenEnabled; fsBtn.setAttribute('aria-label', document.fullscreenElement ? 'Keluar layar penuh' : 'Layar penuh'); };
-    document.addEventListener('fullscreenchange', syncFs); syncFs();
+    // Keep the Pengaturan toggle in sync when fullscreen is left via the browser (back gesture, Esc).
+    document.addEventListener('fullscreenchange', () => { if (this.overlay.querySelector('.panel.settings')) this.openSettings(); });
     this.buildHud();
     this.show('menu');
   }
@@ -75,7 +72,7 @@ export class GameUI {
     this.c.unlockAudio(); this.c.click();
     const a = t.dataset.a!, v = t.dataset.v;
     switch (a) {
-      case 'play': this.autoFullscreen(); this.show('levels'); break;
+      case 'play': this.show('levels'); break;
       case 'fullscreen': this.toggleFullscreen(); break;
       case 'map': this.show('map'); break;
       case 'collection': this.show('collection'); break;
@@ -121,12 +118,6 @@ export class GameUI {
       await o.lock?.('landscape').catch(() => {});
     } catch { this.toast('Layar penuh tidak didukung browser ini. Gunakan "Tambahkan ke layar utama".', 3000); }
   }
-  private autoFullscreen() {
-    // Only once per session: the browser shows its own "exit full screen" hint every time fullscreen starts.
-    if (this.autoFsDone) return;
-    this.autoFsDone = true;
-    if (!document.fullscreenElement && matchMedia('(pointer: coarse)').matches && document.fullscreenEnabled) void this.toggleFullscreen();
-  }
   private closeOverlay() { this.overlay.hidden = true; this.overlay.innerHTML = ''; }
 
   // ---------- menu (Game Board main menu) ----------
@@ -146,28 +137,45 @@ export class GameUI {
     </div>`;
   }
 
-  // ---------- Peta Indonesia (Game Board map panel) ----------
+  // ---------- Peta Indonesia (layers sliced from referensiasset/Indonesia Adventure Map.png) ----------
   private mapHtml() {
     const jawaStars = LEVELS.reduce((s, l) => s + (store.progress.stars[l.id] ?? 0), 0);
-    const card = (id: string, name: string, sub: string, box: number[], count: string, locked: boolean, wide = false) => {
-      const [x0, y0, x1, y1] = box;
-      return `<button class="region ${locked ? 'locked' : 'open'} ${wide ? 'wide' : ''}" data-a="region" data-v="${id}" style="left:${x0 / 5.6}%;top:${y0 / 4.32}%;width:${(x1 - x0) / 5.6}%;height:${(y1 - y0) / 4.32}%">
-        <span class="region-card"><b>${name}</b><small>${sub}</small></span>
-        <span class="region-count"><img src="${A('star-gold')}" alt=""/>${count}</span>
-        <span class="region-lock ${locked ? '' : 'ok'}"><img src="${A(locked ? 'lock' : 'round-check')}" alt="${locked ? 'terkunci' : 'terbuka'}"/></span>
+    const jawaMax = REGION.total * 3;
+    // Rects are [x, y, w, h] in reference pixels (1672x941); see MAP in scripts/prepare_ui_assets.py.
+    const W = 1672, H = 941;
+    const at = (x: number, y: number, w: number, h: number) => `left:${(x / W) * 100}%;top:${(y / H) * 100}%;width:${(w / W) * 100}%;height:${(h / H) * 100}%`;
+    const inside = (o: number[], r: number[]) => `left:${((r[0] - o[0]) / o[2]) * 100}%;top:${((r[1] - o[1]) / o[3]) * 100}%;width:${(r[2] / o[2]) * 100}%;height:${(r[3] / o[3]) * 100}%`;
+    const regions: [string, string, number[], number[]][] = [
+      ['sumatra', 'Sumatra', [180, 205, 258, 146], [181, 207, 45, 54]],
+      ['kalimantan', 'Kalimantan', [743, 212, 259, 141], [744, 215, 45, 54]],
+      ['sulawesi', 'Sulawesi', [1210, 224, 256, 141], [1211, 226, 44, 54]],
+      ['jawa', 'Jawa', [308, 500, 256, 130], [310, 503, 44, 53]],
+      ['bali', 'Bali', [740, 638, 230, 127], [742, 641, 43, 51]],
+      ['nusa', 'Nusa Tenggara', [1009, 650, 272, 122], [1011, 653, 43, 53]],
+      ['papua', 'Papua', [1407, 578, 245, 141], [1409, 580, 42, 52]],
+    ];
+    const cards = regions.map(([id, name, r, pin], k) => {
+      const open = id === 'jawa';
+      const label = open ? `${name}: terbuka, ${jawaStars} dari ${jawaMax} bintang` : `${name}: terkunci, segera hadir`;
+      return `<button class="mreg ${open ? 'open' : 'locked'}" data-a="region" data-v="${id}" aria-label="${label}" style="${at(r[0], r[1], r[2], r[3])};--d:${k * -0.37}s">
+        <img class="mreg-card" src="${A(`map-card-${id}`)}" alt="" draggable="false"/>
+        ${open ? `<span class="mreg-count" style="${inside(r, [421, 582, 60, 28])}">${jawaStars}/${jawaMax}</span>` : ''}
+        <img class="mreg-pin" src="${A(`map-pin-${id}`)}" alt="" draggable="false" style="${inside(r, pin)}"/>
       </button>`;
-    };
+    }).join('');
+    const clouds: [string, number[]][] = [['tl', [300, 0, 230, 95]], ['tr', [1500, 0, 172, 90]], ['r', [1500, 160, 172, 200]], ['l', [0, 420, 120, 120]], ['bl', [30, 740, 330, 201]], ['br', [1340, 840, 230, 101]]];
+    const dots = [[441, 630], [478, 649], [615, 682], [660, 696], [697, 705]];
     return `<div class="map">
-      <div class="map-blur" style="background-image:url(${A('map-board')})"></div>
+      <div class="map-blur" style="background-image:url(${A('map-blur')})"></div>
       <div class="map-box">
-        <img class="map-img" src="${A('map-board')}" alt="Peta Indonesia"/>
-        <button class="map-back" data-a="menu" aria-label="Kembali"></button>
-        ${card('sumatra', 'SUMATRA', 'Hutan Hujan Tropis', [42, 150, 186, 230], '0/24', true)}
-        ${card('kalimantan', 'KALIMANTAN', 'Hutan Gambut &amp; Sungai', [220, 133, 380, 212], '0/24', true, true)}
-        ${card('sulawesi', 'SULAWESI', 'Hutan Tropis &amp; Karst', [414, 163, 556, 242], '0/24', true)}
-        ${card('jawa', 'JAWA', 'Hutan Pegunungan', [90, 291, 250, 372], `${jawaStars}/${LEVELS.length * 3}`, false)}
-        ${card('papua', 'PAPUA', 'Hutan Dataran Rendah', [328, 298, 496, 374], '0/24', true)}
-        <div class="map-marker" style="left:${252 / 5.6}%;top:${262 / 4.32}%"><img class="pin" src="${A('gb-pin')}" alt=""/><img class="mini-truck" src="/assets/vehicle/truck.webp" alt="Posisi truk: Jawa"/></div>
+        <img class="map-img" src="${A('map-base')}" alt="Peta Indonesia" draggable="false"/>
+        <div class="map-glint" aria-hidden="true"></div>
+        ${clouds.map(([k, r]) => `<img class="map-cloud c-${k}" src="${A(`map-cloud-${k}`)}" alt="" aria-hidden="true" style="${at(r[0], r[1], r[2], r[3])}"/>`).join('')}
+        ${dots.map(([x, y], k) => `<i class="map-dot" aria-hidden="true" style="${at(x - 4, y - 4, 22, 22)};--d:${k * 0.28}s"></i>`).join('')}
+        <img class="map-truck" src="${A('map-truck')}" alt="Posisi truk: Jawa" style="${at(484, 628, 128, 72)}"/>
+        <img class="map-pin-solo" src="${A('map-pin-poso')}" alt="" aria-hidden="true" style="${at(1015, 352, 44, 52)}"/>
+        ${cards}
+        <button class="map-back" data-a="menu" aria-label="Kembali" style="${at(24, 20, 116, 94)}"><img src="${A('map-back')}" alt="" draggable="false"/></button>
       </div>
     </div>`;
   }
@@ -191,7 +199,7 @@ export class GameUI {
           <img class="thumb" src="${A(`thumb-${l.id}`)}" alt="Pratinjau ${l.name}"/>
           <div class="info">
             <b>Level ${l.id}</b><strong>${l.name}</strong>
-            <ul>${l.boss ? `<li>${star(true)}Kalahkan Pembakar Hutan</li><li>${star(true)}Nyawa truk tetap ≥ 50%</li><li>${star(true)}Jaga hutan terbakar &lt; 50%</li>` : `<li>${star(true)}Padamkan api &amp; selamatkan satwa</li><li>${star(true)}Hemat penggunaan air</li><li>${star(true)}Selesai dalam ${l.time} detik</li>`}</ul>
+            <ul>${l.boss ? `<li>${star(true)}Kalahkan Pembakar Hutan</li><li>${star(true)}Nyawa truk tetap ≥ 50%</li><li>${star(true)}Jaga hutan terbakar &lt; 50%</li>` : `<li>${star(true)}Padamkan api &amp; selamatkan satwa</li><li>${star(true)}Hemat penggunaan air</li><li>${star(true)}Cegah api menjalar</li>`}</ul>
             <button class="green-btn" data-a="start">${ico.play}<span>Main</span></button>
           </div>
         </div>
@@ -229,7 +237,10 @@ export class GameUI {
         <button class="hit" style="left:85%;top:4%;width:13%;height:14%" data-a="close-settings" aria-label="Tutup"></button>
         ${[['music', 'Musik', 28], ['sfx', 'Efek Suara', 40.8]].map(([k, label, top]) => `
           <label class="set-row slider" style="top:${top}%"><input type="range" min="0" max="100" value="${s[k as 'music']}" data-k="${k}" aria-label="${label}"/><span class="pct">${s[k as 'music']}%</span></label>`).join('')}
-        <div class="set-zoom"><span>Zoom kamera</span><button data-a="cycle" data-k="zoom" data-v="-1" aria-label="Perkecil">‹</button><span class="pill">${s.zoom}%</span><button data-a="cycle" data-k="zoom" data-v="1" aria-label="Perbesar">›</button></div>
+        <div class="set-extra">
+          <div class="set-zoom"><span>Zoom kamera</span><button data-a="cycle" data-k="zoom" data-v="-1" aria-label="Perkecil">‹</button><span class="pill">${s.zoom}%</span><button data-a="cycle" data-k="zoom" data-v="1" aria-label="Perbesar">›</button></div>
+          ${document.fullscreenEnabled ? `<div class="set-zoom set-fs"><span>Layar penuh</span><button class="pill ${document.fullscreenElement ? 'on' : ''}" data-a="fullscreen" aria-pressed="${!!document.fullscreenElement}">${document.fullscreenElement ? 'Aktif' : 'Mati'}</button></div>` : ''}
+        </div>
         ${[['quality', s.quality, 55.2], ['control', s.control, 69.1], ['language', s.language, 83]].map(([k, val, top]) => `
           <div class="set-row cycle" style="top:${top}%"><button data-a="cycle" data-k="${k}" data-v="-1" aria-label="Sebelumnya">‹</button><span class="pill">${val}</span><button data-a="cycle" data-k="${k}" data-v="1" aria-label="Berikutnya">›</button></div>`).join('')}
       </div>`;
@@ -242,7 +253,7 @@ export class GameUI {
     this.overlay.querySelectorAll<HTMLInputElement>('input[type=range]').forEach(inp => inp.style.setProperty('--v', `${inp.value}%`));
   }
   private cycle(k: string, dir: number) {
-    if (k === 'zoom') { store.settings.zoom = Math.max(50, Math.min(100, store.settings.zoom + dir * 10)); store.save(); this.openSettings(); return; }
+    if (k === 'zoom') { store.settings.zoom = Math.max(50, Math.min(100, store.settings.zoom + dir * 10)); store.settings.zoomSet = true; store.save(); this.openSettings(); return; }
     const opts: Record<string, string[]> = { quality: ['Rendah', 'Sedang', 'Tinggi'], control: ['Sentuh', 'Mouse'], language: ['Indonesia'] };
     const list = opts[k]; const cur = (store.settings as unknown as Record<string, string>)[k];
     const next = list[(list.indexOf(cur) + dir + list.length) % list.length];
@@ -277,7 +288,6 @@ export class GameUI {
       <div class="hud-banner"><span class="code"></span><span class="name"></span><span class="hstars"></span></div>
       <div class="hud-status">
         <div class="chip animal"><img class="ani" alt=""/><div class="bar"><span></span></div></div>
-        <div class="chip timer" role="timer" aria-label="Waktu standar"><span class="clock"></span><b class="tval">0:00</b><small class="tlabel">WAKTU</small></div>
       </div>
       <div class="hud-objective"><img src="${A('objective-panel')}" alt=""/><b class="count">0/0</b></div>
       <div class="hud-actions">
@@ -312,7 +322,7 @@ export class GameUI {
     const q = (s: string) => this.hudEl.querySelector<HTMLElement>(s)!;
     this.els = {
       code: q('.code'), name: q('.name'), hstars: q('.hstars'), aniImg: q('.ani'), aniBar: q('.animal .bar span'), aniChip: q('.chip.animal'),
-      timer: q('.chip.timer'), tval: q('.tval'), tlabel: q('.tlabel'), count: q('.count'), wfill: q('.wtrack span'), refill: q('.refill'), tipV: q('.tip-v'), boomV: q('.boom-v'),
+      count: q('.count'), wfill: q('.wtrack span'), refill: q('.refill'), tipV: q('.tip-v'), boomV: q('.boom-v'),
       spray: q('.spray'), bossSpray: q('.bh-spray'), pres: q('.bh-pressure span'), resv: q('.bh-reserve span'), life: q('.bh-life span'), fuel: q('.bh-fuel span'), fuelWrap: q('.bh-fuel'), waitWrap: q('.bh-reserve'), bhp: q('.bh-boss span'), indL: q('.ind.left'), indR: q('.ind.right'), wtrack: q('.wtrack'),
     };
     this.hudEl.querySelectorAll<HTMLElement>('[data-hold]').forEach(b => {
@@ -349,11 +359,6 @@ export class GameUI {
   hud(d: HudData) {
     const e = this.els;
     e.wfill.style.width = `${d.water}%`; e.wtrack.classList.toggle('low', d.water < 25);
-    const t = Math.max(0, Math.ceil(d.timeLeft));
-    e.tval.textContent = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
-    e.tlabel.textContent = d.critical ? 'KRITIS!' : 'WAKTU';
-    e.timer.classList.toggle('critical', d.critical);
-    e.timer.classList.toggle('warn', !d.critical && d.timeLeft < 20);
     e.aniBar.style.width = `${d.animalHp}%`; e.aniChip.classList.toggle('danger', d.animalDanger);
     e.count.textContent = `${d.out}/${d.total}`;
     e.hstars.innerHTML = d.stars.map(star).join('');
@@ -414,14 +419,13 @@ export class GameUI {
     this.overlay.hidden = false;
     const won = r.won;
     const mark = (ok: boolean) => `<img class="mark" src="${A(ok ? 'round-check' : 'round-x')}" alt="${ok ? 'berhasil' : 'gagal'}"/>`;
-    const reason = r.reason === 'animal' ? `Terlambat! ${r.animal.name} terbakar api.` : r.reason === 'water' ? 'Air habis sebelum api padam.' : r.reason === 'burn' ? 'Hutan habis terbakar oleh Pembakar Hutan!' : r.reason === 'truck' ? 'Truk rusak parah terkena serangan boss!' : '';
-    const clock = (sec: number) => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
+    const reason = r.reason === 'water' ? 'Air habis sebelum api padam.' : r.reason === 'burn' ? 'Hutan habis terbakar oleh Pembakar Hutan!' : r.reason === 'truck' ? 'Truk rusak parah terkena serangan boss!' : '';
     const rows = `
       ${r.boss ? `<div class="rrow"><span>Nyawa truk ≥ 50%</span><em>${r.truckHp ?? 0}%</em>${mark(won && r.water.ok)}</div>`
         : `<div class="rrow"><span>Hemat air (maks ${r.water.budget} L)</span><em>${Math.round(r.water.used)} L</em>${mark(won && r.water.ok)}</div>`}
       <div class="rrow"><span>Selamatkan ${r.animal.name}</span><em>${won ? '1/1' : '0/1'}</em>${mark(won)}</div>
       ${r.boss ? `<div class="rrow"><span>Hutan terbakar &lt; 50%</span><em>${won ? (r.stars === 3 || (r.stars === 2 && !r.water.ok) ? 'Ya' : 'Tidak') : '-'}</em>${mark(won && (r.stars === 3 || (r.stars === 2 && !r.water.ok)))}</div>`
-        : `<div class="rrow"><span>Selesaikan dalam ${r.par} detik</span><em>${clock(r.time)}</em>${mark(won && r.time <= r.par)}</div>`}`;
+        : `<div class="rrow"><span>Cegah api menjalar</span><em>${r.spread ? `${r.spread}×` : 'Aman'}</em>${mark(won && !r.spread)}</div>`}`;
     const starsDim = won ? [0, 1, 2].filter(i => i >= r.stars).map(i => `<img class="dim s${i}" src="${A('star-silver')}" alt=""/>`).join('') : '';
     const btn = (a: string, b: number[], label: string) => `<button class="hit" data-a="${a}" aria-label="${label}" style="left:${b[0]}%;top:${b[1]}%;width:${b[2]}%;height:${b[3]}%"></button>`;
     this.overlay.innerHTML = `<div class="scrim ${won ? 'win' : 'lose'}"></div>

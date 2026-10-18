@@ -5,7 +5,7 @@ export const STEP = 1 / 120;
 export const WATER_SPEED = 680;
 export const WATER_GRAVITY = 560;
 export const WATER_RATE = 165;
-export const WATER_USE = 2.6;
+export const WATER_USE = 3.6;   // tank % per second of spraying
 export const DROP_DAMAGE = .0052;
 export const FIRE_MAX = 1.6;
 export const TRUCK_SCALE = .46;
@@ -14,6 +14,8 @@ export interface Point { x: number; y: number }
 export interface Nozzle extends Point { angle: number }
 export const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+import { TERRAIN_TILES } from './terrainTiles';
 
 export const ASSETS: Record<string, string> = {
   truck: 'vehicle/truck', wheel: 'vehicle/wheel', 'cannon-base': 'cannon/cannon-base',
@@ -32,16 +34,21 @@ export const ASSETS: Record<string, string> = {
   rusa: 'animals/rusa', trenggiling: 'animals/trenggiling', 'raja-udang': 'animals/raja-udang', 'kura-kura': 'animals/kura-kura', gajah: 'animals/gajah', 'orangutan-sit': 'animals/orangutan-sit', boss: 'boss/boss', fireball: 'boss/fireball', 'boss-tower': 'boss/tower', 'vp-sky': 'theme/vp-sky', 'p-temple-a': 'theme/p-temple-a', 'p-temple-b': 'theme/p-temple-b', 'p-temple-c': 'theme/p-temple-c', 'p-temple-d': 'theme/p-temple-d', 'p-top': 'theme/p-top', 'p-fill': 'theme/p-fill', 'p-pillar': 'theme/p-pillar', 'p-stupa': 'theme/p-stupa', 'p-gate': 'theme/p-gate', 'p-guardian': 'theme/p-guardian', 'vp-plain': 'theme/vp-plain', 'vp-rocks': 'theme/vp-rocks', 'vp-front': 'theme/vp-front', 'v-top': 'theme/v-top', 'v-fill': 'theme/v-fill', 'v-rock': 'theme/v-rock', 'v-tree': 'theme/v-tree', 'v-spire': 'theme/v-spire', 'babi-hutan': 'animals/babi-hutan', buaya: 'animals/buaya', komodo: 'animals/komodo', ular: 'animals/ular', berang: 'animals/berang', pivot: 'props/pivot', target: 'props/target', bucket: 'props/bucket',
 };
 
+// Earthy terrain pieces (sliced by scripts/prepare_terrain.py) and their rock fill.
+for (const k of [...Object.keys(TERRAIN_TILES), 'fill']) ASSETS[`et-${k}`] = `terrain/earthy/${k}`;
+
 /** Assets only some levels need; everything else in ASSETS is loaded for every level. Keeps the first load small. */
 export const ASSET_GROUPS: Record<string, string[]> = {
   volcanic: Object.keys(ASSETS).filter(k => k.startsWith('v-') || k.startsWith('vp-')),
   ruins: Object.keys(ASSETS).filter(k => k.startsWith('p-')),
   boss: ['boss', 'fireball', 'boss-tower', 'orangutan-sit'],
+  earthy: Object.keys(ASSETS).filter(k => k.startsWith('et-')),
 };
-export function assetsFor(theme?: string, boss?: boolean) {
+export function assetsFor(theme?: string, boss?: boolean, earthy?: boolean) {
   const grouped = new Set(Object.values(ASSET_GROUPS).flat());
   const keys = Object.keys(ASSETS).filter(k => !grouped.has(k));
   if (theme && ASSET_GROUPS[theme]) keys.push(...ASSET_GROUPS[theme]);
   if (boss) keys.push(...ASSET_GROUPS.boss);
+  if (earthy) keys.push(...ASSET_GROUPS.earthy);
   return keys;
 }

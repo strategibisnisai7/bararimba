@@ -4,8 +4,14 @@ export interface Bridge { x0: number; x1: number; y: number }
 /** `max` caps a fire's size: the fire that creeps toward the animal stays small and slow. */
 export interface FireDef { x: number; y: number; start: number; growth: number; lit: boolean; max?: number }
 export interface PropDef { kind: 'crate' | 'crate-plain' | 'boulder' | 'log'; x: number; y: number }
-export interface Decor { key: string; x: number; y: number; scale: number; flip?: boolean; fuel?: number }
-export interface HangDef { anchorX: number; anchorY: number; rope: number; postX: number; groundY: number; load?: 'barrel' | 'crate' }
+/** `back`: drawn behind the terrain (tall ruins standing in the background). */
+export interface Decor { key: string; x: number; y: number; scale: number; flip?: boolean; fuel?: number; back?: boolean }
+/** `door`: the crate is swung by spraying it, flies off at the top of its swing and blasts that gate open. */
+export interface HangDef { anchorX: number; anchorY: number; rope: number; postX: number; groundY: number; load?: 'barrel' | 'crate'; door?: string }
+/** One earthy terrain piece. (x, y) is its top-left corner in world px, `s` its scale (default 1.5).
+ * `base`: solid rock fills from the piece down past the river and the truck can drive on it;
+ * `road`: drivable without the fill (a span over water). Other pieces are ledges/overhangs. */
+export interface TerrainStamp { key: string; x: number; y: number; s?: number; flip?: boolean; base?: boolean; road?: boolean; grass?: boolean }
 export interface AnimalDef { key: string; name: string; x: number; y: number; scale: number; flip?: boolean }
 import type { BossDef } from '../entities/Boss';
 export type Theme = 'forest' | 'ruins' | 'volcanic';
@@ -14,22 +20,27 @@ export interface LevelDef {
   /** Visual tile set; gameplay is unchanged. */
   theme?: Theme;
   supply: number; waterBudget: number; burnRate: number; spreadDelay: number;
-  /** Standard time (s): the animal is safe until it runs out, then becomes critical for `critical` seconds. */
-  time: number; critical: number;
   truckX: number; driveMin: number;
-  lands: Land[]; bridges: Bridge[]; fires: FireDef[]; props: PropDef[]; decor: Decor[];
+  /** Furthest the truck may drive (keeps it on the starting hill when floating rock hangs ahead). */
+  driveMax?: number;
+  lands: Land[]; bridges: Bridge[];
+  /** Sculpted terrain from earthy pieces: slopes, valleys and ledges that water runs along. */
+  terrain?: TerrainStamp[]; fires: FireDef[]; props: PropDef[]; decor: Decor[];
   hang?: HangDef; refill?: { x: number; half: number };
   /** River gap the truck cannot cross until `need` pushed logs float into it as a raft. */
   floatGap?: { x0: number; x1: number; need: number };
   /** Water wheel: spraying it spins it, and while it turns the trough pours water from `out`. */
   /** Water basin: fill it so the boulder floats up, overflows onto the ledge and presses the button,
    * which opens the cage holding the animal. */
-  basin?: { x0: number; x1: number; floor: number; lip: number; boulder: { x: number; r: number };
+  basin?: { x0: number; x1: number; floor: number; lip: number; boulder: { x: number; r: number }; stone?: boolean;
     button: { x: number; y: number }; cage: { x: number; y: number } };
-  /** Seesaw catapult: spraying the raised end flips it and flings the water barrel toward `target`. */
+  /** Seesaw catapult: a boulder pushed off the floating ledge above slams the raised end, flinging the water barrel toward `target`. */
   seesaw?: { x: number; y: number; target: { x: number; y: number } };
-  /** Static rock slabs (cave ceilings, overhangs). */
-  rocks?: { x0: number; x1: number; y0: number; y1: number }[];
+  /** Static rock slabs (cave ceilings, overhangs); `stone`: cut temple blocks instead of grassy earth. */
+  rocks?: { x0: number; x1: number; y0: number; y1: number; stone?: boolean }[];
+  /** Wooden ramp planks hinged at (x0, y0): a water jet skims along them and flies off the far end.
+   * `drops`: when that gate opens the plank swings down to the mirrored angle. */
+  ramps?: { x0: number; y0: number; x1: number; y1: number; drops?: string }[];
   /** Pressure switch: a pushed boulder resting on the button opens the cage. */
   lever?: { button: { x: number; y: number }; cage: { x: number; y: number } };
   /** Region boss: throws fireballs and a flame stream; defeat it to win. */
@@ -50,7 +61,7 @@ export const REGION = { name: 'JAWA', subtitle: 'Hutan Pegunungan', total: 15, b
 export const LEVELS: LevelDef[] = [
   {
     id: 1, code: '1-1', name: 'Api di Jembatan', width: 2480,
-    supply: 100, waterBudget: 40, burnRate: .3, spreadDelay: 16, time: 90, critical: 30,
+    supply: 100, waterBudget: 55, burnRate: .3, spreadDelay: 16,
     truckX: 230, driveMin: 160,
     lands: [{ x0: -80, x1: 600, top: 548 }, { x0: 1230, x1: 1960, top: 548 }, { x0: 1950, x1: 2600, top: 430 }],
     bridges: [{ x0: 588, x1: 880, y: 540 }, { x0: 980, x1: 1242, y: 540 }],
@@ -74,188 +85,209 @@ export const LEVELS: LevelDef[] = [
     tutorial: [1, 2, 3, 4, 6], brief: 'Jembatan berlubang! Semprot peti sampai jatuh ke lubang — peti mengapung jadi pijakan truk. Lalu padamkan api dan selamatkan rusa.',
   },
   {
+    // A curved cliff hides the valley: lob over its crest or spin the wheel on top; either way the water
+    // runs down the far slope and pools on the fires in the hollow.
     id: 2, code: '1-2', name: 'Api di Balik Tebing', width: 2350,
-    supply: 100, waterBudget: 45, burnRate: .36, spreadDelay: 15, time: 120, critical: 30,
+    supply: 100, waterBudget: 65, burnRate: .36, spreadDelay: 15,
     truckX: 230, driveMin: 160,
-    // Tall cliffs hide the plateaus behind them: only a high, well-judged arc reaches the fires.
-    lands: [
-      { x0: -80, x1: 1030, top: 548 },
-      { x0: 1110, x1: 1235, top: 300, style: 'pillar' },
-      { x0: 1225, x1: 1570, top: 490, style: 'pillar' },
-      { x0: 1560, x1: 1790, top: 400, style: 'pillar' },
-      { x0: 1780, x1: 1875, top: 270, style: 'pillar' },
-      { x0: 1865, x1: 2450, top: 480, style: 'pillar' },
+    lands: [], bridges: [],
+    terrain: [
+      { key: 'flat-thick', x: -80, y: 548, base: true },
+      { key: 'wave', x: 440, y: 538, base: true },
+      { key: 'quarter', x: 1000, y: 230, base: true },
+      { key: 'curve-up', x: 1300, y: 225, flip: true, base: true },
+      { key: 'valley', x: 1620, y: 390, base: true },
+      { key: 'flat-b', x: 2000, y: 402, base: true },
     ],
-    bridges: [],
     fires: [
-      { x: 1330, y: 490, start: .55, growth: .0055, lit: true },
-      { x: 1480, y: 490, start: .5, growth: .0060, lit: true },
-      { x: 1680, y: 400, start: .6, growth: .0065, lit: true },
-      { x: 1965, y: 480, start: .6, growth: .0065, lit: true },
-      { x: 2085, y: 480, start: .3, growth: .0030, lit: false, max: .75 },
+      { x: 1480, y: 355, start: .55, growth: .0055, lit: true },
+      { x: 1720, y: 394, start: .55, growth: .0060, lit: true },
+      { x: 1870, y: 450, start: .6, growth: .0060, lit: true },
+      { x: 2120, y: 404, start: .3, growth: .0030, lit: false, max: .75 },
     ],
     props: [],
     decor: [
-      { key: 'tree-b', x: 70, y: 560, scale: 1 },
-      { key: 'tree-slender', x: 1480, y: 498, scale: .9, fuel: 1 },
-      { key: 'tree-small', x: 2085, y: 488, scale: .7, fuel: 4 },
-      { key: 'tree-a', x: 2330, y: 492, scale: .85 },
+      { key: 'tree-b', x: 70, y: 556, scale: 1 },
+      { key: 'tree-small', x: 2120, y: 412, scale: .7, fuel: 3 },
+      { key: 'tree-a', x: 2320, y: 412, scale: .85 },
     ],
-    // Water wheel on top of the first cliff: spinning it scoops water over the edge onto the hidden fires.
-    wheel: { x: 1172, y: 246, r: 52, out: { x: 1230, y: 268, vx: 95 } },
-    animal: { key: 'rangkong', name: 'Rangkong', x: 2200, y: 480, scale: .62, flip: true },
-    tutorial: [3, 6], brief: 'Api tersembunyi di balik tebing. Lob air melewati puncak agar mengalir turun, atau semprot kincir di puncak tebing — kincir yang berputar menuang air ke balik tebing.',
+    wheel: { x: 1290, y: 178, r: 52, out: { x: 1342, y: 200, vx: 95 } },
+    animal: { key: 'rangkong', name: 'Rangkong', x: 2240, y: 404, scale: .62, flip: true },
+    tutorial: [3, 6], brief: 'Api tersembunyi di lembah balik tebing. Lob air melewati puncak — air akan mengalir menuruni lereng ke api. Semprot kincir di puncak agar ikut menuang air.',
   },
   {
-    id: 3, code: '1-3', name: 'Rakit dan Tuas', width: 2760,
-    supply: 80, waterBudget: 55, burnRate: .42, spreadDelay: 14, time: 170, critical: 35,
+    // Reference "Colorful Cartoon Water Puzzle Level": bridge, ledge with boulder and ramp plank, the
+    // red button below, a grassy chute over the fire and a wooden post that holds the water back.
+    id: 3, code: '1-3', name: 'Lembah Berliku', width: 2000,
+    supply: 100, waterBudget: 70, burnRate: .42, spreadDelay: 14,
     truckX: 230, driveMin: 160,
-    lands: [
-      { x0: -80, x1: 720, top: 548 },
-      { x0: 960, x1: 1560, top: 548 },
-      { x0: 1550, x1: 1700, top: 380, style: 'pillar' },
-      { x0: 1690, x1: 2900, top: 420 },
+    lands: [], bridges: [{ x0: 335, x1: 615, y: 538 }],
+    terrain: [
+      { key: 'flat-a', x: -110, y: 548, base: true, grass: true },
+      { key: 'block-tall', x: 598, y: 482, s: 2.7, base: true, grass: true },
+      { key: 'float-drip', x: 588, y: 368, s: 1.63, grass: true },
+      { key: 'flat-c', x: 850, y: 614, base: true, grass: true },
+      { key: 'ramp', x: 1262, y: 612, s: 1.2, flip: true, base: true, grass: true },
+      { key: 'flat-b', x: 1530, y: 680, base: true, grass: true },
+      { key: 'ramp', x: 1290, y: 150, s: 2.1, grass: true },
     ],
-    bridges: [],
-    floatGap: { x0: 720, x1: 960, need: 2 },
+    rocks: [{ x0: 600, x1: 662, y0: 300, y1: 372, stone: true }],
+    ramps: [{ x0: 936, y0: 386, x1: 1242, y1: 194, drops: 'post' }],
+    gates: [{ id: 'post', x: 1360, y0: 377, y1: 640 }],
+    switches: [{ kind: 'button', x: 950, y: 616, opens: 'post' }],
     fires: [
-      { x: 1080, y: 548, start: .55, growth: .0055, lit: true },
-      { x: 1450, y: 548, start: .55, growth: .0060, lit: true },
-      { x: 1820, y: 420, start: .6, growth: .0065, lit: true },
-      { x: 2010, y: 420, start: .6, growth: .0065, lit: true },
-      { x: 2200, y: 420, start: .95, growth: .0090, lit: true },
-      { x: 2350, y: 420, start: .3, growth: .0030, lit: false, max: .75 },
+      { x: 1120, y: 614, start: .5, growth: .0050, lit: true },
+      { x: 1500, y: 672, start: .6, growth: .0060, lit: true, max: 1.1 },
+      { x: 1640, y: 682, start: .3, growth: .0030, lit: false, max: .75 },
     ],
-    props: [
-      { kind: 'log', x: 640, y: 514 }, { kind: 'log', x: 640, y: 450 },
-      { kind: 'crate', x: 1595, y: 346 }, { kind: 'crate-plain', x: 1655, y: 346 },
-    ],
+    props: [{ kind: 'boulder', x: 860, y: 326 }],
     decor: [
-      { key: 'tree-c', x: 90, y: 560, scale: .9 },
-      { key: 'tree-small', x: 1450, y: 556, scale: .7, fuel: 1 },
-      { key: 'tree-flower', x: 2350, y: 428, scale: .8, fuel: 5 },
-      { key: 'tree-b', x: 2690, y: 432, scale: .9 },
+      { key: 'tree-a', x: 40, y: 556, scale: 1 },
+      { key: 'tree-small', x: 1640, y: 690, scale: .65, fuel: 2 },
+      { key: 'tree-c', x: 1960, y: 690, scale: .85 },
     ],
-    hang: { anchorX: 2200, anchorY: 262, rope: 64, postX: 2290, groundY: 420 },
-    refill: { x: 1255, half: 80 },
-    animal: { key: 'orangutan', name: 'Orangutan', x: 2510, y: 420, scale: .6, flip: true },
-    tutorial: [4, 5, 6], brief: 'Semprot kayu ke sungai jadi rakit, jatuhkan peti penghalang, lalu putus tali tong air di atas api terbesar.',
+    animal: { key: 'orangutan', name: 'Orangutan', x: 1790, y: 682, scale: .6, flip: true },
+    tutorial: [4, 5, 6], brief: 'Api tersembunyi di bawah talang rumput dan tertahan tiang kayu. Dorong batu dari tebing ke tombol merah agar tiang terbuka, lalu semprot papan miring — air meluncur ke talang dan mengalir ke api.',
   },
   {
-    id: 4, code: '1-4', name: 'Batu Apung', width: 2300,
-    supply: 100, waterBudget: 55, burnRate: .36, spreadDelay: 15, time: 170, critical: 35,
+    // Reference "Jungle Ruins Waterfall Puzzle": stone pool split by a tall tower. Same mission as before:
+    // fill the pool until the boulder floats over the lip onto the button; the overflow runs down to the fires.
+    id: 4, code: '1-4', name: 'Batu Apung', width: 2600,
+    supply: 100, waterBudget: 75, burnRate: .36, spreadDelay: 15,
     truckX: 230, driveMin: 160,
-    lands: [
-      { x0: -80, x1: 830, top: 548 },
-      { x0: 820, x1: 882, top: 360, style: 'pillar' },
-      { x0: 872, x1: 1090, top: 640, style: 'pillar' },
-      { x0: 1080, x1: 1262, top: 392, style: 'pillar' },
-      { x0: 1252, x1: 2400, top: 520, style: 'pillar' },
+    lands: [], bridges: [],
+    terrain: [
+      { key: 'flat-thick', x: -80, y: 548, base: true, grass: true },
+      { key: 'ramp', x: 1640, y: 525, flip: true, base: true, grass: true },
+      { key: 'flat-b', x: 1950, y: 620, base: true, grass: true },
+      { key: 'flat-short', x: 1500, y: 120, s: 1.6, grass: true },
     ],
-    bridges: [],
-    basin: { x0: 882, x1: 1080, floor: 640, lip: 392, boulder: { x: 975, r: 32 }, button: { x: 1196, y: 392 }, cage: { x: 1930, y: 520 } },
+    rocks: [
+      { x0: 476, x1: 558, y0: 538, y1: 720, stone: true },
+      { x0: 476, x1: 1650, y0: 643, y1: 720, stone: true },
+      { x0: 1002, x1: 1218, y0: -120, y1: 643, stone: true },
+      { x0: 1578, x1: 1650, y0: 538, y1: 720, stone: true },
+      { x0: 1880, x1: 2300, y0: 300, y1: 352, stone: true },
+    ],
+    basin: { x0: 558, x1: 1578, floor: 643, lip: 538, stone: true, boulder: { x: 1400, r: 32 }, button: { x: 1690, y: 544 }, cage: { x: 2420, y: 621 } },
     fires: [
-      { x: 1350, y: 520, start: .55, growth: .0055, lit: true },
-      { x: 1530, y: 520, start: .55, growth: .0060, lit: true },
-      { x: 1700, y: 520, start: .6, growth: .0060, lit: true },
-      { x: 1810, y: 520, start: .3, growth: .0030, lit: false, max: .75 },
+      { x: 1800, y: 588, start: .55, growth: .0055, lit: true },
+      { x: 2020, y: 621, start: .55, growth: .0060, lit: true },
+      { x: 2180, y: 621, start: .6, growth: .0060, lit: true },
+      { x: 2300, y: 621, start: .3, growth: .0030, lit: false, max: .75 },
     ],
     props: [],
     decor: [
-      { key: 'tree-b', x: 70, y: 560, scale: 1 },
-      { key: 'tree-small', x: 1810, y: 528, scale: .7, fuel: 3 },
-      { key: 'tree-a', x: 2200, y: 532, scale: .85 },
+      { key: 'tree-b', x: 70, y: 556, scale: 1 },
+      { key: 'tree-small', x: 2300, y: 629, scale: .6, fuel: 3 },
+      { key: 'tree-a', x: 2560, y: 629, scale: .85 },
     ],
-    animal: { key: 'beruang', name: 'Beruang Madu', x: 1930, y: 520, scale: .58, flip: true },
-    tutorial: [5, 6], brief: 'Beruang madu terkurung! Isi kolam dengan air sampai batu mengapung dan terdorong ke tombol merah untuk membuka kandang. Padamkan semua api.',
+    refill: { x: 300, half: 80 },
+    animal: { key: 'beruang', name: 'Beruang Madu', x: 2420, y: 621, scale: .58, flip: true },
+    tutorial: [5, 6], brief: 'Beruang madu terkurung! Isi kolam batu dengan air — semprot langsung atau ke menara agar menjadi air terjun. Batu mengapung ke tombol merah dan luapan air mengalir ke api.',
   },
   {
-    id: 5, code: '1-5', name: 'Jungkat-Jungkit', width: 2300,
-    supply: 100, waterBudget: 50, burnRate: .4, spreadDelay: 15, time: 160, critical: 35,
-    truckX: 230, driveMin: 160,
-    lands: [
-      { x0: -80, x1: 1250, top: 548 },
-      { x0: 1240, x1: 1330, top: 250, style: 'pillar' },
-      { x0: 1320, x1: 2400, top: 520, style: 'pillar' },
+    // Reference "Colorful Cartoon Water Rescue Level": the truck stays on the left hill; a curled rock with
+    // a pocket opening toward it (shoot flat through the mouth), a valley whose pooled water spills over its
+    // right rim down to the lower ledge, and a high ledge on the right cliff for a long lob.
+    id: 5, code: '1-5', name: 'Lembah Penyelamat', width: 1500,
+    supply: 100, waterBudget: 75, burnRate: .4, spreadDelay: 15,
+    truckX: 200, driveMin: 160, driveMax: 260,
+    lands: [], bridges: [],
+    terrain: [
+      { key: 'flat-a', x: -110, y: 548, base: true, grass: true },
+      { key: 'wave', x: 275, y: 574, s: 1.83, base: true, grass: true },
+      { key: 'flat-b', x: 1140, y: 628, base: true, grass: true },
+      { key: 'overhang', x: 470, y: 145, s: 1.6, grass: true },
+      { key: 'float-drip', x: 640, y: 381, s: 1.8, grass: true },
+      { key: 'block-tall', x: 900, y: 230, s: 1.6, grass: true },
+      { key: 'flat-short', x: 1159, y: 399, s: 1.67, grass: true },
     ],
-    bridges: [],
-    seesaw: { x: 980, y: 518, target: { x: 1420, y: 500 } },
+    rocks: [{ x0: 1400, x1: 1446, y0: 490, y1: 630, stone: true }],
     fires: [
-      { x: 1180, y: 548, start: .45, growth: .0050, lit: true },
-      { x: 1460, y: 520, start: .7, growth: .0070, lit: true },
-      { x: 1580, y: 520, start: .7, growth: .0070, lit: true },
-      { x: 1760, y: 520, start: .55, growth: .0060, lit: true },
-      { x: 1880, y: 520, start: .3, growth: .0030, lit: false, max: .75 },
+      { x: 540, y: 146, start: .5, growth: .0050, lit: true },
+      { x: 820, y: 383, start: .5, growth: .0050, lit: true, max: .7 },
+      { x: 1250, y: 401, start: .55, growth: .0055, lit: true },
+      { x: 1300, y: 630, start: .55, growth: .0055, lit: true, max: .9 },
+      { x: 1360, y: 630, start: .3, growth: .0030, lit: false, max: .7 },
     ],
     props: [],
     decor: [
-      { key: 'tree-b', x: 70, y: 560, scale: 1 },
-      { key: 'tree-small', x: 1880, y: 528, scale: .7, fuel: 4 },
-      { key: 'tree-c', x: 2200, y: 532, scale: .85 },
+      { key: 'tree-b', x: 40, y: 556, scale: 1 },
+      { key: 'tree-small', x: 1360, y: 638, scale: .5, fuel: 4 },
     ],
-    animal: { key: 'bekantan', name: 'Bekantan', x: 2010, y: 520, scale: .6, flip: true },
-    tutorial: [4, 6], brief: 'Tebing terlalu tinggi! Semprot ujung jungkat-jungkit yang terangkat agar tong air terlempar ke api di balik tebing.',
+    animal: { key: 'bekantan', name: 'Bekantan', x: 1440, y: 630, scale: .5, flip: true },
+    tutorial: [3, 6], brief: 'Satwa terjebak di tebing! Lob air ke puncak batu melengkung dan tebing kanan, tembak datar ke celah batu, lalu isi lembah sampai airnya meluap ke api di bawah.',
   },
   {
-    id: 6, code: '1-6', name: 'Gua Sempit', width: 2400,
-    supply: 100, waterBudget: 50, burnRate: .4, spreadDelay: 15, time: 170, critical: 35,
+    // Swing the crate into the cave door; the cave floor slopes down, so water sprayed in runs deep inside.
+    id: 6, code: '1-6', name: 'Gua Sempit', width: 2450,
+    supply: 100, waterBudget: 70, burnRate: .4, spreadDelay: 15,
     truckX: 230, driveMin: 160,
-    lands: [
-      { x0: -80, x1: 980, top: 548 },
-      { x0: 1100, x1: 2500, top: 470, style: 'pillar' },
+    lands: [], bridges: [],
+    terrain: [
+      { key: 'flat-thick', x: -80, y: 548, base: true },
+      { key: 'flat-b', x: 440, y: 546, base: true },
+      { key: 'ramp', x: 1095, y: 455, flip: true, base: true },
+      { key: 'flat-long', x: 1420, y: 545, base: true },
+      { key: 'flat-thick', x: 1180, y: 260 },
+      { key: 'flat-thick', x: 1700, y: 262 },
+      { key: 'flat-b', x: 2050, y: 258 },
     ],
-    bridges: [],
-    rocks: [{ x0: 1190, x1: 2500, y0: 150, y1: 362 }],
-    hang: { anchorX: 1040, anchorY: 300, rope: 90, postX: 1110, groundY: 470, load: 'crate' },
+    hang: { anchorX: 1040, anchorY: 300, rope: 90, postX: 1110, groundY: 457, load: 'crate', door: 'cave' },
+    gates: [{ id: 'cave', x: 1212, y0: 366, y1: 492 }],
     fires: [
-      { x: 1330, y: 470, start: .4, growth: .0040, lit: true, max: .55 },
-      { x: 1520, y: 470, start: .4, growth: .0040, lit: true, max: .55 },
-      { x: 1720, y: 470, start: .4, growth: .0045, lit: true, max: .55 },
-      { x: 1900, y: 470, start: .3, growth: .0030, lit: false, max: .5 },
+      { x: 1330, y: 528, start: .4, growth: .0040, lit: true, max: .6 },
+      { x: 1560, y: 550, start: .45, growth: .0045, lit: true, max: .7 },
+      { x: 1760, y: 563, start: .45, growth: .0045, lit: true, max: .7 },
+      { x: 1960, y: 563, start: .3, growth: .0030, lit: false, max: .6 },
     ],
     props: [],
     decor: [
-      { key: 'tree-a', x: 60, y: 560, scale: 1 },
-      { key: 'tree-c', x: 2350, y: 160, scale: .8 },
+      { key: 'tree-a', x: 60, y: 556, scale: 1 },
+      { key: 'tree-small', x: 1960, y: 571, scale: .55, fuel: 3 },
     ],
-    animal: { key: 'trenggiling', name: 'Trenggiling', x: 2040, y: 470, scale: .7, flip: true },
-    tutorial: [3, 5, 6], brief: 'Trenggiling terjebak di gua. Putuskan tali derek agar peti penutup gua jatuh, lalu semprot mendatar masuk celah sempit.',
+    animal: { key: 'trenggiling', name: 'Trenggiling', x: 2120, y: 563, scale: .7, flip: true },
+    tutorial: [3, 5, 6], brief: 'Trenggiling terjebak di gua berpintu kayu. Semprot peti gantung sampai berayun tinggi — peti terlempar dan meledakkan pintu. Lantai gua menurun: semprot ke mulut gua dan air mengalir ke api di dalam.',
   },
   {
-    id: 7, code: '1-7', name: 'Puncak Rimba', width: 3000, theme: 'ruins',
-    supply: 100, waterBudget: 65, burnRate: .45, spreadDelay: 14, time: 220, critical: 40,
+    // Raft over the river, rolling hills, then wash the hilltop boulder down the slope into the button pocket.
+    id: 7, code: '1-7', name: 'Puncak Rimba', width: 3200, theme: 'ruins',
+    supply: 100, waterBudget: 90, burnRate: .45, spreadDelay: 14,
     truckX: 230, driveMin: 160,
-    lands: [
-      { x0: -80, x1: 700, top: 548 },
-      { x0: 800, x1: 2050, top: 548 },
-      { x0: 2040, x1: 2130, top: 250, style: 'pillar' },
-      { x0: 2120, x1: 3100, top: 500, style: 'pillar' },
+    lands: [], bridges: [],
+    terrain: [
+      { key: 'flat-thick', x: -80, y: 548, base: true },
+      { key: 'flat-d', x: 440, y: 546, base: true },
+      { key: 'wave', x: 1035, y: 538, base: true },
+      { key: 'curve-up', x: 1700, y: 398, base: true },
+      { key: 'mound', x: 2020, y: 398, base: true },
+      { key: 'ramp', x: 2310, y: 468, flip: true, base: true },
+      { key: 'u-small', x: 2630, y: 538, base: true },
+      { key: 'flat-b', x: 2910, y: 538, base: true },
     ],
-    bridges: [],
-    floatGap: { x0: 700, x1: 800, need: 1 },
-    seesaw: { x: 1780, y: 518, target: { x: 2180, y: 480 } },
-    lever: { button: { x: 2520, y: 500 }, cage: { x: 2860, y: 500 } },
+    floatGap: { x0: 930, x1: 1040, need: 1 },
+    lever: { button: { x: 2777, y: 607 }, cage: { x: 3030, y: 539 } },
     fires: [
-      { x: 1000, y: 548, start: .5, growth: .0055, lit: true },
-      { x: 1300, y: 548, start: .55, growth: .0060, lit: true },
-      { x: 2250, y: 500, start: .75, growth: .0075, lit: true },
-      { x: 2370, y: 500, start: .75, growth: .0075, lit: true },
-      { x: 2640, y: 500, start: .5, growth: .0060, lit: true },
-      { x: 2780, y: 500, start: .3, growth: .0030, lit: false, max: .75 },
+      { x: 1200, y: 545, start: .5, growth: .0055, lit: true },
+      { x: 1390, y: 581, start: .55, growth: .0060, lit: true },
+      { x: 2430, y: 505, start: .65, growth: .0065, lit: true },
+      { x: 2540, y: 548, start: .65, growth: .0065, lit: true },
+      { x: 2610, y: 556, start: .3, growth: .0030, lit: false, max: .75 },
     ],
-    props: [{ kind: 'crate', x: 640, y: 504 }, { kind: 'boulder', x: 2430, y: 455 }],
+    props: [{ kind: 'crate', x: 850, y: 514 }, { kind: 'boulder', x: 2090, y: 356 }],
     decor: [
-      { key: 'tree-b', x: 70, y: 560, scale: 1 },
-      { key: 'tree-flower', x: 1300, y: 556, scale: .8, fuel: 1 },
-      { key: 'tree-c', x: 2950, y: 512, scale: .85 },
+      { key: 'tree-b', x: 70, y: 556, scale: 1 },
+      { key: 'tree-small', x: 2610, y: 564, scale: .6, fuel: 4 },
+      { key: 'tree-c', x: 3150, y: 546, scale: .85 },
     ],
-    animal: { key: 'gajah', name: 'Gajah Sumatra', x: 2860, y: 500, scale: .62, flip: true },
-    tutorial: [4, 5, 6], brief: 'Ujian terakhir: buat pijakan peti, lempar tong dengan jungkat-jungkit, lalu dorong batu ke tombol untuk membuka kandang gajah.',
+    animal: { key: 'gajah', name: 'Gajah Sumatra', x: 3030, y: 539, scale: .62, flip: true },
+    tutorial: [4, 5, 6], brief: 'Ujian terakhir: buat pijakan peti, padamkan api di bukit, lalu semprot batu di puncak bukit sampai menggelinding menuruni lereng ke tombol merah untuk membuka kandang gajah.',
   },
   {
     // Target behind a narrow slit opens the temple gate; fires burn inside a roofed courtyard.
     id: 8, code: '1-8', name: 'Gerbang Candi', width: 2400, theme: 'ruins',
-    supply: 100, waterBudget: 55, burnRate: .38, spreadDelay: 15, time: 170, critical: 35,
+    supply: 100, waterBudget: 75, burnRate: .38, spreadDelay: 15,
     truckX: 230, driveMin: 160,
     lands: [{ x0: -80, x1: 2500, top: 548 }],
     bridges: [],
@@ -289,7 +321,7 @@ export const LEVELS: LevelDef[] = [
   {
     // A stone plugs a reservoir on the cliff; the valley fires are shielded by the cliff and a rock roof.
     id: 9, code: '1-9', name: 'Bendungan Batu', width: 2500, theme: 'ruins',
-    supply: 100, waterBudget: 50, burnRate: .38, spreadDelay: 15, time: 170, critical: 35,
+    supply: 100, waterBudget: 70, burnRate: .38, spreadDelay: 15,
     truckX: 230, driveMin: 160,
     lands: [
       { x0: -80, x1: 1100, top: 548 },
@@ -323,7 +355,7 @@ export const LEVELS: LevelDef[] = [
   {
     // Raft across, then drop the crane crate onto the red button to open the gate.
     id: 10, code: '1-10', name: 'Tombol Peti', width: 2500, theme: 'ruins',
-    supply: 100, waterBudget: 55, burnRate: .4, spreadDelay: 14, time: 180, critical: 35,
+    supply: 100, waterBudget: 75, burnRate: .4, spreadDelay: 14,
     truckX: 230, driveMin: 160,
     lands: [{ x0: -80, x1: 700, top: 548 }, { x0: 820, x1: 2600, top: 548 }],
     bridges: [],
@@ -351,7 +383,7 @@ export const LEVELS: LevelDef[] = [
   {
     // Spin the wheel to open the dam gate; water cascades down the terraces onto the fires.
     id: 11, code: '1-11', name: 'Teras Kawah', width: 2600, theme: 'volcanic',
-    supply: 100, waterBudget: 50, burnRate: .42, spreadDelay: 14, time: 180, critical: 35,
+    supply: 100, waterBudget: 70, burnRate: .42, spreadDelay: 14,
     truckX: 230, driveMin: 160,
     lands: [
       { x0: -80, x1: 1060, top: 548 },
@@ -386,7 +418,7 @@ export const LEVELS: LevelDef[] = [
   {
     // Two locks: the first target (through a slit) opens room one, revealing the second target inside.
     id: 12, code: '1-12', name: 'Dua Kunci', width: 2600, theme: 'volcanic',
-    supply: 100, waterBudget: 60, burnRate: .42, spreadDelay: 14, time: 200, critical: 35,
+    supply: 100, waterBudget: 85, burnRate: .42, spreadDelay: 14,
     truckX: 230, driveMin: 160,
     lands: [{ x0: -80, x1: 680, top: 548 }, { x0: 800, x1: 2700, top: 548 }],
     bridges: [],
@@ -420,7 +452,7 @@ export const LEVELS: LevelDef[] = [
     // Chain reaction: release the dam -> water fills the basin -> the boulder floats to the button -> the cage opens;
     // the basin's overflow then runs on to the fires.
     id: 13, code: '1-13', name: 'Bendungan Ganda', width: 2700, theme: 'volcanic',
-    supply: 100, waterBudget: 55, burnRate: .42, spreadDelay: 14, time: 210, critical: 40,
+    supply: 100, waterBudget: 75, burnRate: .42, spreadDelay: 14,
     truckX: 230, driveMin: 160,
     lands: [
       { x0: -80, x1: 1000, top: 548 },
@@ -453,7 +485,7 @@ export const LEVELS: LevelDef[] = [
   {
     // Finale: raft, target through a slit opens the gate, then push the dam stone off the roof to flood the far fires.
     id: 14, code: '1-14', name: 'Puncak Merapi', width: 2900, theme: 'volcanic',
-    supply: 100, waterBudget: 65, burnRate: .45, spreadDelay: 13, time: 230, critical: 40,
+    supply: 100, waterBudget: 90, burnRate: .45, spreadDelay: 13,
     truckX: 230, driveMin: 160,
     lands: [{ x0: -80, x1: 640, top: 548 }, { x0: 760, x1: 3000, top: 548 }],
     bridges: [],
@@ -486,7 +518,7 @@ export const LEVELS: LevelDef[] = [
   },
   {
     id: 15, code: '1-15', name: 'Boss Pembakar Hutan', width: 3000,
-    supply: 200, waterBudget: 150, burnRate: .3, spreadDelay: 16, time: 9999, critical: 60,
+    supply: 200, waterBudget: 200, burnRate: .3, spreadDelay: 16,
     truckX: 230, driveMin: 160,
     // A wide river splits the map: the truck keeps its own bank to dodge on; the boss leaps between ledges across it.
     lands: [

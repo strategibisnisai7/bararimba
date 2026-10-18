@@ -2,6 +2,9 @@ import Phaser from 'phaser';
 import type { AnimalDef } from '../config/levels';
 import type { Effects } from '../systems/Effects';
 
+/** Animals read small at the wide default zoom: every rescue target is drawn this much larger. */
+const ANIMAL_BOOST = 1.35;
+
 export type Mood = 'calm' | 'danger' | 'happy' | 'crying';
 
 export class Animal {
@@ -15,8 +18,8 @@ export class Animal {
   private fxT = 0;
   private baseScale: number;
   constructor(scene: Phaser.Scene, readonly def: AnimalDef, private effects: Effects) {
-    this.baseScale = def.scale;
-    this.sprite = scene.add.image(def.x, def.y + 4, def.key).setOrigin(.5, 1).setScale(def.scale).setFlipX(!!def.flip).setDepth(33);
+    this.baseScale = def.scale * ANIMAL_BOOST;
+    this.sprite = scene.add.image(def.x, def.y + 4, def.key).setOrigin(.5, 1).setScale(this.baseScale).setFlipX(!!def.flip).setDepth(33);
     this.alert = scene.add.image(def.x, 0, 'alert').setScale(.42).setDepth(48).setVisible(false);
     this.bubble = scene.add.graphics().setDepth(47);
   }

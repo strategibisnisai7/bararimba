@@ -17,8 +17,8 @@ test('menu shows all Game Board entries and every screen opens', async ({ page }
   await page.goto('/');
   for (const label of ['Main', 'Peta Indonesia', 'Koleksi Satwa', 'Pengaturan']) await expect(page.getByRole('button', { name: label })).toBeVisible();
   await page.locator('[data-a=map]').click();
-  await expect(page.locator('.region')).toHaveCount(5);
-  await page.locator('.region.open').click();
+  await expect(page.locator('[data-a=region]')).toHaveCount(7);
+  await page.locator('[data-a=region][data-v=jawa]').click({ force: true });   // the open card pulses forever, so it is never "stable"
   await expect(page.locator('.tile')).toHaveCount(15);
   await expect(page.locator('.tile.boss')).toHaveCount(1);
   await expect(page.locator('.tile.boss')).toContainText('BOSS');

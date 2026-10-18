@@ -8,7 +8,8 @@
 #loading{position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#173f34;color:#fff4da}#loading strong{font-size:22px}#load-progress{color:#b6d0b5;font-size:13px}.loading-leaf{font-size:54px;color:#e3b957;animation:pulse 1.5s ease-in-out infinite}
 
 /* ---------- main menu (Game Board) ---------- */
-.menu{position:absolute;inset:0;background:linear-gradient(90deg,#0b2a1a55,transparent 32%)}
+.menu{position:absolute;inset:0}
+.menu:before{content:'';position:absolute;top:0;bottom:0;left:-60vw;width:calc(60vw + 32%);background:linear-gradient(90deg,#0b2a1a55 calc(100% - 32cqw),transparent);pointer-events:none}
 .menu-logo{position:absolute;left:50%;top:1.6cqw;width:41cqw;transform:translateX(-50%);filter:drop-shadow(0 .5cqw .8cqw #0006);animation:logo-in .6s ease-out,float 4s 0.6s ease-in-out infinite}
 .gb-orangutan{position:absolute;left:1.4cqw;top:12.5cqw;width:11.5cqw;filter:drop-shadow(0 .4cqw .6cqw #0005);animation:sway 5s ease-in-out infinite;transform-origin:50% 100%}
 .gb-toucan{position:absolute;right:1.6cqw;top:9.5cqw;width:9.5cqw;filter:drop-shadow(0 .4cqw .6cqw #0005);animation:sway 4s ease-in-out infinite reverse;transform-origin:30% 100%}
@@ -20,24 +21,51 @@
 .mbtn.main svg{width:3cqw;height:3cqw;color:#fff;filter:drop-shadow(0 .15cqw 0 #1c5a16)}
 .mbtn:hover{filter:brightness(1.06)}.mbtn:active{transform:translateY(.25cqw)}
 
-/* ---------- Peta Indonesia ---------- */
-.map{position:absolute;inset:0;background:#2b8ccc;overflow:hidden}
-.map-blur{position:absolute;inset:-3cqw;background-size:cover;background-position:center;filter:blur(1.6cqw) saturate(1.1)}
-.map-box{position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);height:100%;aspect-ratio:560/432;box-shadow:0 0 4cqw #0006}
-.map-img{display:block;width:100%;height:100%}
-.map-back{position:absolute;left:1.6%;top:2%;width:8.6%;height:9.6%;border:0;background:transparent;border-radius:1cqw}.map-back:hover{background:#fff2}
-.region{position:absolute;padding:0;border:0;background:none;filter:drop-shadow(0 .25cqw .3cqw #0005)}
-.region-card{position:absolute;left:2%;right:12%;top:3%;height:64%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(#fcefd6,#efd3a4);border:.16cqw solid #b88b52;border-radius:.6cqw;box-shadow:inset 0 0 0 .12cqw #fff6e0}
-.region-card b{font-size:1.32cqw;font-weight:900;color:#4a2a0f;letter-spacing:.02em}.region-card small{font-size:.98cqw;color:#5c3b1c;white-space:nowrap}
-.region-count{position:absolute;left:22%;top:63%;height:30%;display:flex;align-items:center;gap:.4cqw;padding:0 1cqw;background:linear-gradient(#6b4524,#4c2f16);border:.16cqw solid #f0d9b0;border-radius:2cqw;color:#fff;font-weight:900;font-size:1.25cqw}
-.region-count img{height:72%}
-.region-lock{position:absolute;right:0;bottom:2%;height:46%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 40% 35%,#a8a8a8,#5e5e5e);border:.16cqw solid #3c3c3c;display:grid;place-items:center}
-.region-lock img{width:66%}.region-lock.ok{background:none;border:0}.region-lock.ok img{width:100%}
-.region.wide .region-card{right:2%}.region.wide .region-lock{right:-15%;bottom:-2%}
-.region.open .region-card{border-color:#e0a23c;box-shadow:inset 0 0 0 .12cqw #fff6e0,0 0 1.2cqw #ffd24a}
-.region.open{animation:glow-pulse 1.8s ease-in-out infinite}
-.map-marker{position:absolute;width:10%;transform:translate(-50%,-100%);animation:bob 1.6s ease-in-out infinite;pointer-events:none}
-.map-marker .pin{display:block;width:36%;margin:0 auto -6%}.map-marker .mini-truck{display:block;width:100%;filter:drop-shadow(0 .2cqw .2cqw #0006)}
+/* ---------- Peta Indonesia ----------
+   map-base is the reference board with the layer footprints inpainted; every card, pin, the truck, the back
+   button and the corner clouds are crops of the reference placed at their exact spot, so at rest the screen
+   equals referensiasset/Indonesia Adventure Map.png. The layers then lift / bob / drift. */
+.map{position:absolute;inset:0;background:#1f6fb8;overflow:hidden}
+.map-blur{position:absolute;inset:-3cqw;background-size:cover;background-position:center;filter:blur(1.6cqw) saturate(1.1) brightness(.92)}
+.map-box{position:absolute;left:calc(50% - 50cqw);top:calc(50% - 28.14cqw);width:100cqw;aspect-ratio:1672/941;box-shadow:0 0 4cqw #0006;overflow:hidden}
+.map-img{position:absolute;inset:0;display:block;width:100%;height:100%;user-select:none;-webkit-user-drag:none}
+.map-box>img,.map-box i{position:absolute;pointer-events:none}
+.map-glint{position:absolute;inset:0;pointer-events:none;mix-blend-mode:soft-light;background:linear-gradient(115deg,transparent 40%,#fff9 48%,#fff0 56%) no-repeat;background-size:60% 100%;background-position:-120% 0;animation:map-glint 11s ease-in-out 2s infinite}
+@keyframes map-glint{0%{background-position:-120% 0}45%,100%{background-position:240% 0}}
+.map-cloud{-webkit-mask:radial-gradient(closest-side,#000 55%,#0000);mask:radial-gradient(closest-side,#000 55%,#0000);animation:map-drift 16s ease-in-out infinite alternate}
+.map-cloud.c-tr,.map-cloud.c-r,.map-cloud.c-br{animation-direction:alternate-reverse;animation-duration:19s}
+.map-cloud.c-l,.map-cloud.c-bl{animation-duration:21s}
+@keyframes map-drift{from{transform:translateX(-.5cqw)}to{transform:translateX(.5cqw)}}
+.map-dot{border-radius:50%;background:radial-gradient(circle,#fff 0 30%,#fff8 45%,#fff0 70%);opacity:0;animation:map-dot 2.6s ease-in-out var(--d) infinite}
+@keyframes map-dot{0%,60%,100%{opacity:0;transform:scale(.6)}25%{opacity:.95;transform:scale(1.15)}}
+.map-truck{transform-origin:50% 95%;animation:map-idle .9s ease-in-out infinite;filter:drop-shadow(0 .12cqw .1cqw #0004)}
+@keyframes map-idle{0%,100%{transform:translateY(0) rotate(0)}30%{transform:translateY(-.14cqw) rotate(-.6deg)}60%{transform:translateY(-.05cqw) rotate(.3deg)}}
+.map-pin-solo,.mreg-pin{transform-origin:50% 100%;animation:map-bob 2.6s ease-in-out var(--d,-1.1s) infinite}
+@keyframes map-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-.32cqw)}}
+.map-back{position:absolute;padding:0;border:0;background:none;cursor:pointer;border-radius:1.2cqw;transition:transform .22s cubic-bezier(.3,1.7,.5,1),filter .2s;-webkit-tap-highlight-color:transparent}
+.map-back img{display:block;width:100%;height:100%;pointer-events:none}.map-back::before{content:"";position:absolute;inset:-22% -18%}
+.map-back:focus-visible{outline:none;filter:drop-shadow(0 0 .6cqw #ffe27a) brightness(1.06)}
+.map-back:active{transform:scale(.9);transition-duration:.06s}
+@media(hover:hover){.map-back:hover{transform:scale(1.08) rotate(-3deg);filter:drop-shadow(0 .4cqw .5cqw #0005) brightness(1.06)}.map-back:hover:active{transform:scale(.92)}}
+.mreg{position:absolute;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent;transform-origin:55% 70%;transition:transform .28s cubic-bezier(.3,1.7,.5,1),filter .25s}
+.mreg img{position:absolute;display:block;pointer-events:none;user-select:none}
+.mreg-card{inset:0;width:100%;height:100%;transform-origin:50% 60%}
+.mreg-count{position:absolute;display:grid;place-items:center;border-radius:.6cqw;background:linear-gradient(#3e1e07,#48250a 55%,#45230a);color:#fff;font:600 1.06cqw/1 "Segoe UI",system-ui,sans-serif;letter-spacing:.01em;pointer-events:none;box-shadow:0 0 .15cqw .1cqw #43220a}
+.mreg:focus-visible{outline:none}
+.mreg.open{animation:map-pulse 2.2s ease-in-out infinite}
+@keyframes map-pulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 0 #ffd24a00)}50%{transform:scale(1.035);filter:drop-shadow(0 0 .9cqw #ffd24acc)}}
+.mreg:focus-visible,.mreg:active{animation:none;z-index:2;transform:translateY(-.55cqw) scale(1.07);filter:drop-shadow(0 .7cqw .6cqw #0006) drop-shadow(0 0 .8cqw #ffcf5acc) brightness(1.05)}
+.mreg:focus-visible .mreg-pin,.mreg:active .mreg-pin{animation:map-hop .7s cubic-bezier(.3,1.4,.5,1) infinite}
+.mreg.locked:focus-visible .mreg-card,.mreg.locked:active .mreg-card{animation:map-wiggle .5s ease-in-out}
+@media(hover:hover){
+  .mreg:hover{animation:none;z-index:2;transform:translateY(-.55cqw) scale(1.07);filter:drop-shadow(0 .7cqw .6cqw #0006) drop-shadow(0 0 .8cqw #ffcf5acc) brightness(1.05)}
+  .mreg:hover .mreg-pin{animation:map-hop .7s cubic-bezier(.3,1.4,.5,1) infinite}
+  .mreg.locked:hover .mreg-card{animation:map-wiggle .5s ease-in-out}
+  .mreg.locked:hover{filter:drop-shadow(0 .7cqw .6cqw #0006) drop-shadow(0 0 .7cqw #ffffffaa)}
+}
+@keyframes map-hop{0%,100%{transform:translateY(0) scaleY(1)}35%{transform:translateY(-.9cqw) scaleY(1.05)}60%{transform:translateY(0) scaleY(.9)}75%{transform:translateY(-.2cqw)}}
+@media(prefers-reduced-motion:reduce){.map *{animation:none!important}.map-dot{opacity:0}}
+@keyframes map-wiggle{0%,100%{transform:rotate(0)}20%{transform:rotate(-2.2deg)}40%{transform:rotate(2deg)}60%{transform:rotate(-1.4deg)}80%{transform:rotate(.8deg)}}
 
 /* ---------- level select / collection board ---------- */
 .levels{position:absolute;inset:0;background:#0b1f1466;backdrop-filter:blur(.35cqw)}
@@ -237,18 +265,13 @@
 .bh-fuel.reloading .bh-track span{background:linear-gradient(#9a9a9a,#666)}
 #ui.boss .toast{top:12.6cqw}
 
-.fs-btn{position:absolute;right:1.5cqw;top:1.2cqw;width:4.6cqw;height:4.6cqw;padding:.9cqw;border-radius:1cqw;border:.22cqw solid #4c2a10;background:linear-gradient(#a26b3b,#7b4b25);box-shadow:inset 0 .2cqw 0 #c78d55,0 .3cqw .6cqw #0006;color:#fff6e3;pointer-events:auto;z-index:6}
-.fs-btn svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
-#ui[data-screen=game] .fs-btn{top:auto;bottom:auto;right:1.5cqw;top:22.8cqw;width:4cqw;height:4cqw}
-#ui.boss[data-screen=game] .fs-btn{top:23.6cqw}
-.fs-btn[hidden]{display:none}
 
 /* Wide screens: menus and dialogs live in a centred 16:9 box sized by screen height (cqw inside refers to
    that box), while the game canvas and HUD use the full width. Dim backdrops still cover the whole screen. */
 #stage{container-type:size}
 .screen,.overlay{left:50%;right:auto;width:min(100%,177.7778cqh);transform:translateX(-50%);container-type:inline-size}
 .levels,.map,.scrim{left:-60vw;right:-60vw}
-.map .map-box{left:50%}
+.map .map-box{left:calc(50% - 50cqw)}
 
 /* ---------- Touch landscape: thumb-zone controls ----------
    Left thumb drives (◀ ▶ bottom-left); right thumb sprays, with boom/nozzle columns beside the spray button.
@@ -274,7 +297,6 @@
   .hud .zoom{gap:.6cqh;padding:.8cqh}
   .hud .zbtn{width:9cqh;height:9cqh}
   .hud .zval{font-size:2.2cqh}
-  #ui[data-screen=game] .fs-btn{width:9cqh;height:9cqh;top:auto;bottom:auto;top:43cqh}
   .hud .round{width:11cqh;height:11cqh}
   .hud .hud-actions{gap:1.6cqh}
 }
@@ -290,9 +312,14 @@
   .hud.boss-mode .bh-reload,.hud.boss-mode .bh-wait{font-size:2cqh}
 }
 
-.set-zoom{position:absolute;left:6%;right:6%;bottom:-9%;display:flex;align-items:center;gap:.8cqw;padding:.6cqw 1.2cqw;border-radius:1cqw;background:#fde3b3;border:.2cqw solid #b88b52;box-shadow:0 .3cqw .6cqw #0005}
+.set-extra{position:absolute;left:6%;right:6%;bottom:-9%;display:flex;gap:1cqw}
+.set-zoom{flex:1.4;display:flex;align-items:center;gap:.8cqw;padding:.6cqw 1.2cqw;border-radius:1cqw;background:#fde3b3;border:.2cqw solid #b88b52;box-shadow:0 .3cqw .6cqw #0005}
 .set-zoom>span:first-child{flex:1;color:#4a2a0f;font-weight:900;font-size:1.4cqw}
 .set-zoom button{border:0;background:none;color:#1f6fe0;font-size:3cqw;font-weight:900;line-height:1;padding:0 .6cqw}
 .set-zoom .pill{min-width:8cqw;padding:.45cqw 0;text-align:center;border-radius:.9cqw;background:linear-gradient(#3aa0ff,#1667d8);border:.18cqw solid #0d4fb0;color:#fff;font-weight:900;font-size:1.4cqw}
-#ui[data-screen=game] .fs-btn{top:7.5cqw}
-@media (pointer: coarse){#ui[data-screen=game] .fs-btn{top:14cqh}}
+.set-fs{flex:1}
+.set-fs .pill{border:.18cqw solid #0d4fb0;cursor:pointer;font-family:inherit;background:linear-gradient(#9aa6b4,#6b7787);border-color:#525d6b}
+.set-fs .pill.on{background:linear-gradient(#3aa0ff,#1667d8);border-color:#0d4fb0}
+.set-extra{left:4%;right:4%;gap:.8cqw}.set-extra .set-zoom{min-width:0;gap:.4cqw;padding:.5cqw .9cqw}
+.set-extra .set-zoom>span:first-child{white-space:nowrap;font-size:1.2cqw}.set-extra .set-zoom .pill{min-width:6.5cqw}.set-extra .set-zoom button:not(.pill){font-size:2.6cqw;padding:0 .3cqw}.set-fs .pill{font-size:1.3cqw;padding:.45cqw 1cqw}
+.set-fs{flex:none}

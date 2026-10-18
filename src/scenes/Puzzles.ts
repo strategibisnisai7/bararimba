@@ -102,6 +102,18 @@ export class Puzzles {
       this.scene.tweens.add({ targets: [g.sprite, g.beam], y: `-=${g.y1 - g.y0 + 30}`, alpha: 0, duration: 1100, ease: 'cubic.in' });
     }
   }
+  /** Smash a gate apart (a flung crate): its planks scatter instead of sliding up. */
+  blastGate(id: string) {
+    for (const g of this.gates) {
+      if (g.id !== id || g.open) continue;
+      g.open = true; g.surface.enabled = false;
+      this.scene.matter.world.remove(g.body);
+      g.sprite.setOrigin(.5, .5).setPosition(g.x, (g.y0 + g.y1) / 2);
+      this.scene.tweens.add({ targets: g.sprite, x: g.x + 90, y: g.y1 + 60, angle: 75, alpha: 0, scaleX: .4, duration: 800, ease: 'quad.in' });
+      this.scene.tweens.add({ targets: g.beam, x: g.x + 140, y: g.y0 - 40, angle: -160, alpha: 0, duration: 900, ease: 'quad.out' });
+    }
+  }
+  gate(id: string) { return this.gates.find(g => g.id === id); }
   isOpen(id: string) { return this.gates.filter(g => g.id === id).every(g => g.open); }
   /** A closed gate standing across the road at x (used to stop the truck). */
   gateBlocks(x: number, groundTop: number) {
@@ -115,8 +127,24 @@ export class Puzzles {
     for (const sw of this.switches) {
       if (sw.done) continue;
       if (sw.kind === 'button') {
+        // A boulder dropping toward the pad is steered onto it, and one rolling over it settles in its recess.
+        for (const pr of this.world.props) {
+          if (pr.gone || pr.kind !== 'boulder') continue;
+          const bd = pr.body, dx = sw.x - bd.position.x, v = bd.velocity;
+          if (Math.abs(dx) < 220 && bd.position.y < sw.y - 45 && v.y > .5) this.scene.matter.body.setVelocity(bd, { x: v.x * .8 + dx * .004, y: v.y });
+          else if (Math.abs(dx) < 70 && bd.bounds.max.y > sw.y - 30) this.scene.matter.body.setVelocity(bd, { x: v.x * .85 + dx * .002, y: v.y });
+        }
         const bodies = [...this.world.props.filter(p => !p.gone).map(p => p.body), ...(this.world.barrel ? [this.world.barrel.body] : [])];
-        if (bodies.some(b => Math.abs(b.position.x - sw.x) < 40 && b.bounds.max.y > sw.y - 30 && b.bounds.max.y < sw.y + 12)) this.trigger(sw);
+        const on = bodies.find(b => Math.abs(b.position.x - sw.x) < 40 && b.bounds.max.y > sw.y - 30 && b.bounds.max.y < sw.y + 12);
+        if (on) {
+          // The weight stays on the pad: later spray can't wash it off (or into the fires).
+          if (this.world.props.some(pr => pr.body === on)) {
+            this.scene.matter.body.setStatic(on, true);
+            const sf = this.world.surfaces.find(q => q.body === on); if (sf) sf.enabled = false;   // water flows past the weight
+            this.scene.matter.body.setPosition(on, { x: on.position.x, y: on.position.y + (sw.y - 2 - on.bounds.max.y) });
+          }
+          this.trigger(sw);
+        }
       }
       if (sw.kind === 'wheel' && wheelSpin >= sw.need) this.trigger(sw);
       if (sw.kind === 'target' && sw.sprite) sw.sprite.setAlpha(.6 + Math.sin(this.t * 5) * .25);

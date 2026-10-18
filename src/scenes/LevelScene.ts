@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { ASSETS, assetsFor, STEP, RENDER_SCALE, WATER_GRAVITY, WATER_SPEED, clamp } from '../config/level';
+import { ASSETS, ASSET_GROUPS, assetsFor, STEP, RENDER_SCALE, WATER_GRAVITY, WATER_SPEED, clamp } from '../config/level';
 import { LEVELS, type LevelDef } from '../config/levels';
 import { Truck } from '../entities/Truck';
 import { Animal } from '../entities/Animal';
@@ -19,7 +19,7 @@ export interface SceneData { level?: number; mode?: 'attract' | 'play' }
 export interface ResultInfo {
   won: boolean; level: LevelDef; stars: number; score: number; record: boolean;
   water: { ok: boolean; used: number; budget: number }; animal: { ok: boolean; name: string; key: string; hp: number };
-  fires: { out: number; total: number }; time: number; par: number; reason?: 'animal' | 'water' | 'burn' | 'truck'; boss?: boolean; truckHp?: number;
+  fires: { out: number; total: number }; time: number; spread: number; reason?: 'water' | 'burn' | 'truck'; boss?: boolean; truckHp?: number;
 }
 
 export const sound = new Sound();
@@ -54,7 +54,8 @@ export class LevelScene extends Phaser.Scene {
   /** Player-controlled view scale: 1 = close-up, 0.5 (default) shows the wide battlefield. */
   private zoom = 1;
   private zoomTarget = 1;
-  private critical = false;
+  /** Fires that spread to new trees this run (the third star asks for none). */
+  private spreads = 0;
   private boss?: Boss;
   private burnWarned = false;
   private pressure = 100;
@@ -68,14 +69,15 @@ export class LevelScene extends Phaser.Scene {
   private wheelPouring = false;
   private respawnT = 3;
   private pourAcc = 0;
-  private alarmT = 0;
 
   constructor() { super('level'); }
   preload() {
     // Load only what this level uses: core sprites plus its theme and boss assets (cached across restarts).
     const data = this.sys.settings.data as SceneData | undefined;
     const def = LEVELS[(data?.level ?? 1) - 1];
-    for (const key of [...assetsFor(def.theme, !!def.boss), 'alert'])
+    // Temple-stone pieces (blocks, pillars) borrow the ruins set on any theme.
+    const ruins = def.theme !== 'ruins' && (def.decor.some(d => d.key.startsWith('p-')) || (def.rocks ?? []).some(r => r.stone) || !!def.basin?.stone);
+    for (const key of [...assetsFor(def.theme, !!def.boss, !!def.terrain), ...(ruins ? ASSET_GROUPS.ruins : []), 'alert'])
       if (!this.textures.exists(key)) this.load.image(key, `/assets/${key === 'alert' ? 'ui/alert' : ASSETS[key]}.webp`);
     this.load.on('progress', (v: number) => { const el = document.querySelector('#load-progress'); if (el) el.textContent = `${Math.round(v * 100)}% · Hutan Jawa`; });
     this.load.on('loaderror', () => {
@@ -87,7 +89,7 @@ export class LevelScene extends Phaser.Scene {
     this.ui = this.registry.get('ui');
     this.def = LEVELS[(data.level ?? 1) - 1];
     this.mode = data.mode === 'play' ? 'intro' : 'attract';
-    Object.assign(this, { truckHp: 100, idleWater: 0, refillToast: false, burnWarned: false, boss: undefined, pressure: 100, pressureLock: false, hitCool: 0, respawnT: 3, critical: false, alarmT: 0, acc: 0, matterAcc: 0, burn: 0, elapsed: 0, hudT: 0, endT: 0, result: undefined, introT: 0, pointerHeld: false, firing: false });
+    Object.assign(this, { truckHp: 100, idleWater: 0, refillToast: false, burnWarned: false, boss: undefined, pressure: 100, pressureLock: false, hitCool: 0, respawnT: 3, spreads: 0, acc: 0, matterAcc: 0, burn: 0, elapsed: 0, hudT: 0, endT: 0, result: undefined, introT: 0, pointerHeld: false, firing: false });
     this.keys.clear();
     createParticleTextures(this);
     this.cameras.main.setZoom(RENDER_SCALE);
@@ -98,7 +100,7 @@ export class LevelScene extends Phaser.Scene {
       sound.win(); this.ui.toast(`Tombol tertekan! Kandang terbuka — ${this.def.animal.name} bebas!`, 2800);
       this.animal.setMood('calm'); this.effects.hearts(this.def.animal.x, this.def.animal.y - 80, 6);
     };
-    this.world.onLaunch = () => { sound.click(); this.ui.toast('Tong air terlempar!', 1600); };
+    this.world.onLaunch = () => { sound.splash(); this.ui.toast('Batu menghantam jungkat-jungkit! Tong air terlempar!', 1800); };
     this.world.onSink = (x, y) => { this.effects.bigSplash(x, y); sound.splash(); };
     this.world.onFloat = (x, y, bridged) => {
       this.effects.bigSplash(x, y); sound.splash();
@@ -113,9 +115,10 @@ export class LevelScene extends Phaser.Scene {
     this.water = new WaterSystem(this, this.world.surfaces, () => this.fires.burning,
       (hit, d) => this.onWaterHit(hit, d), (f, x, y) => this.onWaterFire(f, x, y), (x, y) => this.effects.mist(x, y), this.def.supply);
     if (this.def.boss) this.boss = new Boss(this, this.def.boss, this.effects);
-    this.water.absorb = (x, y) => (!!this.world.basin && this.world.absorb(x, y)) || this.world.catchBucket(x, y) || this.world.puzzles.absorb(x, y);
+    this.water.absorb = (x, y) => (!!this.world.basin && this.world.absorb(x, y)) || this.world.puzzles.absorb(x, y);
     this.world.onPour = (x, y, vx, vy) => this.water.pour(x, y, vx, vy);
-    this.world.puzzles.onOpen = (_id, sw) => {
+    this.world.puzzles.onOpen = (id, sw) => {
+      this.world.swingRamps(id);
       sound.win();
       this.ui.toast(sw.kind === 'wheel' ? 'Kincir berputar! Pintu bendungan terbuka.' : sw.kind === 'button' ? 'Tombol tertekan! Pintu terbuka.' : 'Tepat sasaran! Pintu terbuka.', 2200);
     };
@@ -179,10 +182,12 @@ export class LevelScene extends Phaser.Scene {
     if (s.kind === 'prop') this.world.push(s.body, hit.point, d.vx, d.vy);
     if (s.kind === 'barrel' && this.world.barrel) {
       const b = this.world.barrel;
-      if (b.load !== 'crate') this.world.push(s.body, hit.point, d.vx * 1.4, d.vy);   // a hanging crate only takes rope damage, so it drops straight
-      if (b.rope && --b.hp <= 0) { this.world.breakRope(); this.ui.toast('Tali putus! Tong air jatuh…', 1800); sound.click(); }
+      // A hanging crate only takes rope damage so it drops straight, unless it is meant to be swung into a door.
+      if (b.load !== 'crate' || b.door) this.world.push(s.body, hit.point, d.vx * 1.4, d.vy);
+      if (b.rope && !b.door && --b.hp <= 0) { this.world.breakRope(); this.ui.toast('Tali putus! Tong air jatuh…', 1800); sound.click(); }
     }
     if (s.kind === 'switch') this.world.puzzles.hit(s);
+    if (s.kind === 'ramp') return;
     const wh = this.world.wheel;
     if (s.kind === 'wheel' && wh) {
       // Torque from the impact offset crossed with the drop velocity.
@@ -205,6 +210,7 @@ export class LevelScene extends Phaser.Scene {
   }
   private onSpread(f: Fire) {
     if (this.mode !== 'playing') return;
+    this.spreads++;
     sound.alarm();
     this.ui.toast('Api menjalar ke pepohonan! Cepat padamkan!', 2000);
     this.effects.ash(f.def.x, f.def.y - 40, 12);
@@ -297,7 +303,7 @@ export class LevelScene extends Phaser.Scene {
   }
   private setZoom(z: number) {
     this.zoomTarget = clamp(Math.round(z * 100) / 100, .5, 1);
-    store.settings.zoom = Math.round(this.zoomTarget * 100); store.save();
+    store.settings.zoom = Math.round(this.zoomTarget * 100); store.settings.zoomSet = true; store.save();
     this.ui.setZoomLevel(this.zoomTarget);
   }
   /** Clamp a camera centre so the view never leaves the world, at the current zoom. */
@@ -335,28 +341,32 @@ export class LevelScene extends Phaser.Scene {
    * high to climb, open water, low cave ceilings, burning fires, unmoved props and mechanisms. */
   private driveLimits(drive: number) {
     const w = this.world, half = this.truck.halfLength, x = this.truck.x;
-    const STEP_UP = 26, CLEARANCE = 160;
-    const here = w.groundAt(x);
-    const blocked = (px: number, ref: number) => {
+    // SLOPE: steepest grade (rise per px, ~40 deg) the truck takes up or down; steeper sculpted
+    // ground is a wall, so it never rolls into a valley it cannot climb back out of.
+    const STEP_UP = 26, CLEARANCE = 160, SLOPE = .85, RUN = 24;
+    const blocked = (px: number, ref: number, dir: number) => {
       const top = w.surfaceAt(px);
       if (top === null) return 'river';
       if (top < ref - STEP_UP) return 'wall';
+      const back = w.surfaceAt(px - dir * RUN);
+      if (back !== null && Math.abs(top - back) > SLOPE * RUN) return 'wall';
       if (w.puzzles.gateBlocks(px, top)) return 'gate';
-      if (w.ceilingAt(px) > top - CLEARANCE) return 'wall';
+      if (w.ceilingAt(px, top) > top - CLEARANCE) return 'wall';
       return '';
     };
-    let max = this.def.width - half - 20, min = Math.max(this.def.driveMin, half + 20);
+    let max = Math.min(this.def.width - half - 20, this.def.driveMax ?? Infinity), min = Math.max(this.def.driveMin, half + 20);
     let blocker = '';
     // Scan ahead/behind from the wheels; ground may step down freely but not up by more than a curb.
-    let ref = here;
+    // Curb heights are compared wheel to wheel: the ground under the truck's middle can sit lower (a dip).
+    let ref = w.groundAt(x + half * .92 - 4);
     for (let d = 0; d <= 320; d += 4) {
-      const px = x + half * .92 + d, why = blocked(px, ref);
+      const px = x + half * .92 + d, why = blocked(px, ref, 1);
       if (why) { max = Math.min(max, x + d - 2); blocker = why; break; }
       ref = w.surfaceAt(px) ?? ref;
     }
-    ref = here;
+    ref = w.groundAt(x - half * .92 + 4);
     for (let d = 0; d <= 320; d += 4) {
-      const px = x - half * .92 - d, why = blocked(px, ref);
+      const px = x - half * .92 - d, why = blocked(px, ref, -1);
       if (why) { min = Math.max(min, x - d + 2); break; }
       ref = w.surfaceAt(px) ?? ref;
     }
@@ -421,6 +431,7 @@ export class LevelScene extends Phaser.Scene {
   }
   private updateBarrel() {
     const b = this.world.barrel;
+    if (b?.door && !b.landed) return this.updateSwingCrate();
     if (!b || b.landed || b.rope || !b.armed) return;
     const v = b.body.velocity;
     const arrived = b.flightY !== undefined && v.y > 0 && b.body.position.y >= b.flightY - 20;
@@ -435,18 +446,37 @@ export class LevelScene extends Phaser.Scene {
       this.tweens.add({ targets: b.sprite, alpha: 0, scale: .6, duration: 400 });
     }
   }
+  /** Swing crate: sprayed high enough toward the door, it lets go of the rope, flies and blasts the door open. */
+  private updateSwingCrate() {
+    const b = this.world.barrel!, h = this.def.hang!, gate = this.world.puzzles.gate(b.door!);
+    const { x, y } = b.body.position, v = b.body.velocity;
+    if (b.rope) {
+      const swing = Math.atan2(x - h.anchorX, y - h.anchorY);
+      if (swing > .62 && v.x > 0 && gate) {
+        this.world.breakRope();
+        b.flung = true; b.body.isSensor = true;
+        // Short ballistic hop onto the middle of the door (same half-step velocity scaling as the seesaw).
+        const g = .001 * (1000 / 60) ** 2, T = 26, ty = (gate.y0 + gate.y1) / 2;
+        this.matter.body.setVelocity(b.body, { x: .5 * (gate.x - x) / T, y: .5 * (ty - y - .5 * g * T * T) / T });
+        this.matter.body.setAngularVelocity(b.body, .2);
+        this.ui.toast('Peti terlempar ke pintu!', 1400);
+      }
+      return;
+    }
+    if (b.flung && gate && x >= gate.x - 40) {
+      b.landed = true;
+      this.world.puzzles.blastGate(b.door!);
+      this.matter.world.remove(b.body); b.surface.enabled = false;
+      this.tweens.add({ targets: b.sprite, alpha: 0, scale: .2, angle: 200, duration: 450 });
+      for (let i = 0; i < 6; i++) { this.effects.dust(gate.x + (Math.random() - .5) * 40, gate.y0 + Math.random() * (gate.y1 - gate.y0)); this.effects.ash(gate.x, gate.y0 + 30 + i * 12, 3); }
+      this.effects.bigSplash(gate.x, gate.y1 - 30);
+      this.cameras.main.shake(260, .01); sound.splash(); sound.win();
+      this.ui.toast('BOOM! Pintu gua hancur — semprot api di lorong!', 2400);
+    }
+  }
   private updateRules(dt: number) {
     this.elapsed += dt;
     this.burn = Math.min(100, this.burn + this.fires.heat * this.def.burnRate * dt);
-    const over = this.elapsed - this.def.time;
-    if (over >= 0) {
-      if (!this.critical) {
-        this.critical = true; sound.alarm();
-        this.ui.toast(`Waktu standar habis! ${this.def.animal.name} kritis — cepat padamkan api!`, 3200);
-      }
-      this.animal.setCritical(this.def.critical - over, this.def.critical);
-      this.alarmT -= dt; if (this.alarmT <= 0) { this.alarmT = 2; sound.alarm(); }
-    }
     const r = this.def.refill;
     const refilling = !!r && Math.abs(this.truck.x - r.x) < r.half && !this.firing && this.water.supply < this.water.capacity;
     if (refilling) this.water.refill(24 * dt);
@@ -459,8 +489,7 @@ export class LevelScene extends Phaser.Scene {
       this.ui.hud({
         water: this.water.supply / this.water.capacity * 100, burn: this.burn, out, total: out + burning,
         animalHp: this.animal.hp, animalDanger: this.animal.mood === 'danger', refilling,
-        timeLeft: over < 0 ? -over : this.def.critical - over, critical: over >= 0 && !this.boss,
-        stars: [burning === 0, this.water.used <= this.def.waterBudget, over < 0],
+        stars: [burning === 0, this.water.used <= this.def.waterBudget, this.spreads === 0],
         firing: this.firing, tip: this.truck.cannon.tipDegrees, boom: this.truck.cannon.boomPercent,
       });
       this.ui.indicators(this.fires.burning.filter(f => Math.abs(f.def.x - this.cam) > (this.viewHalfW - 40) / this.zoom).map(f => ({ side: f.def.x > this.cam ? 1 : -1, y: 720 - (720 - (f.def.y - 60)) * this.zoom })));
@@ -474,7 +503,6 @@ export class LevelScene extends Phaser.Scene {
       return;   // no water loss here: the reserve refills itself after 10 s idle
     }
     if (this.fires.burning.length === 0 && this.world.cageOpen) return this.finish(true);
-    if (this.critical && this.animal.hp <= 0) return this.finish(false, 'animal');
     if (this.water.supply <= 0 && this.water.active === 0 && !this.def.refill) return this.finish(false, 'water');
   }
   private finish(won: boolean, reason?: ResultInfo['reason']) {
@@ -488,14 +516,14 @@ export class LevelScene extends Phaser.Scene {
       onUpdate: tw => { this.cam = tw.getValue() ?? this.cam; } });
     won ? sound.win() : sound.fail();
     const waterOk = this.boss ? this.truckHp >= 50 : this.water.used <= this.def.waterBudget;
-    const timeOk = this.boss ? this.burn < 50 : this.elapsed <= this.def.time;
+    const timeOk = this.boss ? this.burn < 50 : this.spreads === 0;
     const stars = won ? 1 + Number(waterOk) + Number(timeOk) : 0;
     const score = won
-      ? Math.round(3000 + this.water.supply * 15 + this.animal.hp * 20 + Math.max(0, this.def.time - this.elapsed) * 25 + (100 - this.burn) * 10)
+      ? Math.round(3000 + this.water.supply * 15 + this.animal.hp * 20 + (this.spreads === 0 ? 1500 : 0) + (100 - this.burn) * 10)
       : this.fires.outCount * 450;
     const record = won ? store.record(this.def.id, stars, score, this.def.animal.key) : false;
     this.result = {
-      won, level: this.def, stars, score, record, reason, time: this.elapsed, par: this.def.time, boss: !!this.boss, truckHp: Math.round(this.truckHp),
+      won, level: this.def, stars, score, record, reason, time: this.elapsed, spread: this.spreads, boss: !!this.boss, truckHp: Math.round(this.truckHp),
       water: { ok: waterOk, used: this.water.used, budget: this.def.waterBudget },
       animal: { ok: won, name: this.def.animal.name, key: this.def.animal.key, hp: this.animal.hp },
       fires: { out: this.fires.outCount, total: this.fires.outCount + this.fires.burning.length },

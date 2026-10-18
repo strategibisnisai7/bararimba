@@ -3,6 +3,7 @@ import type { LevelDef } from '../config/levels';
 import type { Surface } from '../physics/collision';
 import type { Fuel } from '../systems/FireSystem';
 import { Puzzles } from './Puzzles';
+import { Terrain } from './Terrain';
 
 interface ThemeStyle {
   sky: [number, number]; bed: [number, number]; far: number; mid: number; haze: number;
@@ -30,8 +31,9 @@ export class World {
   readonly fuel = new Map<number, Fuel>();
   /** Swinging/flying load: a water barrel (douses fire where it lands) or a crate (just blocks). */
   barrel?: { body: MatterJS.BodyType; sprite: Phaser.GameObjects.Image; surface: Surface; hp: number; rope?: MatterJS.ConstraintType;
-    falling: number; landed: boolean; armed: boolean; load: 'barrel' | 'crate'; flightY?: number };
-  seesaw?: { plank: MatterJS.BodyType; sprite: Phaser.GameObjects.Image; launched: boolean; hold?: MatterJS.ConstraintType; bucket: Phaser.GameObjects.Image; fill: number; lastAv: number; x: number; y: number; target: { x: number; y: number } };
+    falling: number; landed: boolean; armed: boolean; load: 'barrel' | 'crate'; flightY?: number; door?: string; flung?: boolean;
+    lob?: { x0: number; y0: number; x1: number; y1: number; t: number; T: number; h: number } };
+  seesaw?: { plank: MatterJS.BodyType; sprite: Phaser.GameObjects.Image; launched: boolean; hold?: MatterJS.ConstraintType; x: number; y: number; target: { x: number; y: number } };
   lever?: { button: Phaser.GameObjects.Image; fence: Phaser.GameObjects.Image; roof: Phaser.GameObjects.Image; pressed: boolean };
   private layers: Layer[] = [];
   private river: Phaser.GameObjects.Graphics;
@@ -50,6 +52,7 @@ export class World {
   onButton?: () => void;
   wheel?: { cx: number; cy: number; r: number; w: number; spun: number; sprite: Phaser.GameObjects.Image; out?: { x: number; y: number; vx: number }; surface: Surface };
   puzzles!: Puzzles;
+  terrain?: Terrain;
   /** Emits free water (reservoirs, basin overflow); wired to the water system by the scene. */
   onPour?: (x: number, y: number, vx: number, vy: number) => void;
 
@@ -97,8 +100,9 @@ export class World {
 
     for (const b of def.bridges) this.bridge(b.x0, b.x1, b.y);
     for (const l of def.lands) this.land(l.x0, l.x1, l.top, l.style);
+    if (def.terrain) this.terrain = new Terrain(scene, def.terrain, this.surfaces);
     for (const d of def.decor) {
-      const img = scene.add.image(d.x, d.y, d.key).setOrigin(.5, 1).setScale(d.scale).setFlipX(!!d.flip).setDepth(16);
+      const img = scene.add.image(d.x, d.y, d.key).setOrigin(.5, 1).setScale(d.scale).setFlipX(!!d.flip).setDepth(d.back ? 8 : 16);
       if (T.parallax === 'volcano' && d.key.startsWith('tree')) img.setTint(0x7a5444);   // scorched volcanic trees
       if (d.fuel !== undefined) this.fuel.set(d.fuel, { image: img, burn: 0 });
     }
@@ -110,6 +114,7 @@ export class World {
     for (const p of def.props) this.prop(p.kind, p.x, p.y);
     if (def.hang) this.hang(def.hang);
     for (const r of def.rocks ?? []) this.rock(r);
+    for (const r of def.ramps ?? []) this.ramp(r);
     if (def.seesaw) this.makeSeesaw(def.seesaw);
     if (def.lever) this.makeLever(def.lever);
     if (def.basin) this.makeBasin(def.basin);
@@ -149,6 +154,22 @@ export class World {
 
   }
 
+  /** Temple stone for blocks and pools: the ruins wall course recoloured to sunlit limestone outside
+   * the ruins theme (whose own grey stone matches its temples). */
+  private stoneTexture() {
+    if (this.def.theme === 'ruins') return 'p-fill';
+    const tex = this.scene.textures;
+    if (!tex.exists('stone-beige')) {
+      const src = tex.get('p-fill').getSourceImage() as HTMLImageElement;
+      const c = tex.createCanvas('stone-beige', src.width, src.height)!, ctx = c.getContext();
+      ctx.drawImage(src, 0, 0);
+      ctx.globalCompositeOperation = 'color'; ctx.fillStyle = '#c8ad7e'; ctx.fillRect(0, 0, src.width, src.height);
+      ctx.globalCompositeOperation = 'screen'; ctx.fillStyle = '#5a4a32'; ctx.fillRect(0, 0, src.width, src.height);
+      ctx.globalCompositeOperation = 'destination-in'; ctx.drawImage(src, 0, 0);
+      c.refresh();
+    }
+    return 'stone-beige';
+  }
   private ensureDirt() {
     if (this.scene.textures.exists('dirt')) return;
     const src = this.scene.textures.get('top-b').getSourceImage() as HTMLImageElement;
@@ -197,7 +218,9 @@ export class World {
     const left = this.props.some(p => !p.gone && !p.floating && p.kind !== 'boulder' && p.body.position.x < fg.x0 + 20 && p.body.position.y < 560);
     if (left) return false;
     const src = this.def.props.find(p => p.kind !== 'boulder' && p.x < fg.x0)!;
-    this.prop(src.kind, src.x, src.y - 260);
+    const p = this.prop(src.kind, src.x, src.y);
+    p.sprite.setAlpha(0);
+    this.scene.tweens.add({ targets: p.sprite, alpha: 1, duration: 500 });
     return true;
   }
   private prop(kind: string, x: number, y: number) {
@@ -216,7 +239,9 @@ export class World {
     sprite.setDepth(21);
     const surface: Surface = { body, kind: 'prop', enabled: true };
     this.surfaces.push(surface);
-    this.props.push({ kind, body, sprite, surface, gone: false });
+    const prop: Prop = { kind, body, sprite, surface, gone: false };
+    this.props.push(prop);
+    return prop;
   }
   private hang(h: NonNullable<LevelDef['hang']>) {
     const s = this.scene;
@@ -231,11 +256,18 @@ export class World {
     const sprite = s.add.image(h.anchorX, y, crate ? 'crate' : 'barrel-blue').setScale(.5).setDepth(21);
     const surface: Surface = { body, kind: 'barrel', enabled: true };
     this.surfaces.push(surface);
-    this.barrel = { body, sprite, surface, hp: crate ? 30 : 35, rope, falling: 0, landed: false, armed: false, load: crate ? 'crate' : 'barrel' };
+    this.barrel = { body, sprite, surface, hp: crate ? 30 : 35, rope, falling: 0, landed: false, armed: false, load: crate ? 'crate' : 'barrel', door: h.door };
   }
-  private rock(r: { x0: number; x1: number; y0: number; y1: number }) {
+  private rock(r: NonNullable<LevelDef['rocks']>[number]) {
     const s = this.scene, w = r.x1 - r.x0, h = r.y1 - r.y0;
     this.add(r.x0 + w / 2, r.y0 + h / 2, w, h, 'terrain');
+    if (r.stone) {
+      // Cut temple blocks: stone courses with a lit top edge and a shaded base.
+      s.add.tileSprite(r.x0, r.y0, w, h, this.stoneTexture()).setOrigin(0, 0).setTileScale(1.15).setDepth(15);
+      s.add.rectangle(r.x0, r.y0, w, 5, 0xfff0d0, .35).setOrigin(0, 0).setDepth(15.5);
+      s.add.rectangle(r.x0, r.y1 - 8, w, 8, 0x1a1408, .4).setOrigin(0, 0).setDepth(15.5);
+      return;
+    }
     const T = this.theme;
     s.add.tileSprite(r.x0, r.y0, w, h, T.fill).setOrigin(0, 0).setTileScale(T.fill === 'dirt' ? .9 : 1.1).setDepth(15);
     // Grass lip on top and a dark underside so the slab reads as an overhang.
@@ -245,6 +277,36 @@ export class World {
       x += img.displayWidth - 8;
     }
     s.add.rectangle(r.x0, r.y1 - 10, w, 10, 0x2b1a0c, .55).setOrigin(0, 0).setDepth(15.5);
+  }
+  readonly ramps: { def: NonNullable<LevelDef['ramps']>[number]; body: MatterJS.BodyType; image: Phaser.GameObjects.Image; len: number; angle: number }[] = [];
+  /** Planks released by gate `id` swing down about their hinge; their water surface follows. */
+  swingRamps(id: string) {
+    for (const r of this.ramps) {
+      if (r.def.drops !== id) continue;
+      const from = r.angle, to = Math.abs(from);
+      this.scene.tweens.addCounter({ from, to, duration: 700, ease: 'bounce.out', onUpdate: tw => {
+        const a = tw.getValue() ?? to, { x0, y0 } = r.def, nx = Math.sin(a), ny = -Math.cos(a), T = 14;
+        const x1 = x0 + Math.cos(a) * r.len, y1 = y0 + Math.sin(a) * r.len;
+        const v = r.body.vertices as unknown as { x: number; y: number }[];
+        v[0] = { x: x0, y: y0 }; v[1] = { x: x1, y: y1 }; v[2] = { x: x1 - nx * T, y: y1 - ny * T }; v[3] = { x: x0 - nx * T, y: y0 - ny * T };
+        const xs = v.map(q => q.x), ys = v.map(q => q.y);
+        r.body.bounds = { min: { x: Math.min(...xs), y: Math.min(...ys) }, max: { x: Math.max(...xs), y: Math.max(...ys) } } as typeof r.body.bounds;
+        r.image.setRotation(a); r.angle = a;
+      } });
+    }
+  }
+  /** Hinged wooden ramp: a water-only surface (props pass it) that redirects a jet along its length. */
+  private ramp(r: NonNullable<LevelDef['ramps']>[number]) {
+    const s = this.scene, len = Math.hypot(r.x1 - r.x0, r.y1 - r.y0), a = Math.atan2(r.y1 - r.y0, r.x1 - r.x0);
+    const nx = Math.sin(a), ny = -Math.cos(a), T = 14;   // top face along the line, thickness below it
+    const vertices = [{ x: r.x0, y: r.y0 }, { x: r.x1, y: r.y1 }, { x: r.x1 - nx * T, y: r.y1 - ny * T }, { x: r.x0 - nx * T, y: r.y0 - ny * T }];
+    const xs = vertices.map(v => v.x), ys = vertices.map(v => v.y);
+    const body = { vertices, bounds: { min: { x: Math.min(...xs), y: Math.min(...ys) }, max: { x: Math.max(...xs), y: Math.max(...ys) } }, position: { x: (r.x0 + r.x1) / 2, y: (r.y0 + r.y1) / 2 } } as unknown as MatterJS.BodyType;
+    this.surfaces.push({ body, kind: 'ramp', enabled: true });
+    const image = s.add.image(r.x0, r.y0, 'plank').setOrigin(0, .3).setDisplaySize(len, 24).setRotation(a).setDepth(20);
+    this.ramps.push({ def: r, body, image, len, angle: a });
+    const g = s.add.graphics().setDepth(20.5);
+    g.fillStyle(0x2b2f36, 1).fillCircle(r.x0, r.y0, 15).fillStyle(0x8a929c, 1).fillCircle(r.x0, r.y0, 10).fillStyle(0x2b2f36, 1).fillCircle(r.x0, r.y0, 4);
   }
   private makeSeesaw(d: NonNullable<LevelDef['seesaw']>) {
     const s = this.scene, M = s.matter;
@@ -264,34 +326,40 @@ export class World {
     // The barrel sits in a cradle on the plank end until the catapult fires.
     plank.collisionFilter.group = -7; body.collisionFilter.group = -7;
     const hold = M.add.constraint(plank, body, 0, .9, { pointA: { x: 100, y: -36 }, pointB: { x: 0, y: 0 } });
-    const bucket = s.add.image(d.x - 105, d.y - 40, 'bucket').setOrigin(.5, 1).setScale(.55).setDepth(21);
-    this.seesaw = { plank, sprite, launched: false, hold, bucket, fill: 0, lastAv: 0, x: d.x, y: d.y, target: d.target };
+    this.seesaw = { plank, sprite, launched: false, hold, x: d.x, y: d.y, target: d.target };
   }
   private updateSeesaw() {
     const sw = this.seesaw!, M = this.scene.matter.body, p = sw.plank;
     // Hinge stops: the plank can only tilt +-0.32 rad.
     if (p.angle > .32) { M.setAngle(p, .32); if (p.angularVelocity > 0) M.setAngularVelocity(p, 0); }
     if (p.angle < -.32) { M.setAngle(p, -.32); if (p.angularVelocity < 0) M.setAngularVelocity(p, 0); }
-    // Plank swings down hard past -0.12 rad (toward the ground): the cradle releases the barrel like a catapult.
+    // A boulder dropping onto the raised (left) end slams it down: the cradle releases the barrel like a catapult.
     const b = this.barrel;
-    if (!sw.launched && b && sw.fill > 8 && p.angle < -.12 && sw.lastAv < -.006) {
+    // A boulder tipping off the ledge drops almost straight onto the raised end instead of sailing past it.
+    if (!sw.launched) for (const r of this.props) {
+      const v = r.body.velocity;
+      if (!r.gone && r.kind === 'boulder' && v.y > .3 && r.body.position.x > sw.x - 135 && r.body.position.x < sw.x && r.body.position.y < sw.y - 40 && Math.abs(v.x) > .8)
+        M.setVelocity(r.body, { x: Math.sign(v.x) * .8, y: v.y });
+    }
+    const slam = !sw.launched && this.props.find(r => {
+      if (r.gone || r.kind !== 'boulder') return false;
+      const { x, y } = r.body.position, dx = x - p.position.x;
+      const surf = p.position.y + dx * Math.tan(p.angle) - 8;
+      return dx < -15 && dx > -135 && r.body.velocity.y > 1.5 && y + 40 >= surf - 10;
+    });
+    if (slam && b) {
       sw.launched = true; b.armed = true; b.falling = 0;
+      M.setAngularVelocity(p, -.12);
+      M.setVelocity(slam.body, { x: slam.body.velocity.x * .3, y: slam.body.velocity.y * .2 });
+      this.scene.cameras.main.shake(160, .005);
       if (sw.hold) this.scene.matter.world.removeConstraint(sw.hold);
-      const g = .001 * (1000 / 60) ** 2, T = 110;  // ~1.8 s flight: apex clears a 300 px cliff
+      // Scripted high lob onto the target: apex ~420 px above the launch point clears the cliff.
       const { x, y } = b.body.position;
-      b.body.isSensor = true; b.flightY = sw.target.y;   // free ballistic flight over the cliff
-      // Matter's setVelocity here is scaled per half step, hence the 0.5 (measured: unscaled overshot 2x).
-      M.setVelocity(b.body, { x: .5 * (sw.target.x - x) / T, y: .5 * (sw.target.y - y - .5 * g * T * T) / T });
-      M.setAngularVelocity(b.body, .15);
+      b.body.isSensor = true; b.flightY = sw.target.y;
+      b.lob = { x0: x, y0: y, x1: sw.target.x, y1: sw.target.y, t: 0, T: 1.9, h: 420 };
       this.onLaunch?.();
     }
-    sw.lastAv = p.angularVelocity;
     sw.sprite.setPosition(p.position.x, p.position.y).setRotation(p.angle);
-    const c = Math.cos(p.angle), sn = Math.sin(p.angle);
-    sw.bucket.setPosition(p.position.x - 105 * c + 8 * sn, p.position.y - 105 * sn - 8 * c).setRotation(p.angle * .3);
-    // The filling bucket's weight on its lever arm tips the plank (gravity .278 px/step^2).
-    if (!sw.launched) M.setAngularVelocity(p, p.angularVelocity - sw.fill * 105 * .278 / 40000);
-    else if (sw.fill > 0) sw.fill = Math.max(0, sw.fill - 2);
   }
   onLaunch?: () => void;
   private makeLever(d: NonNullable<LevelDef['lever']>) {
@@ -331,8 +399,12 @@ export class World {
   }
   private makeBasin(b: NonNullable<LevelDef['basin']>) {
     const s = this.scene;
-    s.add.tileSprite(b.x0, b.lip, b.x1 - b.x0, b.floor - b.lip, 'dirt').setOrigin(0, 0).setTileScale(.9).setTint(0x8a6a50).setDepth(9.5);
-    const g = s.add.graphics().setDepth(12);
+    // A sculpted basin (terrain piece) is its own backdrop; its water sits behind the rock so the
+    // opaque stone masks the rectangular water body to the bowl's curve. A stone pool shows cut blocks.
+    const bowl = !!this.def.terrain && !b.stone;
+    if (b.stone) s.add.tileSprite(b.x0, b.lip, b.x1 - b.x0, b.floor - b.lip, this.stoneTexture()).setOrigin(0, 0).setTileScale(1.15).setTint(0xb0a898).setDepth(9.5);
+    else if (!bowl) s.add.tileSprite(b.x0, b.lip, b.x1 - b.x0, b.floor - b.lip, 'dirt').setOrigin(0, 0).setTileScale(.9).setTint(0x8a6a50).setDepth(9.5);
+    const g = s.add.graphics().setDepth(bowl ? 10.5 : 12);
     const boulder = s.matter.add.circle(b.boulder.x, b.floor - b.boulder.r - 2, b.boulder.r, { density: .0011, friction: .02, frictionAir: .01, restitution: .1, label: 'prop' });
     const rock = s.add.image(b.boulder.x, b.floor - b.boulder.r, 'boulder').setScale(b.boulder.r * 2.15 / 241).setDepth(13);
     this.surfaces.push({ body: boulder, kind: 'prop', enabled: true });
@@ -368,7 +440,7 @@ export class World {
         x === b.x0 ? g.moveTo(x, y) : g.lineTo(x, y);
       }
       g.strokePath();
-      if (st.overflow && Math.random() < dt * 30) this.onPour?.(b.x1 + 6, b.lip - 6, 70 + Math.random() * 40, 0);
+      if (st.overflow && Math.random() < dt * (this.def.terrain ? 60 : 30)) this.onPour?.(b.x1 + 6, b.lip - 6, 70 + Math.random() * 40, 0);
       if (st.overflow) for (let i = 0; i < 3; i++) g.fillStyle(0xd8f5ff, .8).fillCircle(b.x1 + 6 + Math.random() * 20, b.lip - 2 - Math.random() * 6, 2 + Math.random() * 2);
     }
     // Buoyancy (Matter gravity is mass * 0.001 per step at scale 1).
@@ -388,6 +460,8 @@ export class World {
       if (Math.abs(body.position.x - b.button.x) < 26 && body.position.y < b.lip) {
         st.pressed = true;
         M.setStatic(body, true);
+        // Resting on the pad it is only a weight: the overflow runs past it on to the fires.
+        const sf = this.surfaces.find(q => q.body === body); if (sf) sf.enabled = false;
         M.setPosition(body, { x: b.button.x, y: b.lip - r + 4 });
         st.button.setScale(.42, .3);
         this.scene.tweens.add({ targets: [st.fence, st.roof], y: '-=180', alpha: 0, duration: 900, ease: 'back.in' });
@@ -396,15 +470,6 @@ export class World {
     }
     st.rock.setPosition(body.position.x, body.position.y).setRotation(body.angle);
   }
-  /** Drops landing in the seesaw bucket fill it. */
-  catchBucket = (x: number, y: number) => {
-    const sw = this.seesaw;
-    if (!sw || sw.launched || sw.fill >= 90) return false;
-    const b = sw.bucket;
-    if (Math.abs(x - b.x) > 24 || y < b.y - 72 || y > b.y - 8) return false;
-    sw.fill++;
-    return true;
-  };
   get cageOpen() { return (!this.basin || this.basin.pressed) && (!this.lever || this.lever.pressed); }
   get bridged() { return !this.def.floatGap || this.rafts >= this.def.floatGap.need; }
   breakRope() {
@@ -416,12 +481,7 @@ export class World {
   push(body: MatterJS.BodyType, at: { x: number; y: number }, vx: number, vy: number) {
     // Matter integrates force/mass * dt(ms)^2; ~0.04-0.1 px/step of velocity per droplet.
     const sw = this.seesaw;
-    if (sw && body === sw.plank) {
-      // Each drop's momentum times its lever arm about the hinge spins the plank.
-      const dw = (at.x - sw.x) * Math.max(0, vy) * 4.5e-8 - (at.y - sw.y) * vx * 4.5e-8;
-      this.scene.matter.body.setAngularVelocity(body, body.angularVelocity + dw);
-      return;
-    }
+    if (sw && body === sw.plank) return;   // only the falling boulder works the catapult
     const k = 4.6e-6 * Math.pow(body.mass, .75);
     this.scene.matter.body.applyForce(body, at, { x: vx * k, y: Math.min(0, vy) * k * .5 });
   }
@@ -430,13 +490,15 @@ export class World {
     let top: number | null = null;
     for (const l of this.def.lands) if (x >= l.x0 && x <= l.x1) top = top === null ? l.top : Math.min(top, l.top);
     for (const br of this.def.bridges) if (x >= br.x0 && x <= br.x1) top = top === null ? br.y : Math.min(top, br.y);
+    const t = this.terrain?.topAt(x) ?? null;
+    if (t !== null) top = top === null ? t : Math.min(top, t);
     const fg = this.def.floatGap;
     if (top === null && fg && this.bridged && x > fg.x0 - 2 && x < fg.x1 + 2) top = this.surfaceAt(fg.x0 - 4) ?? 548;
     return top;
   }
-  /** Lowest point of any rock slab hanging over x (cave ceilings). */
-  ceilingAt(x: number) {
-    let c = -Infinity;
+  /** Lowest point of any rock slab or terrain ledge hanging over x (cave ceilings) above `ground`. */
+  ceilingAt(x: number, ground = Infinity) {
+    let c = this.terrain?.ceilingAt(x, ground) ?? -Infinity;
     for (const r of this.def.rocks ?? []) if (x >= r.x0 && x <= r.x1) c = Math.max(c, r.y1);
     return c;
   }
@@ -488,7 +550,9 @@ export class World {
       const { x, y } = p.body.position;
       if (fg && x > fg.x0 - 10 && x < fg.x1 + 10 && y > 548 && this.rafts < fg.need) { this.float(p, fg); continue; }
       p.sprite.setPosition(x, y).setRotation(p.body.angle);
-      if (p.body.position.y > 585) {
+      // Sinks only into open water: sculpted ground may lie below the river line.
+      const under = this.surfaceAt(p.body.position.x);
+      if (p.body.position.y > 585 && (under === null || p.body.position.y > under + 20)) {
         this.onSink?.(p.body.position.x, 600);
         p.gone = true; p.surface.enabled = false; this.scene.matter.world.remove(p.body);
         this.scene.tweens.add({ targets: p.sprite, alpha: 0, y: p.sprite.y + 30, duration: 500, onComplete: () => p.sprite.destroy() });
@@ -511,6 +575,16 @@ export class World {
     if (this.lever) this.updateLever();
     this.ropeG.clear();
     const b = this.barrel;
+    if (b?.lob && !b.landed) {
+      const l = b.lob, M = this.scene.matter.body;
+      l.t = Math.min(l.T, l.t + dt);
+      const u = l.t / l.T, du = 1 / l.T / 60;
+      const at = (k: number) => ({ x: l.x0 + (l.x1 - l.x0) * k, y: l.y0 + (l.y1 - l.y0) * k - 4 * l.h * k * (1 - k) });
+      const now = at(u), next = at(Math.min(1, u + du));
+      M.setPosition(b.body, now);
+      M.setVelocity(b.body, { x: next.x - now.x, y: u >= 1 ? 2 : next.y - now.y });
+      M.setAngle(b.body, b.body.angle + dt * 6);
+    }
     if (b && !b.landed) {
       b.sprite.setPosition(b.body.position.x, b.body.position.y).setRotation(b.body.angle);
       if (b.rope) {

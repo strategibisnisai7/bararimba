@@ -1,6 +1,6 @@
 """Second asset pass: UI, props, animals, fire/terrain extras for the 3-level build.
 
-Run: python scripts/prepare_ui_assets.py  (Pillow, numpy, scipy; opencv-python-headless for 'grab').
+Run: python scripts/prepare_ui_assets.py [--map]  (Pillow, numpy, scipy; opencv-python-headless for 'grab').
 Methods
   main  - like comp but keeps only the largest component.
   comp  - crop rect from an RGBA sheet, keep the largest alpha component plus components that do
@@ -267,5 +267,144 @@ def main():
     print(len(manifest), 'assets')
 
 
+# ---------------------------------------------------------------------------------------------
+# Peta Indonesia map screen (python scripts/prepare_ui_assets.py --map runs only this block).
+# Source: referensiasset/Indonesia Adventure Map.png (1672x941 RGB). Every layer is a crop of the
+# reference at its own spot; layers get an alpha matte (GrabCut seeded by the card's cream panel,
+# dark star pill and lock/check disk; pins by their red body) so they can lift/bob on hover. The
+# board under the layers is the same reference with the layer footprints inpainted (cv2 Telea), so
+# the few pixels uncovered while a layer moves show plausible sea/island instead of a double image.
+# At rest the layers sit pixel-exact over the board, i.e. the screen equals the reference.
+MAPREF = 'Indonesia Adventure Map.png'
+# key, rect [x, y, w, h], kind, extra (card: lock/check disk centre in source px)
+MAP = [
+    ('ui/map-card-sumatra', [180, 205, 258, 146], 'card', (403, 312)),
+    ('ui/map-card-kalimantan', [743, 212, 259, 141], 'card', (966, 314)),
+    ('ui/map-card-sulawesi', [1210, 224, 256, 141], 'card', (1430, 327)),
+    ('ui/map-card-jawa', [308, 500, 256, 130], 'card', (528, 594)),
+    ('ui/map-card-bali', [740, 638, 230, 127], 'card', (936, 729)),
+    ('ui/map-card-nusa', [1009, 650, 272, 122], 'card', (1244, 736)),
+    ('ui/map-card-papua', [1407, 578, 245, 141], 'card', (1616, 683)),
+    ('ui/map-pin-sumatra', [181, 207, 45, 54], 'pin', None),
+    ('ui/map-pin-kalimantan', [744, 215, 45, 54], 'pin', None),
+    ('ui/map-pin-sulawesi', [1211, 226, 44, 54], 'pin', None),
+    ('ui/map-pin-poso', [1015, 352, 44, 52], 'pin', None),
+    ('ui/map-pin-jawa', [310, 503, 44, 53], 'pin', None),
+    ('ui/map-pin-bali', [742, 641, 43, 51], 'pin', None),
+    ('ui/map-pin-nusa', [1011, 653, 43, 53], 'pin', None),
+    ('ui/map-pin-papua', [1409, 580, 42, 52], 'pin', None),
+    ('ui/map-truck', [484, 628, 128, 72], 'grab', None),
+    ('ui/map-back', [24, 20, 116, 94], 'grab', None),
+]
+# Cloud banks in the corners, drifted slightly in CSS with feathered masks (plain crops).
+MAP_PLAIN = [
+    ('ui/map-cloud-tl', [300, 0, 230, 95]),
+    ('ui/map-cloud-tr', [1500, 0, 172, 90]),
+    ('ui/map-cloud-r', [1500, 160, 172, 200]),
+    ('ui/map-cloud-l', [0, 420, 120, 120]),
+    ('ui/map-cloud-bl', [30, 740, 330, 201]),
+    ('ui/map-cloud-br', [1340, 840, 230, 101]),
+]
+
+
+def map_assets():
+    import cv2
+    full = np.array(Image.open(SRC / MAPREF).convert('RGB'))
+    H, W = full.shape[:2]
+    footprint = np.zeros((H, W), bool)
+    mattes = {}
+
+    def pin_matte(x, y, w, h):
+        a = full[y:y + h, x:x + w].astype(int)
+        r, g, b = a[..., 0], a[..., 1], a[..., 2]
+        red = (r > 150) & (g < 90) & (b < 90) & (r - g > 90)
+        lab, n = ndimage.label(red)
+        if n > 1:
+            sizes = ndimage.sum(np.ones_like(lab), lab, range(1, n + 1))
+            red = lab == int(np.argmax(sizes)) + 1
+        m = ndimage.binary_fill_holes(ndimage.binary_closing(red, iterations=2))
+        return ndimage.binary_dilation(m, iterations=2)  # dark outline ring
+
+    for key, (x, y, w, h), kind, extra in MAP:
+        crop = full[y:y + h, x:x + w]
+        if kind == 'pin':
+            alpha = ndimage.gaussian_filter(pin_matte(x, y, w, h).astype(float), .8)
+        else:
+            gc = np.full((h, w), cv2.GC_PR_BGD, np.uint8)
+            gc[[0, 1, -2, -1], :] = cv2.GC_BGD
+            gc[:, [0, 1, -2, -1]] = cv2.GC_BGD
+            if kind == 'card':
+                a = crop.astype(int)
+                r, g, b = a[..., 0], a[..., 1], a[..., 2]
+                cream = ((r > 215) & (g > 190) & (b > 140) | (r > 240) & (g > 200) & (b > 100)) & (b < 225) & (r - b > 25)
+                lab, n = ndimage.label(ndimage.binary_closing(cream, iterations=2))
+                sizes = ndimage.sum(np.ones_like(lab), lab, range(1, n + 1))
+                panel = np.isin(lab, [i + 1 for i in range(n) if sizes[i] > 2500])
+                ys, xs = np.nonzero(panel)
+                hull = np.zeros_like(panel)
+                hull[ys.min() + 4:ys.max() - 3, xs.min() + 4:xs.max() - 3] = True
+                dark = (r < 110) & (g < 70) & (b < 45)
+                lab2, _ = ndimage.label(dark)
+                pill = np.zeros_like(dark)
+                for i, sl in enumerate(ndimage.find_objects(lab2)):
+                    c = lab2[sl] == i + 1
+                    if c.sum() > 1500 and sl[0].start > ys.min():
+                        pill[sl] |= c
+                pill = ndimage.binary_fill_holes(ndimage.binary_closing(pill, iterations=3))
+                cx, cy = extra[0] - x, extra[1] - y
+                yy, xx = np.mgrid[0:h, 0:w]
+                d = np.hypot(xx - cx, yy - cy)
+                gc[(d < 34) | ndimage.binary_dilation(panel | pill, iterations=6)] = cv2.GC_PR_FGD
+                gc[hull | pill | (d < 24) | pin_matte(x, y, w, h)] = cv2.GC_FGD
+                # Keep GrabCut inside the card silhouette: panel/pill/disk plus the leaf above the panel.
+                core = np.isin(lab, [i + 1 for i in range(n) if sizes[i] > 300]) | pill | (d < 31)
+                solid = ndimage.binary_fill_holes(ndimage.binary_closing(core & (d > 31) | (d < 22), iterations=3))
+                gc[solid] = cv2.GC_FGD
+                hull_pts = cv2.convexHull(np.argwhere(core)[:, ::-1].astype(np.int32))
+                allow = np.zeros((h, w), np.uint8)
+                cv2.fillConvexPoly(allow, hull_pts, 1)
+                allow = ndimage.binary_dilation(allow > 0, iterations=4)
+                allow[:ys.min() + 12, :xs.min() + 90] = True
+            else:
+                gc[6:-6, 6:-6] = cv2.GC_PR_FGD
+            bgd = np.zeros((1, 65), np.float64)
+            fgd = np.zeros((1, 65), np.float64)
+            cv2.grabCut(crop[:, :, ::-1].copy(), gc, None, bgd, fgd, 8, cv2.GC_INIT_WITH_MASK)
+            m = (gc == cv2.GC_FGD) | (gc == cv2.GC_PR_FGD)
+            if kind == 'card':
+                m = (m & allow) | solid
+            lab, n = ndimage.label(ndimage.binary_opening(m, iterations=1))
+            if n > 1:
+                sizes = ndimage.sum(np.ones_like(lab), lab, range(1, n + 1))
+                m = lab == int(np.argmax(sizes)) + 1
+            alpha = ndimage.gaussian_filter(ndimage.binary_fill_holes(m).astype(float), .8)
+        mattes[key] = [x, y, w, h, kind, alpha]
+        footprint[y:y + h, x:x + w] |= alpha > .05
+
+    # Cards are cut without their pins (each pin is its own bobbing layer).
+    for key, v in mattes.items():
+        if v[4] != 'card':
+            continue
+        x, y, w, h, _, alpha = v
+        px, py, pw, ph, _, palpha = mattes[key.replace('map-card-', 'map-pin-')]
+        canvas = np.zeros((H, W))
+        canvas[py:py + ph, px:px + pw] = palpha
+        v[5] = np.where(ndimage.binary_dilation(canvas[y:y + h, x:x + w] > .02, iterations=1), 0, alpha)
+
+    for key, (x, y, w, h, kind, alpha) in mattes.items():
+        rgba = np.dstack([full[y:y + h, x:x + w], (alpha * 255).astype(np.uint8)])
+        Image.fromarray(rgba, 'RGBA').save(OUT / f'{key}.webp', 'WEBP', quality=88, method=6)
+
+    # Base board: the reference with the layer footprints inpainted; plus a tiny copy for the blur fill.
+    hole = ndimage.binary_dilation(footprint, iterations=3).astype(np.uint8) * 255
+    base = cv2.inpaint(full[:, :, ::-1].copy(), hole, 9, cv2.INPAINT_TELEA)[:, :, ::-1]
+    Image.fromarray(base).save(OUT / 'ui/map-base.webp', 'WEBP', quality=84, method=6)
+    Image.fromarray(full).resize((W // 4, H // 4), Image.LANCZOS).save(OUT / 'ui/map-blur.webp', 'WEBP', quality=70)
+    for key, (x, y, w, h) in MAP_PLAIN:
+        Image.fromarray(full[y:y + h, x:x + w]).save(OUT / f'{key}.webp', 'WEBP', quality=84, method=6)
+    print(len(mattes) + len(MAP_PLAIN) + 2, 'map assets')
+
+
 if __name__ == '__main__':
-    main()
+    import sys
+    map_assets() if '--map' in sys.argv else main()

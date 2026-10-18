@@ -1,5 +1,7 @@
 export type Quality = 'Rendah' | 'Sedang' | 'Tinggi';
-export interface Settings { music: number; sfx: number; quality: Quality; control: 'Sentuh' | 'Mouse'; language: 'Indonesia'; zoom: number }
+export interface Settings { music: number; sfx: number; quality: Quality; control: 'Sentuh' | 'Mouse'; language: 'Indonesia'; zoom: number;
+  /** True once the player picked a zoom; until then it follows the device (phone 80%, desktop 50%). */
+  zoomSet?: boolean }
 export interface Progress { stars: Record<number, number>; best: Record<number, number>; animals: string[]; tutorialSeen: boolean }
 
 const KEY = 'bararimba.v2';
@@ -19,11 +21,14 @@ class Store {
         this.data = { settings: { ...this.data.settings, ...parsed.settings }, progress: { ...this.data.progress, ...parsed.progress } };
       }
     } catch { /* storage unavailable */ }
+    if (!this.data.settings.zoomSet) this.data.settings.zoom = matchMedia('(pointer: coarse)').matches ? 80 : 50;
   }
   get settings() { return this.data.settings; }
   get progress() { return this.data.progress; }
   save() { try { localStorage.setItem(KEY, JSON.stringify(this.data)); } catch { /* ignore */ } }
-  unlocked(level: number) { return level === 1 || (this.progress.stars[level - 1] ?? 0) > 0; }
+  /** `?unlock=all` in the URL opens every level (testing shortcut; progress itself is untouched). */
+  readonly unlockAll = new URLSearchParams(location.search).get('unlock') === 'all';
+  unlocked(level: number) { return this.unlockAll || level === 1 || (this.progress.stars[level - 1] ?? 0) > 0; }
   record(level: number, stars: number, score: number, animal?: string) {
     const p = this.progress;
     p.stars[level] = Math.max(p.stars[level] ?? 0, stars);
