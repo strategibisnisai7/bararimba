@@ -3,7 +3,7 @@ import type { LevelDef } from '../config/levels';
 import type { Surface } from '../physics/collision';
 import type { World } from './World';
 
-interface Gate { id: string; x: number; y0: number; y1: number; open: boolean; body: MatterJS.BodyType; surface: Surface; sprite: Phaser.GameObjects.TileSprite; beam: Phaser.GameObjects.Image }
+interface Gate { id: string; x: number; y0: number; y1: number; open: boolean; body: MatterJS.BodyType; surface: Surface; sprite: Phaser.GameObjects.TileSprite | Phaser.GameObjects.Image; beam: Phaser.GameObjects.Image }
 interface Switch { kind: 'target' | 'button' | 'wheel'; x: number; y: number; opens: string; need: number; hits: number; done: boolean;
   surface?: Surface; sprite?: Phaser.GameObjects.Image; disc?: Phaser.GameObjects.Graphics }
 interface Tank { x0: number; x1: number; floor: number; depth: number; left: number; released: boolean; drained: number; amount: number;
@@ -26,15 +26,22 @@ export class Puzzles {
 
   constructor(private scene: Phaser.Scene, private world: World, def: LevelDef) {
     this.g = scene.add.graphics().setDepth(13.5);
-    for (const d of def.gates ?? []) this.makeGate(d.id, d.x, d.y0, d.y1);
+    for (const d of def.gates ?? []) this.makeGate(d.id, d.x, d.y0, d.y1, d.style);
     for (const d of def.reservoirs ?? []) this.makeTank(d);
     for (const d of def.switches ?? []) this.makeSwitch(d);
   }
-  private makeGate(id: string, x: number, y0: number, y1: number) {
+  private makeGate(id: string, x: number, y0: number, y1: number, style?: 'stone') {
     const s = this.scene, h = y1 - y0;
     const body = s.matter.add.rectangle(x, y0 + h / 2, GATE_W, h, { isStatic: true, label: 'gate' });
     const surface: Surface = { body, kind: 'terrain', enabled: true };
     this.world.surfaces.push(surface);
+    if (style === 'stone') {
+      // Carved Sumatra cave door (sheet cutout 023), hung from a pulley rope; it slides up into the roof.
+      const sprite = s.add.image(x, y0, 'sm-gate').setOrigin(.5, 0).setDisplaySize(h * .9, h + 6).setDepth(14);
+      const beam = s.add.image(x, y0 - 2, 'sm-beam').setScale(.7, .5).setDepth(14.5).setAlpha(0);
+      this.gates.push({ id, x, y0, y1, open: false, body, surface, sprite, beam });
+      return;
+    }
     // Wooden barricade: stacked crate tiles with an iron-banded beam on top.
     const sprite = s.add.tileSprite(x - GATE_W / 2, y0, GATE_W, h, 'crate').setOrigin(0, 0).setTileScale(.29).setDepth(14);
     const beam = s.add.image(x, y0 + 2, 'plank').setScale(.28, .34).setDepth(14.5);

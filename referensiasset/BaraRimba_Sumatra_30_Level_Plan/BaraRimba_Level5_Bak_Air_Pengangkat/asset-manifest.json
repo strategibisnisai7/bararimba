@@ -1,0 +1,177 @@
+{
+  "project": "BaraRimba",
+  "region": "Sumatra",
+  "level": 5,
+  "mission": "Bak Air Pengangkat",
+  "rescue_target": "Beruang Madu Sumatra",
+  "difficulty": {
+    "relative_to_level_4": "lebih tinggi",
+    "new_complexity": [
+      "pengelolaan volume air",
+      "urutan katup",
+      "dua bak air",
+      "platform pengangkat dengan beban",
+      "risiko meluap dan kehilangan momentum"
+    ],
+    "expected_solution_steps": 6
+  },
+  "objective": "Isi bak air melalui semburan, buka katup untuk mengalirkan air ke bak kedua, isi hingga platform naik, tahan beban batu, padamkan api, lalu bebaskan beruang madu menuju titik aman.",
+  "reference": "reference/level5_full_visual_reference.png",
+  "category_crops": [
+    {
+      "category": "01_terrain_batu",
+      "file": "sprites/01_terrain_batu/terrain_batu_reference.png",
+      "source_bbox_xyxy": [
+        0,
+        450,
+        320,
+        680
+      ],
+      "size_px": [
+        320,
+        230
+      ],
+      "description": "Terrain, batu fisika, tebing dan pijakan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "02_struktur_pipa",
+      "file": "sprites/02_struktur_pipa/struktur_pipa_reference.png",
+      "source_bbox_xyxy": [
+        320,
+        450,
+        630,
+        680
+      ],
+      "size_px": [
+        310,
+        230
+      ],
+      "description": "Struktur kayu, pipa, penyangga dan sambungan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "03_bak_air_valve",
+      "file": "sprites/03_bak_air_valve/bak_air_valve_reference.png",
+      "source_bbox_xyxy": [
+        630,
+        450,
+        930,
+        680
+      ],
+      "size_px": [
+        300,
+        230
+      ],
+      "description": "Bak air, tangki, pipa dan katup",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "04_platform_katrol",
+      "file": "sprites/04_platform_katrol/platform_katrol_reference.png",
+      "source_bbox_xyxy": [
+        930,
+        450,
+        1240,
+        680
+      ],
+      "size_px": [
+        310,
+        230
+      ],
+      "description": "Platform, katrol, tali, pemberat dan kandang",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "05_api_asap",
+      "file": "sprites/05_api_asap/api_asap_reference.png",
+      "source_bbox_xyxy": [
+        1240,
+        450,
+        1535,
+        680
+      ],
+      "size_px": [
+        295,
+        230
+      ],
+      "description": "Api, bara, asap dan kayu terbakar",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "06_air_efek",
+      "file": "sprites/06_air_efek/air_efek_reference.png",
+      "source_bbox_xyxy": [
+        0,
+        680,
+        410,
+        850
+      ],
+      "size_px": [
+        410,
+        170
+      ],
+      "description": "Air terjun, aliran, semburan dan percikan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "07_vegetasi_sumatra",
+      "file": "sprites/07_vegetasi_sumatra/vegetasi_sumatra_reference.png",
+      "source_bbox_xyxy": [
+        410,
+        680,
+        780,
+        850
+      ],
+      "size_px": [
+        370,
+        170
+      ],
+      "description": "Vegetasi tropis Sumatra",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "08_beruang_madu",
+      "file": "sprites/08_beruang_madu/beruang_madu_reference.png",
+      "source_bbox_xyxy": [
+        780,
+        680,
+        1135,
+        850
+      ],
+      "size_px": [
+        355,
+        170
+      ],
+      "description": "Beruang madu dan pose penyelamatan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "09_pintu_jalur",
+      "file": "sprites/09_pintu_jalur/pintu_jalur_reference.png",
+      "source_bbox_xyxy": [
+        1135,
+        680,
+        1535,
+        850
+      ],
+      "size_px": [
+        400,
+        170
+      ],
+      "description": "Pintu, jalur, gerbang dan struktur tambahan",
+      "status": "category_reference_crop_not_individual_sprite"
+    }
+  ],
+  "qa_report": "reports/visual_qa.json",
+  "production_status": "visual reference pack; not final isolated sprites",
+  "implementation_notes": [
+    "Gunakan aset mobil pemadam BaraRimba yang sudah ada.",
+    "Level 5 harus lebih sulit daripada Level 4: pemain perlu mengatur urutan pengisian dan katup, bukan sekadar mengarahkan air.",
+    "Gunakan simulasi volume air diskret/level meter, bukan simulasi fluida penuh.",
+    "Bak air punya state kosong, setengah, penuh, meluap; aliran bergantung pada posisi katup.",
+    "Platform lift bergerak sesuai berat air dan batu penyeimbang, dengan batas atas/bawah.",
+    "Api harus dipadamkan sebelum beruang melewati jalur.",
+    "Jalur evakuasi beruang harus kontinu dan dapat dicapai setelah platform berada pada ketinggian tepat."
+  ]
+}

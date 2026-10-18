@@ -1,0 +1,21 @@
+{
+  "reference_dimensions_px": [
+    1536,
+    1024
+  ],
+  "reference_mode": "RGBA",
+  "alpha_extrema": [
+    255,
+    255
+  ],
+  "fully_transparent_pixels": 0,
+  "semi_transparent_pixels": 0,
+  "fully_opaque_pixels": 1572864,
+  "status": "composite visual reference poster, not an isolated transparent sprite atlas",
+  "limitations": [
+    "Checkerboard pattern inside poster is artwork and does not prove actual sprite transparency.",
+    "Category crops include parts of the poster's labels/panels and are not production-ready individual sprites.",
+    "Water volume states, pipe connectivity, valves, pivots, collisions and lift constraints need implementation and in-engine QA.",
+    "Reuse existing BaraRimba fire truck; do not recreate it."
+  ]
+}

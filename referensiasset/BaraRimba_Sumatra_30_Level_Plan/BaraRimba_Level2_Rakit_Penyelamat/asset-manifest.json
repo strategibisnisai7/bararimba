@@ -1,0 +1,126 @@
+{
+  "project": "BaraRimba",
+  "region": "Sumatra",
+  "mission_number": 2,
+  "mission_name": "Rakit Penyelamat",
+  "objective": "Dorong rakit dengan semburan air, kendalikan momentum di sungai bawah tanah, padamkan api penghalang, lalu selamatkan tapir ke titik aman.",
+  "reference": "reference/level2_full_gameplay_reference.png",
+  "source_sprite_sheet": "sprites/sprite_sheet_source_rgba.png",
+  "category_sheets": [
+    {
+      "category": "rafts_logs",
+      "file": "sprites/rafts_logs/rafts_logs_category_sheet.png",
+      "source_crop_xyxy": [
+        0,
+        0,
+        900,
+        190
+      ],
+      "description": "Rakit, kayu, batang dan variasi rakit",
+      "status": "category_crop_not_individual_sprite"
+    },
+    {
+      "category": "rocks_terrain",
+      "file": "sprites/rocks_terrain/rocks_terrain_category_sheet.png",
+      "source_crop_xyxy": [
+        0,
+        175,
+        650,
+        350
+      ],
+      "description": "Batu fisika berbagai ukuran dan batang tumbang",
+      "status": "category_crop_not_individual_sprite"
+    },
+    {
+      "category": "ropes_mechanisms",
+      "file": "sprites/ropes_mechanisms/ropes_mechanisms_category_sheet.png",
+      "source_crop_xyxy": [
+        650,
+        170,
+        1536,
+        350
+      ],
+      "description": "Tali, katrol, winch, kait dan komponen mekanisme",
+      "status": "category_crop_not_individual_sprite"
+    },
+    {
+      "category": "bridges_platforms",
+      "file": "sprites/bridges_platforms/bridges_platforms_category_sheet.png",
+      "source_crop_xyxy": [
+        0,
+        330,
+        800,
+        490
+      ],
+      "description": "Jembatan tali, papan, platform dan penyangga",
+      "status": "category_crop_not_individual_sprite"
+    },
+    {
+      "category": "fire_smoke",
+      "file": "sprites/fire_smoke/fire_smoke_category_sheet.png",
+      "source_crop_xyxy": [
+        0,
+        470,
+        700,
+        650
+      ],
+      "description": "Api, bara dan asap",
+      "status": "category_crop_not_individual_sprite"
+    },
+    {
+      "category": "water_effects",
+      "file": "sprites/water_effects/water_effects_category_sheet.png",
+      "source_crop_xyxy": [
+        680,
+        450,
+        1536,
+        650
+      ],
+      "description": "Semburan air, percikan dan riak",
+      "status": "category_crop_not_individual_sprite"
+    },
+    {
+      "category": "waterfalls_river",
+      "file": "sprites/waterfalls_river/waterfalls_river_category_sheet.png",
+      "source_crop_xyxy": [
+        0,
+        620,
+        720,
+        810
+      ],
+      "description": "Air terjun, genangan, sungai dan tepian berbatu",
+      "status": "category_crop_not_individual_sprite"
+    },
+    {
+      "category": "tapir_rescue",
+      "file": "sprites/tapir_rescue/tapir_rescue_category_sheet.png",
+      "source_crop_xyxy": [
+        700,
+        620,
+        1536,
+        810
+      ],
+      "description": "Pose tapir dan bendera penyelamatan",
+      "status": "category_crop_not_individual_sprite"
+    },
+    {
+      "category": "sumatra_vegetation",
+      "file": "sprites/sumatra_vegetation/sumatra_vegetation_category_sheet.png",
+      "source_crop_xyxy": [
+        0,
+        800,
+        1536,
+        1024
+      ],
+      "description": "Tanaman tropis, akar, pakis, liana dan pohon",
+      "status": "category_crop_not_individual_sprite"
+    }
+  ],
+  "qa_report": "reports/alpha_qa.json",
+  "implementation_notes": [
+    "Rakit harus menjadi body dinamis dengan buoyancy sederhana atau batas ketinggian air.",
+    "Water jet memberi impuls pada rakit sesuai titik kontak dan arah semburan.",
+    "Gunakan tali/katrol sebagai constraint atau mekanisme terprogram; jangan mengandalkan ilustrasi sebagai logika.",
+    "Jalur tapir ke titik aman harus kontinu dan tidak tertutup api setelah api dipadamkan."
+  ]
+}

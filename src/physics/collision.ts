@@ -2,8 +2,9 @@ import type { Point } from '../config/level';
 
 export interface Surface {
   body: MatterJS.BodyType;
-  /** ramp: water skims along it and flies off its end instead of landing. */
-  kind: 'terrain' | 'bridge' | 'river' | 'prop' | 'barrel' | 'wheel' | 'switch' | 'ramp';
+  /** ramp: water skims along it and flies off its end instead of landing. mirror: water bounces off it (Sumatra
+   * reflector panel). raft / handle: Sumatra mechanisms that take the push and swallow the drop. */
+  kind: 'terrain' | 'bridge' | 'river' | 'prop' | 'barrel' | 'wheel' | 'switch' | 'ramp' | 'raft' | 'mirror' | 'handle';
   enabled: boolean;
 }
 /** `normal` is the unit normal of the struck edge, facing back toward the segment start. */

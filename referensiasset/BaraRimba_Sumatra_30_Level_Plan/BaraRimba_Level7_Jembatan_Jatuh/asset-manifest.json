@@ -1,0 +1,177 @@
+{
+  "project": "BaraRimba",
+  "region": "Sumatra",
+  "level": 7,
+  "mission": "Jembatan yang Harus Dijatuhkan",
+  "rescue_target": "Harimau Sumatra",
+  "difficulty": {
+    "relative_to_level_6": "lebih tinggi",
+    "new_complexity": [
+      "memadamkan api sebelum melepas pengunci",
+      "mengatur urutan pelepasan dua pengunci",
+      "jembatan bergerak dengan gravitasi dan momentum",
+      "batu menjadi pemicu mekanisme tambahan",
+      "timing untuk membuat jembatan berhenti di posisi yang dapat dilalui"
+    ],
+    "expected_solution_steps": 6
+  },
+  "objective": "Padamkan api di sekitar pengunci, lepaskan pengunci jembatan dalam urutan tepat, gunakan semburan untuk menggeser batu pemicu, turunkan jembatan secara terkendali dan selamatkan harimau ke titik aman.",
+  "reference": "reference/level7_full_visual_reference.png",
+  "category_crops": [
+    {
+      "category": "01_terrain_batu",
+      "file": "sprites/01_terrain_batu/terrain_batu_reference.png",
+      "source_crop_xyxy": [
+        0,
+        450,
+        320,
+        680
+      ],
+      "size_px": [
+        320,
+        230
+      ],
+      "description": "Terrain, batu fisika, tebing dan pijakan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "02_struktur_jembatan",
+      "file": "sprites/02_struktur_jembatan/struktur_jembatan_reference.png",
+      "source_crop_xyxy": [
+        320,
+        450,
+        630,
+        680
+      ],
+      "size_px": [
+        310,
+        230
+      ],
+      "description": "Struktur kayu, segmen jembatan, penyangga",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "03_rantai_katrol",
+      "file": "sprites/03_rantai_katrol/rantai_katrol_reference.png",
+      "source_crop_xyxy": [
+        630,
+        450,
+        930,
+        680
+      ],
+      "size_px": [
+        300,
+        230
+      ],
+      "description": "Rantai, katrol, pengunci, roda mekanisme",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "04_api_asap",
+      "file": "sprites/04_api_asap/api_asap_reference.png",
+      "source_crop_xyxy": [
+        930,
+        450,
+        1240,
+        680
+      ],
+      "size_px": [
+        310,
+        230
+      ],
+      "description": "Api, asap dan kayu terbakar",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "05_air_efek",
+      "file": "sprites/05_air_efek/air_efek_reference.png",
+      "source_crop_xyxy": [
+        1240,
+        450,
+        1535,
+        680
+      ],
+      "size_px": [
+        295,
+        230
+      ],
+      "description": "Air terjun, aliran dan percikan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "06_vegetasi_sumatra",
+      "file": "sprites/06_vegetasi_sumatra/vegetasi_sumatra_reference.png",
+      "source_crop_xyxy": [
+        0,
+        680,
+        410,
+        850
+      ],
+      "size_px": [
+        410,
+        170
+      ],
+      "description": "Vegetasi tropis Sumatra",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "07_harimau_sumatra",
+      "file": "sprites/07_harimau_sumatra/harimau_sumatra_reference.png",
+      "source_crop_xyxy": [
+        410,
+        680,
+        780,
+        850
+      ],
+      "size_px": [
+        370,
+        170
+      ],
+      "description": "Harimau Sumatra dan pose penyelamatan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "08_properti",
+      "file": "sprites/08_properti/properti_reference.png",
+      "source_crop_xyxy": [
+        780,
+        680,
+        1135,
+        850
+      ],
+      "size_px": [
+        355,
+        170
+      ],
+      "description": "Peti, drum, batu bata dan penanda aman",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "09_pintu_jalur",
+      "file": "sprites/09_pintu_jalur/pintu_jalur_reference.png",
+      "source_crop_xyxy": [
+        1135,
+        680,
+        1535,
+        850
+      ],
+      "size_px": [
+        400,
+        170
+      ],
+      "description": "Pintu batu, jalur dan struktur tambahan",
+      "status": "category_reference_crop_not_individual_sprite"
+    }
+  ],
+  "qa_report": "reports/visual_qa.json",
+  "production_status": "visual reference pack; not final isolated sprites",
+  "implementation_notes": [
+    "Gunakan aset mobil pemadam BaraRimba yang sudah ada.",
+    "Level 7 lebih sulit daripada Level 6 karena menggabungkan urutan aksi dan momentum jembatan.",
+    "Jembatan dibagi menjadi beberapa segmen dengan hinge/constraint, bukan satu sprite datar.",
+    "Pengunci tidak boleh dilepas sebelum api di sekitarnya padam, agar urutan puzzle konsisten.",
+    "Batu yang didorong air menjadi pemicu sekunder untuk mengendalikan penurunan atau stopper.",
+    "Jembatan harus berhenti pada posisi akhir yang dapat dilalui; jangan membuat lintasan mustahil.",
+    "Harimau hanya bergerak setelah jembatan stabil dan api di jalur padam."
+  ]
+}

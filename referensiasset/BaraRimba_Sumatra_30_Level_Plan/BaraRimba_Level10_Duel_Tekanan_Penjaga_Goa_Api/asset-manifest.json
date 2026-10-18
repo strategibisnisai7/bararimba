@@ -1,0 +1,179 @@
+{
+  "project": "BaraRimba",
+  "region": "Sumatra",
+  "level": 10,
+  "mission": "Duel Tekanan: Penjaga Goa Api",
+  "rescue_target": "Orangutan Sumatra",
+  "difficulty": {
+    "relative_to_level_9": "boss finale; highest difficulty in Sumatra arc",
+    "new_complexity": [
+      "boss fireball attack patterns",
+      "water pressure and limited recovery windows",
+      "projectile momentum/deflection",
+      "two arena mechanisms",
+      "multi-phase boss state",
+      "rescue objective remains active during combat"
+    ],
+    "expected_solution_steps": 9
+  },
+  "objective": "Bertahan dari bola api Penjaga Goa, gunakan semburan air bertekanan untuk menahan atau membelokkan proyektil, aktifkan mekanisme gear untuk membuka jendela serangan, padamkan inti api bos, lalu evakuasi orangutan.",
+  "reference": "reference/level10_full_visual_reference.png",
+  "category_crops": [
+    {
+      "category": "01_terrain_batu_lava",
+      "file": "sprites/01_terrain_batu_lava/terrain_batu_lava_reference.png",
+      "source_crop_xyxy": [
+        0,
+        450,
+        320,
+        680
+      ],
+      "size_px": [
+        320,
+        230
+      ],
+      "description": "Terrain goa, batu fisika, tebing dan pijakan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "02_struktur_kayu_baja",
+      "file": "sprites/02_struktur_kayu_baja/struktur_kayu_baja_reference.png",
+      "source_crop_xyxy": [
+        320,
+        450,
+        630,
+        680
+      ],
+      "size_px": [
+        310,
+        230
+      ],
+      "description": "Struktur kayu, balok, rantai dan penyangga",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "03_mekanisme_gear",
+      "file": "sprites/03_mekanisme_gear/mekanisme_gear_reference.png",
+      "source_crop_xyxy": [
+        630,
+        450,
+        930,
+        680
+      ],
+      "size_px": [
+        300,
+        230
+      ],
+      "description": "Gear, poros, katrol dan mekanisme",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "04_saluran_air_katup",
+      "file": "sprites/04_saluran_air_katup/saluran_air_katup_reference.png",
+      "source_crop_xyxy": [
+        930,
+        450,
+        1240,
+        680
+      ],
+      "size_px": [
+        310,
+        230
+      ],
+      "description": "Saluran air, pipa, katup dan air terjun",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "05_api_lava_efek",
+      "file": "sprites/05_api_lava_efek/api_lava_efek_reference.png",
+      "source_crop_xyxy": [
+        1240,
+        450,
+        1535,
+        680
+      ],
+      "size_px": [
+        295,
+        230
+      ],
+      "description": "Api, lava, asap dan efek",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "06_vegetasi_goa",
+      "file": "sprites/06_vegetasi_goa/vegetasi_goa_reference.png",
+      "source_crop_xyxy": [
+        0,
+        680,
+        410,
+        850
+      ],
+      "size_px": [
+        410,
+        170
+      ],
+      "description": "Formasi goa, kristal dan vegetasi",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "07_penjaga_goa",
+      "file": "sprites/07_penjaga_goa/penjaga_goa_reference.png",
+      "source_crop_xyxy": [
+        410,
+        680,
+        780,
+        850
+      ],
+      "size_px": [
+        370,
+        170
+      ],
+      "description": "Penjaga goa api dan pose",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "08_properti_fisika",
+      "file": "sprites/08_properti_fisika/properti_fisika_reference.png",
+      "source_crop_xyxy": [
+        780,
+        680,
+        1135,
+        850
+      ],
+      "size_px": [
+        355,
+        170
+      ],
+      "description": "Peti, drum, batu dan properti fisika",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "09_pintu_jalur",
+      "file": "sprites/09_pintu_jalur/pintu_jalur_reference.png",
+      "source_crop_xyxy": [
+        1135,
+        680,
+        1535,
+        850
+      ],
+      "size_px": [
+        400,
+        170
+      ],
+      "description": "Pintu, penghalang dan jalur akhir",
+      "status": "category_reference_crop_not_individual_sprite"
+    }
+  ],
+  "qa_report": "reports/visual_qa.json",
+  "production_status": "visual reference pack; not final isolated sprites",
+  "implementation_notes": [
+    "Gunakan aset mobil pemadam BaraRimba yang sudah ada.",
+    "Level 10 harus menjadi puncak kesulitan, tetapi pola serangan harus terbaca dan adil.",
+    "Boss phase 1: lempar bola api satu per satu; pemain menahan/membelokkan dengan semburan air.",
+    "Boss phase 2: dua bola api dengan jeda; gunakan batu pelindung untuk memblokir satu dan air untuk membelokkan yang lain.",
+    "Boss phase 3: buka dua katup/gear untuk menurunkan pelindung inti api; gunakan semburan kontinu untuk memadamkan inti.",
+    "Gunakan pressure meter yang pulih saat pemain tidak menyemprot; jangan membuat serangan mustahil ditahan.",
+    "Setelah bos kalah, api jalur padam dan orangutan bergerak ke titik aman.",
+    "Boss memiliki telegraph animasi sebelum melempar bola api, cooldown, dan hitbox jelas."
+  ]
+}

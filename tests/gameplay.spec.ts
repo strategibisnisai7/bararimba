@@ -24,7 +24,7 @@ test('menu shows all Game Board entries and every screen opens', async ({ page }
   await expect(page.locator('.tile.boss')).toContainText('BOSS');
   await page.locator('[data-a=menu]').click();
   await page.locator('[data-a=collection]').click();
-  await expect(page.locator('.animal-card')).toHaveCount(14);
+  await expect(page.locator('.animal-card')).toHaveCount(18);
   await page.locator('[data-a=menu]').click();
   await page.locator('[data-a=settings]').click();
   await expect(page.getByRole('dialog', { name: 'Pengaturan' })).toBeVisible();

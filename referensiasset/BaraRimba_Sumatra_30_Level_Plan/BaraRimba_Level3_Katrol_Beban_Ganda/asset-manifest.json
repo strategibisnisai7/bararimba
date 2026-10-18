@@ -1,0 +1,135 @@
+{
+  "project": "BaraRimba",
+  "region": "Sumatra",
+  "level": 3,
+  "mission": "Katrol dan Beban Ganda",
+  "rescue_target": "Orangutan",
+  "objective": "Dorong batu ke platform pemberat menggunakan semburan air; atur keseimbangan dua beban agar platform penyelamatan terangkat; padamkan api dan arahkan orangutan ke titik aman.",
+  "visual_references": [
+    "reference/level3_visual_reference_poster.png",
+    "reference/level3_alternate_visual_reference.png"
+  ],
+  "category_reference_crops": [
+    {
+      "category": "01_terrain_vegetation",
+      "file": "sprites/01_terrain_vegetation/terrain_vegetation_reference.png",
+      "source_bbox_xyxy": [
+        0,
+        450,
+        405,
+        680
+      ],
+      "size_px": [
+        405,
+        230
+      ],
+      "description": "Terrain, tebing dan vegetasi",
+      "status": "visual_reference_crop_not_individual_production_sprite"
+    },
+    {
+      "category": "02_pulleys_rope",
+      "file": "sprites/02_pulleys_rope/pulleys_rope_reference.png",
+      "source_bbox_xyxy": [
+        400,
+        450,
+        1160,
+        680
+      ],
+      "size_px": [
+        760,
+        230
+      ],
+      "description": "Katrol, tali, struktur kayu dan winch",
+      "status": "visual_reference_crop_not_individual_production_sprite"
+    },
+    {
+      "category": "03_rocks_physics",
+      "file": "sprites/03_rocks_physics/rocks_physics_reference.png",
+      "source_bbox_xyxy": [
+        1150,
+        450,
+        1535,
+        680
+      ],
+      "size_px": [
+        385,
+        230
+      ],
+      "description": "Batu dan objek fisika",
+      "status": "visual_reference_crop_not_individual_production_sprite"
+    },
+    {
+      "category": "04_platforms_cages",
+      "file": "sprites/04_platforms_cages/platforms_cages_reference.png",
+      "source_bbox_xyxy": [
+        0,
+        680,
+        440,
+        900
+      ],
+      "size_px": [
+        440,
+        220
+      ],
+      "description": "Platform, kandang dan mekanisme gantung",
+      "status": "visual_reference_crop_not_individual_production_sprite"
+    },
+    {
+      "category": "05_fire_water_effects",
+      "file": "sprites/05_fire_water_effects/fire_water_effects_reference.png",
+      "source_bbox_xyxy": [
+        440,
+        680,
+        790,
+        900
+      ],
+      "size_px": [
+        350,
+        220
+      ],
+      "description": "Api, asap, air dan efek",
+      "status": "visual_reference_crop_not_individual_production_sprite"
+    },
+    {
+      "category": "06_orangutan_rescue",
+      "file": "sprites/06_orangutan_rescue/orangutan_rescue_reference.png",
+      "source_bbox_xyxy": [
+        790,
+        680,
+        1150,
+        900
+      ],
+      "size_px": [
+        360,
+        220
+      ],
+      "description": "Karakter orangutan dan penanda aman",
+      "status": "visual_reference_crop_not_individual_production_sprite"
+    },
+    {
+      "category": "07_full_scene_components",
+      "file": "sprites/07_full_scene_components/full_scene_mechanism_reference.png",
+      "source_bbox_xyxy": [
+        1150,
+        680,
+        1535,
+        900
+      ],
+      "size_px": [
+        385,
+        220
+      ],
+      "description": "Contoh komposisi mekanisme di dalam level",
+      "status": "visual_reference_crop_not_individual_production_sprite"
+    }
+  ],
+  "qa_report": "reports/visual_asset_qa.json",
+  "production_status": "visual planning pack; not final production-ready sprites",
+  "implementation_notes": [
+    "Gunakan aset mobil pemadam BaraRimba yang sudah tersedia; jangan dibuat ulang.",
+    "Batu harus menjadi dynamic body dengan gaya dari water jet.",
+    "Dua beban dan platform harus dihubungkan dengan constraint atau mekanisme deterministik.",
+    "Platform harus memiliki state turun/naik dan dapat berhenti di posisi aman.",
+    "Jalur orangutan ke titik aman harus kontinu dan bebas api setelah dipadamkan."
+  ]
+}

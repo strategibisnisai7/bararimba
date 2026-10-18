@@ -4,13 +4,16 @@ import type { Surface } from '../physics/collision';
 import type { Fuel } from '../systems/FireSystem';
 import { Puzzles } from './Puzzles';
 import { Terrain } from './Terrain';
+import { SumatraWorld } from './Sumatra';
 
 interface ThemeStyle {
   sky: [number, number]; bed: [number, number]; far: number; mid: number; haze: number;
   top: string[]; fill: string; fillTint?: number; topScale: number; topLift: number;
   props: { key: string; scale: number; lift?: number }[]; particles?: 'embers' | 'snow';
   /** Replace the jungle backdrop with the volcanic parallax sheet layers. */
-  parallax?: 'volcano' | 'temple';
+  parallax?: 'volcano' | 'temple' | 'cave';
+  /** Texture for pushable boulders. */
+  boulder?: { key: string; scale: number };
 }
 const THEMES: Record<string, ThemeStyle> = {
   forest: { sky: [0x5fb8e6, 0xcdeee6], bed: [0x5cc8d6, 0x1a7fa0], far: 0x86bfa8, mid: 0xbfe0bc, haze: 0xd6efe0, top: ['top-a', 'top-b'], fill: 'dirt', topScale: .86, topLift: 16, props: [] },
@@ -19,6 +22,9 @@ const THEMES: Record<string, ThemeStyle> = {
     props: [{ key: 'p-pillar', scale: .55 }, { key: 'p-stupa', scale: .6 }, { key: 'p-gate', scale: .6 }, { key: 'p-guardian', scale: .6 }], parallax: 'temple' },
   volcanic: { sky: [0x6a5a6e, 0xf0a070], bed: [0xff8a2a, 0x9a2a0a], far: 0x8a6a5a, mid: 0xb08a70, haze: 0xd89070, top: ['v-top'], fill: 'v-fill', topScale: .9, topLift: 12, parallax: 'volcano',
     props: [{ key: 'v-rock', scale: .8 }, { key: 'v-spire', scale: .8 }, { key: 'v-tree', scale: .8 }], particles: 'embers' },
+  // Sumatra karst cave: mossy ledge stone, stalactite ceiling, waterfalls and rainforest beyond the cave mouth.
+  cave: { sky: [0x1f3b36, 0x7fb3a0], bed: [0x46c2cf, 0x125468], far: 0x41675d, mid: 0x6d9a7c, haze: 0xa8d6c4, top: ['sm-top'], fill: 'sm-fill',
+    topScale: .78, topLift: 22, props: [], parallax: 'cave', boulder: { key: 'sm-boulder', scale: .54 } },
 };
 
 export interface Prop { kind: string; body: MatterJS.BodyType; sprite: Phaser.GameObjects.Image; surface: Surface; gone: boolean; floating?: { x: number; y: number; t: number }; plug?: boolean }
@@ -53,6 +59,8 @@ export class World {
   wheel?: { cx: number; cy: number; r: number; w: number; spun: number; sprite: Phaser.GameObjects.Image; out?: { x: number; y: number; vx: number }; surface: Surface };
   puzzles!: Puzzles;
   terrain?: Terrain;
+  /** Sumatra mechanisms and rescue flag. */
+  sm?: SumatraWorld;
   /** Emits free water (reservoirs, basin overflow); wired to the water system by the scene. */
   onPour?: (x: number, y: number, vx: number, vy: number) => void;
 
@@ -63,10 +71,11 @@ export class World {
     this.theme = THEMES[def.theme ?? 'forest'];
     const T = this.theme;
     this.ensureDirt();
+    if (T.parallax === 'cave') this.ensureCaveStone();
     const sky = scene.add.graphics().setDepth(0);
     sky.fillGradientStyle(T.sky[0], T.sky[0], T.sky[1], T.sky[1], 1).fillRect(-2400, -1200, W + 4800, 2400);
-    sky.fillStyle(0xfff7d6, .25).fillCircle(980, 150, 80);
-    for (let i = 0; i * 520 < W + 600; i++) {
+    if (T.parallax !== 'cave') sky.fillStyle(0xfff7d6, .25).fillCircle(980, 150, 80);
+    for (let i = 0; T.parallax !== 'cave' && i * 520 < W + 600; i++) {
       const c = scene.add.image(200 + i * 520, 110 + (i % 3) * 38, 'cloud').setScale(.45 + (i % 2) * .3).setAlpha(.85).setDepth(1);
       this.clouds.push(c); this.layers.push({ image: c, x: c.x, factor: .1 });
     }
@@ -76,6 +85,8 @@ export class World {
       for (let x = -700; x < span(.12); x += 1660) this.layer('vp-sky', x + 830, 470, 1, 2, .12);
       for (let x = -700; x < span(.35); x += 1500) this.layer('vp-plain', x + 750, 596, .9, 3, .35);
       for (let x = -700; x < span(.6); x += 1330) this.layer('vp-rocks', x + 665, 616, .8, 5, .6);
+    } else if (T.parallax === 'cave') {
+      this.caveBackdrop(span);
     } else {
       if (T.parallax === 'temple') {
         // Distant Prambanan temple complex silhouetted behind the jungle.
@@ -130,6 +141,7 @@ export class World {
     }
     this.puzzles = new Puzzles(scene, this, def);
     this.puzzles.onPour = (x, y, vx, vy) => this.onPour?.(x, y, vx, vy);
+    if (def.sm) { this.sm = new SumatraWorld(scene, this, def); this.sm.onPour = (x, y, vx, vy) => this.onPour?.(x, y, vx, vy); }
     if (T.props.length) {
       // Scatter themed props along walkable ground, away from fires and mechanisms.
       const busy = [...def.fires.map(f => f.x), ...(def.gates ?? []).map(g => g.x), ...(def.switches ?? []).map(w => w.x), ...(def.reservoirs ?? []).map(r => r.x1), def.animal.x, def.refill?.x ?? -999, def.seesaw?.x ?? -999, def.hang?.anchorX ?? -999, def.wheel?.x ?? -999];
@@ -150,7 +162,10 @@ export class World {
     }).setDepth(47);
     const fgSpan = W + 400;
     if (T.parallax === 'volcano') for (let x = -1400; x < fgSpan + 1000; x += 1400) scene.add.image(x + 700, 800, 'vp-front').setOrigin(.5, 1).setScale(.84).setDepth(49);
-    else for (let x = -1400; x < fgSpan + 1000; x += 1380) scene.add.image(x + 690, 760, 'foreground').setOrigin(.5, 1).setScale(.83).setDepth(49);
+    else if (T.parallax === 'cave') {
+      const fg = ['sm-jungle-bush', 'sm-fern-root', 'sm-fern-a', 'sm-palm-b', 'sm-bush-red'];
+      for (let i = 0, x = -900; x < fgSpan + 900; i++, x += 300 + (i * 61) % 140) scene.add.image(x, 800, fg[i % fg.length]).setOrigin(.5, 1).setScale(.95 + (i % 3) * .12).setDepth(49);
+    } else for (let x = -1400; x < fgSpan + 1000; x += 1380) scene.add.image(x + 690, 760, 'foreground').setOrigin(.5, 1).setScale(.83).setDepth(49);
 
   }
 
@@ -176,6 +191,41 @@ export class World {
     const tex = this.scene.textures.createCanvas('dirt', 240, 58)!;
     tex.getContext().drawImage(src, 22, 52, 240, 58, 0, 0, 240, 58);
     tex.refresh();
+  }
+  /** Ground skin for the cave theme, cut from the Sumatra mossy ledge (sheet cutout 001): its grassy crown as
+   * the top strip and its boulder wall as the fill below. */
+  private ensureCaveStone() {
+    const tex = this.scene.textures;
+    if (tex.exists('sm-top')) return;
+    const src = tex.get('sm-ledge').getSourceImage() as HTMLImageElement;
+    const top = tex.createCanvas('sm-top', 380, 112)!;
+    top.getContext().drawImage(src, 58, 0, 380, 112, 0, 0, 380, 112);
+    top.refresh();
+    const fill = tex.createCanvas('sm-fill', 300, 84)!, ctx = fill.getContext();
+    ctx.drawImage(src, 96, 96, 300, 84, 0, 0, 300, 84);
+    ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = '#8f9a8c'; ctx.fillRect(0, 0, 300, 84);
+    fill.refresh();
+  }
+  /** Karst cave: waterfalls and rainforest glimpsed past stalagmites, a stalactite ceiling hanging overhead. */
+  private caveBackdrop(span: (f: number) => number) {
+    const s = this.scene, T = this.theme;
+    const glow = s.add.graphics().setDepth(1);
+    for (let x = 300; x < span(.15); x += 1500) glow.fillStyle(0xd8f4dc, .14).fillEllipse(x, 470, 1100, 520).fillStyle(0xf4ffe8, .12).fillEllipse(x, 500, 600, 300);
+    const falls = ['sm-falls-tall', 'sm-falls', 'sm-falls-small'];
+    for (let i = 0, x = -600; x < span(.25); i++, x += 520 + (i * 97) % 260) this.layer(falls[i % 3], x, 640, 1.5 + (i % 2) * .4, 2, .25, .55, 0x9cc8c0);
+    const spires = ['sm-spire-a', 'sm-spire-d', 'sm-spire-b', 'sm-spire-e', 'sm-spire-c'];
+    for (let i = 0, x = -800; x < span(.4); i++, x += 210 + (i * 53) % 120) this.layer(spires[i % 5], x, 640, 1.6 + (i % 3) * .5, 3, .4, 1, T.far);
+    const jungle = ['sm-palm-a', 'sm-fern-root', 'sm-palm-b', 'sm-jungle-bush'];
+    for (let i = 0, x = -900; x < span(.6); i++, x += 240 + (i * 71) % 110) this.layer(jungle[i % 4], x, 640, 1 + (i % 2) * .25, 4, .6, 1, T.mid);
+    // Rock ceiling: a dark mass above the view with stalactites and vines hanging from its edge.
+    s.add.tileSprite(-2400, -1600, this.def.width + 4800, 1570, 'sm-fill').setOrigin(0, 0).setTileScale(1.2).setTint(0x55665a).setDepth(4.5);
+    s.add.graphics().setDepth(4.55).fillGradientStyle(0x0e1a15, 0x0e1a15, 0x0e1a15, 0x0e1a15, 0, 0, .6, .6).fillRect(-2400, -160, this.def.width + 4800, 130);
+    const drips = ['sm-cave-ceiling', 'sm-stalactite-c', 'sm-stalactite-b', 'sm-stalactite-a'];
+    for (let i = 0, x = -900; x < span(.9); i++, x += 190 + (i * 43) % 90) {
+      const img = s.add.image(x, -60, drips[i % 4]).setOrigin(.5, 0).setScale(1.3 + (i % 3) * .3).setDepth(4.6).setTint(0x8a9a8c);
+      this.layers.push({ image: img, x, factor: .9 });
+      if (i % 3 === 0) this.layers.push({ image: s.add.image(x + 60, -40, 'sm-vines').setOrigin(.5, 0).setScale(.8).setDepth(4.7).setTint(0xa8c8a0), x: x + 60, factor: .9 });
+    }
   }
   private layer(key: string, x: number, y: number, scale: number, depth: number, factor: number, alpha = 1, tint?: number) {
     const image = this.scene.add.image(x, y, key).setOrigin(.5, 1).setScale(scale).setDepth(depth).setAlpha(alpha);
@@ -223,12 +273,13 @@ export class World {
     this.scene.tweens.add({ targets: p.sprite, alpha: 1, duration: 500 });
     return true;
   }
-  private prop(kind: string, x: number, y: number) {
+  prop(kind: string, x: number, y: number) {
     const s = this.scene;
     let body: MatterJS.BodyType, sprite: Phaser.GameObjects.Image;
     if (kind === 'boulder') {
       body = s.matter.add.circle(x, y, 40, { friction: .04, frictionAir: .01, restitution: .15, density: .0009, label: 'prop' });
-      sprite = s.add.image(x, y, 'boulder').setScale(.37);
+      const skin = this.theme.boulder ?? { key: 'boulder', scale: .37 };
+      sprite = s.add.image(x, y, skin.key).setScale(skin.scale);
     } else if (kind === 'log') {
       body = s.matter.add.rectangle(x, y, 124, 64, { friction: .08, frictionAir: .06, density: .0009, chamfer: { radius: 20 }, label: 'prop' });
       sprite = s.add.image(x, y, 'log').setScale(.62);
@@ -492,6 +543,8 @@ export class World {
     for (const br of this.def.bridges) if (x >= br.x0 && x <= br.x1) top = top === null ? br.y : Math.min(top, br.y);
     const t = this.terrain?.topAt(x) ?? null;
     if (t !== null) top = top === null ? t : Math.min(top, t);
+    const m = this.sm?.surfaceAt(x) ?? null;
+    if (m !== null) top = top === null ? m : Math.min(top, m);
     const fg = this.def.floatGap;
     if (top === null && fg && this.bridged && x > fg.x0 - 2 && x < fg.x1 + 2) top = this.surfaceAt(fg.x0 - 4) ?? 548;
     return top;
@@ -560,6 +613,7 @@ export class World {
     }
     if (this.basin) this.updateBasin(dt);
     this.puzzles.update(dt, this.wheel?.spun ?? 0);
+    this.sm?.update(dt);
     const wf = this.def.boss?.waterfall;
     if (this.fall && wf) {
       // Animated waterfall under the bridge: falling streaks and foam.

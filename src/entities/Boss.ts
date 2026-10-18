@@ -5,7 +5,8 @@ import { firstHit } from '../physics/collision';
 import type { Effects } from '../systems/Effects';
 
 /** `perches` are ledges the boss leaps between; `arena` is the river bank x — fires only start on the truck's side. */
-export interface BossDef { x: number; y: number; hp: number; perches: Point[]; arena: number }
+/** `name`: shown in the level board and results (default "Pembakar Hutan"). */
+export interface BossDef { x: number; y: number; hp: number; perches: Point[]; arena: number; name?: string }
 interface Shot { kind: 'ball' | 'jet'; x: number; y: number; vx: number; vy: number; life: number; hp: number; img: Phaser.GameObjects.Image }
 
 const G = 500;            // projectile gravity, px/s^2
@@ -30,6 +31,9 @@ export class Boss {
   hp: number;
   readonly max: number;
   defeated = false;
+  /** Shielded: water bounces off as steam and does no damage (Sumatra arena mechanisms lower it). */
+  shielded = false;
+  private shieldG?: Phaser.GameObjects.Graphics;
   x: number;
   y: number;
   private perch: number;
@@ -128,7 +132,16 @@ export class Boss {
     }
     // Water striking the body (a moving target is harder to hit).
     const hits = ctx.hitWater(this.core.x, this.core.y, 66);
-    if (hits) { this.damage(hits * .045); if (Math.random() < .5) this.effects.steam(this.core.x - 30, this.core.y, 1); }
+    if (hits && this.shielded) { if (Math.random() < .5) this.effects.steam(this.core.x - 60, this.core.y, 1); }
+    else if (hits) { this.damage(hits * .045); if (Math.random() < .5) this.effects.steam(this.core.x - 30, this.core.y, 1); }
+    if (this.shielded || this.shieldG) {
+      this.shieldG ??= this.scene.add.graphics().setDepth(34).setBlendMode(Phaser.BlendModes.ADD);
+      const g = this.shieldG.clear();
+      if (this.shielded) {
+        const r = 92 + Math.sin(this.t * 4) * 4, c = this.core;
+        g.fillStyle(0x3fb7ff, .12).fillCircle(c.x, c.y, r).lineStyle(4, 0x8fe0ff, .55 + Math.sin(this.t * 6) * .2).strokeCircle(c.x, c.y, r);
+      }
+    }
     const recoil = this.jetT > 0 ? Math.sin(this.t * 40) * 1.5 : 0;
     this.sprite.setPosition(this.x + recoil, this.y + 4 + (this.jump ? 0 : Math.sin(this.t * 2.2) * 1.5))
       .setRotation(this.jump ? -.15 : Math.sin(this.t * 1.3) * .015);

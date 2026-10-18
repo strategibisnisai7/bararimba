@@ -1,0 +1,22 @@
+{
+  "reference_file": "reference/level3_visual_reference_poster.png",
+  "reference_dimensions_px": [
+    1536,
+    1024
+  ],
+  "reference_alpha_extrema": [
+    164,
+    251
+  ],
+  "reference_transparent_pixels": 0,
+  "reference_semi_transparent_pixels": 1572864,
+  "reference_opaque_pixels": 0,
+  "status": "poster is a composite reference image, not a transparent sprite atlas",
+  "limitations": [
+    "Cropped category images include labels/panel graphics and are not individual sprites.",
+    "The checkerboard shown inside the poster is part of the poster artwork, not proof of alpha transparency.",
+    "No individual production sprites with verified clean alpha have been generated in this package.",
+    "Use existing BaraRimba fire truck asset; it is not re-created here.",
+    "Pivots, collision polygons, pulley constraints, weight balance, animation states and rescue path must be authored in the game engine."
+  ]
+}

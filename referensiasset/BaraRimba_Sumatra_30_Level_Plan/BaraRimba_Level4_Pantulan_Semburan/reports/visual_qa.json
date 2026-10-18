@@ -1,0 +1,22 @@
+{
+  "reference_dimensions_px": [
+    1536,
+    1024
+  ],
+  "reference_mode": "RGBA",
+  "alpha_extrema": [
+    16,
+    252
+  ],
+  "fully_transparent_pixels": 0,
+  "semi_transparent_pixels": 1572864,
+  "fully_opaque_pixels": 0,
+  "status": "composite poster; not a clean transparent sprite atlas",
+  "limitations": [
+    "Poster contains panels, labels, and full-scene composition.",
+    "Checkerboard visuals in poster do not prove actual alpha transparency.",
+    "Category crops are grouped references and are not production-ready individual sprites.",
+    "Existing BaraRimba fire truck must be reused; do not recreate it.",
+    "Reflector collision, water reflection rules, pivots, fire states, tiger animation, and exit path require implementation and in-engine testing."
+  ]
+}

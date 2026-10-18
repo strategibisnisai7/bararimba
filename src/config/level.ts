@@ -37,18 +37,31 @@ export const ASSETS: Record<string, string> = {
 // Earthy terrain pieces (sliced by scripts/prepare_terrain.py) and their rock fill.
 for (const k of [...Object.keys(TERRAIN_TILES), 'fill']) ASSETS[`et-${k}`] = `terrain/earthy/${k}`;
 
+/** Sumatra cave set (scripts/prepare_sumatra.py), loaded as `sm-<name>` for Sumatra levels only. */
+export const SUMATRA_SPRITES = ['ledge', 'slope', 'stalactite-a', 'stalactite-b', 'stalactite-c', 'boulder', 'boulder-m', 'boulder-s',
+  'rock-pile', 'rock-moss', 'rock-heap', 'seesaw', 'post', 'aframe', 'pulley', 'pulley-weights', 'pulley-single', 'pulley-rig', 'peg',
+  'gate', 'gate-frame', 'gate-portal', 'pillar', 'flag', 'rock-stump', 'coals', 'falls', 'falls-b', 'cave-mouth', 'cave-ceiling',
+  'spire-a', 'spire-b', 'spire-c', 'spire-d', 'spire-e', 'fern-a', 'fern-b', 'bush-red', 'gajah-b', 'gajah-c', 'gajah-d',
+  'raft', 'raft-dry', 'log-moss', 'log', 'branch-log', 'winch', 'hook', 'rope-bridge', 'frame', 'float-ledge', 'cliff', 'beam',
+  'falls-tall', 'falls-small', 'river-rocks', 'river-rocks-b', 'tapir-b', 'tapir-c', 'palm-a', 'palm-b', 'vines', 'vine',
+  'jungle-bush', 'fern-root', 'harimau-b', 'harimau-c', 'rusa-sumatra-b'];
+for (const k of SUMATRA_SPRITES) ASSETS[`sm-${k}`] = `sumatra/${k}`;
+for (const k of ['anak-gajah', 'tapir', 'harimau', 'rusa-sumatra']) ASSETS[k] = `animals/${k}`;
+
 /** Assets only some levels need; everything else in ASSETS is loaded for every level. Keeps the first load small. */
 export const ASSET_GROUPS: Record<string, string[]> = {
   volcanic: Object.keys(ASSETS).filter(k => k.startsWith('v-') || k.startsWith('vp-')),
   ruins: Object.keys(ASSETS).filter(k => k.startsWith('p-')),
   boss: ['boss', 'fireball', 'boss-tower', 'orangutan-sit'],
   earthy: Object.keys(ASSETS).filter(k => k.startsWith('et-')),
+  sumatra: [...Object.keys(ASSETS).filter(k => k.startsWith('sm-')), 'anak-gajah', 'tapir', 'harimau', 'rusa-sumatra'],
 };
-export function assetsFor(theme?: string, boss?: boolean, earthy?: boolean) {
+export function assetsFor(theme?: string, boss?: boolean, earthy?: boolean, sumatra?: boolean) {
   const grouped = new Set(Object.values(ASSET_GROUPS).flat());
   const keys = Object.keys(ASSETS).filter(k => !grouped.has(k));
   if (theme && ASSET_GROUPS[theme]) keys.push(...ASSET_GROUPS[theme]);
   if (boss) keys.push(...ASSET_GROUPS.boss);
   if (earthy) keys.push(...ASSET_GROUPS.earthy);
+  if (sumatra) keys.push(...ASSET_GROUPS.sumatra);
   return keys;
 }

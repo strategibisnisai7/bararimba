@@ -1,0 +1,1695 @@
+{
+  "policy": "Sources unchanged. l1 = cutout with alpha<24 cleared; l2 = rect crop of the RGBA sheet; key = light border-connected background removed from an opaque poster crop (animals with dark outlines only). Alpha measured after export.",
+  "sprites": [
+    {
+      "key": "sm-ledge",
+      "file": "assets/sumatra/ledge.webp",
+      "size": [
+        497,
+        198
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/001_terrain_or_cave.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.273,
+        "opaque": 0.489,
+        "partial": 0.237,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 49944
+    },
+    {
+      "key": "sm-slope",
+      "file": "assets/sumatra/slope.webp",
+      "size": [
+        750,
+        210
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/002_terrain_or_cave.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.411,
+        "opaque": 0.39,
+        "partial": 0.198,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 65148
+    },
+    {
+      "key": "sm-stalactite-a",
+      "file": "assets/sumatra/stalactite-a.webp",
+      "size": [
+        162,
+        108
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/003_terrain_or_cave.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.524,
+        "opaque": 0.198,
+        "partial": 0.278,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 6314
+    },
+    {
+      "key": "sm-stalactite-b",
+      "file": "assets/sumatra/stalactite-b.webp",
+      "size": [
+        156,
+        160
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/005_terrain_or_cave.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.428,
+        "opaque": 0.305,
+        "partial": 0.267,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 11202
+    },
+    {
+      "key": "sm-stalactite-c",
+      "file": "assets/sumatra/stalactite-c.webp",
+      "size": [
+        263,
+        180
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/006_terrain_or_cave.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.465,
+        "opaque": 0.337,
+        "partial": 0.198,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 17428
+    },
+    {
+      "key": "sm-boulder",
+      "file": "assets/sumatra/boulder.webp",
+      "size": [
+        165,
+        160
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/008_rocks_or_levers.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.238,
+        "opaque": 0.564,
+        "partial": 0.198,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 13906
+    },
+    {
+      "key": "sm-boulder-m",
+      "file": "assets/sumatra/boulder-m.webp",
+      "size": [
+        117,
+        112
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/009_rocks_or_levers.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.255,
+        "opaque": 0.479,
+        "partial": 0.266,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 7568
+    },
+    {
+      "key": "sm-boulder-s",
+      "file": "assets/sumatra/boulder-s.webp",
+      "size": [
+        85,
+        82
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/010_rocks_or_levers.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.255,
+        "opaque": 0.419,
+        "partial": 0.326,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 4574
+    },
+    {
+      "key": "sm-rock-pile",
+      "file": "assets/sumatra/rock-pile.webp",
+      "size": [
+        363,
+        123
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/011_rocks_or_levers.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.456,
+        "opaque": 0.3,
+        "partial": 0.244,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 17934
+    },
+    {
+      "key": "sm-rock-moss",
+      "file": "assets/sumatra/rock-moss.webp",
+      "size": [
+        212,
+        191
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/014_rocks_or_levers.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.411,
+        "opaque": 0.392,
+        "partial": 0.197,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 18522
+    },
+    {
+      "key": "sm-rock-heap",
+      "file": "assets/sumatra/rock-heap.webp",
+      "size": [
+        136,
+        83
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/015_rocks_or_levers.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.49,
+        "opaque": 0.218,
+        "partial": 0.293,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 5270
+    },
+    {
+      "key": "sm-seesaw",
+      "file": "assets/sumatra/seesaw.webp",
+      "size": [
+        601,
+        141
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/012_rocks_or_levers.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.574,
+        "opaque": 0.25,
+        "partial": 0.176,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 28706
+    },
+    {
+      "key": "sm-post",
+      "file": "assets/sumatra/post.webp",
+      "size": [
+        110,
+        143
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/013_rocks_or_levers.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.376,
+        "opaque": 0.405,
+        "partial": 0.219,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 6946
+    },
+    {
+      "key": "sm-aframe",
+      "file": "assets/sumatra/aframe.webp",
+      "size": [
+        82,
+        72
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/018_rocks_or_levers.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.332,
+        "opaque": 0.403,
+        "partial": 0.265,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 3524
+    },
+    {
+      "key": "sm-pulley",
+      "file": "assets/sumatra/pulley.webp",
+      "size": [
+        85,
+        175
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/019_pulley_rope.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.48,
+        "opaque": 0.231,
+        "partial": 0.289,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 8268
+    },
+    {
+      "key": "sm-pulley-weights",
+      "file": "assets/sumatra/pulley-weights.webp",
+      "size": [
+        289,
+        176
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/020_pulley_rope.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.558,
+        "opaque": 0.215,
+        "partial": 0.227,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 21470
+    },
+    {
+      "key": "sm-pulley-single",
+      "file": "assets/sumatra/pulley-single.webp",
+      "size": [
+        71,
+        149
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/021_pulley_rope.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.577,
+        "opaque": 0.207,
+        "partial": 0.216,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 4952
+    },
+    {
+      "key": "sm-pulley-rig",
+      "file": "assets/sumatra/pulley-rig.webp",
+      "size": [
+        375,
+        180
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/022_pulley_rope.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.563,
+        "opaque": 0.191,
+        "partial": 0.247,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 28042
+    },
+    {
+      "key": "sm-peg",
+      "file": "assets/sumatra/peg.webp",
+      "size": [
+        25,
+        70
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/028_pulley_rope.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.211,
+        "opaque": 0.014,
+        "partial": 0.775,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 1528
+    },
+    {
+      "key": "sm-gate",
+      "file": "assets/sumatra/gate.webp",
+      "size": [
+        177,
+        188
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/023_stone_gate.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.256,
+        "opaque": 0.525,
+        "partial": 0.219,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 16910
+    },
+    {
+      "key": "sm-gate-frame",
+      "file": "assets/sumatra/gate-frame.webp",
+      "size": [
+        155,
+        186
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/024_stone_gate.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.346,
+        "opaque": 0.341,
+        "partial": 0.313,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 13624
+    },
+    {
+      "key": "sm-gate-portal",
+      "file": "assets/sumatra/gate-portal.webp",
+      "size": [
+        317,
+        198
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/025_stone_gate.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.236,
+        "opaque": 0.351,
+        "partial": 0.413,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 32316
+    },
+    {
+      "key": "sm-pillar",
+      "file": "assets/sumatra/pillar.webp",
+      "size": [
+        62,
+        121
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/026_rescue_flag.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.299,
+        "opaque": 0.385,
+        "partial": 0.316,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 4226
+    },
+    {
+      "key": "sm-flag",
+      "file": "assets/sumatra/flag.webp",
+      "size": [
+        135,
+        187
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/027_rescue_flag.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.451,
+        "opaque": 0.272,
+        "partial": 0.277,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 11740
+    },
+    {
+      "key": "sm-rock-stump",
+      "file": "assets/sumatra/rock-stump.webp",
+      "size": [
+        76,
+        69
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/029_rescue_flag.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.244,
+        "opaque": 0.352,
+        "partial": 0.404,
+        "extrema": [
+          0,
+          252
+        ]
+      },
+      "bytes": 3462
+    },
+    {
+      "key": "sm-coals",
+      "file": "assets/sumatra/coals.webp",
+      "size": [
+        94,
+        59
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/045_fire.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.459,
+        "opaque": 0.262,
+        "partial": 0.279,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 3546
+    },
+    {
+      "key": "sm-falls",
+      "file": "assets/sumatra/falls.webp",
+      "size": [
+        277,
+        179
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/044_waterfall_cave.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.192,
+        "opaque": 0.531,
+        "partial": 0.277,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 29170
+    },
+    {
+      "key": "sm-falls-b",
+      "file": "assets/sumatra/falls-b.webp",
+      "size": [
+        262,
+        176
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/046_waterfall_cave.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.31,
+        "opaque": 0.44,
+        "partial": 0.249,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 22054
+    },
+    {
+      "key": "sm-cave-mouth",
+      "file": "assets/sumatra/cave-mouth.webp",
+      "size": [
+        215,
+        175
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/048_waterfall_cave.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.231,
+        "opaque": 0.531,
+        "partial": 0.238,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 18004
+    },
+    {
+      "key": "sm-cave-ceiling",
+      "file": "assets/sumatra/cave-ceiling.webp",
+      "size": [
+        252,
+        140
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/049_waterfall_cave.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.423,
+        "opaque": 0.336,
+        "partial": 0.24,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 14688
+    },
+    {
+      "key": "sm-spire-a",
+      "file": "assets/sumatra/spire-a.webp",
+      "size": [
+        44,
+        102
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/053_vegetation.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.263,
+        "opaque": 0.319,
+        "partial": 0.418,
+        "extrema": [
+          0,
+          254
+        ]
+      },
+      "bytes": 2980
+    },
+    {
+      "key": "sm-spire-b",
+      "file": "assets/sumatra/spire-b.webp",
+      "size": [
+        49,
+        131
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/055_vegetation.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.328,
+        "opaque": 0.399,
+        "partial": 0.273,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 3540
+    },
+    {
+      "key": "sm-spire-c",
+      "file": "assets/sumatra/spire-c.webp",
+      "size": [
+        70,
+        102
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/064_vegetation.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.394,
+        "opaque": 0.378,
+        "partial": 0.228,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 3674
+    },
+    {
+      "key": "sm-spire-d",
+      "file": "assets/sumatra/spire-d.webp",
+      "size": [
+        134,
+        112
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/066_vegetation.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.566,
+        "opaque": 0.226,
+        "partial": 0.208,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 5778
+    },
+    {
+      "key": "sm-spire-e",
+      "file": "assets/sumatra/spire-e.webp",
+      "size": [
+        100,
+        62
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/075_elephant_animation_candidate.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.464,
+        "opaque": 0.164,
+        "partial": 0.372,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 3650
+    },
+    {
+      "key": "sm-fern-a",
+      "file": "assets/sumatra/fern-a.webp",
+      "size": [
+        116,
+        86
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/057_vegetation.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.379,
+        "opaque": 0.111,
+        "partial": 0.51,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 7502
+    },
+    {
+      "key": "sm-fern-b",
+      "file": "assets/sumatra/fern-b.webp",
+      "size": [
+        103,
+        86
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/058_vegetation.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.34,
+        "opaque": 0.222,
+        "partial": 0.438,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 6568
+    },
+    {
+      "key": "sm-bush-red",
+      "file": "assets/sumatra/bush-red.webp",
+      "size": [
+        122,
+        62
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/062_vegetation.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.412,
+        "opaque": 0.112,
+        "partial": 0.476,
+        "extrema": [
+          0,
+          252
+        ]
+      },
+      "bytes": 5416
+    },
+    {
+      "key": "sm-gajah-a",
+      "file": "assets/sumatra/gajah-a.webp",
+      "size": [
+        107,
+        91
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/069_elephant_animation_candidate.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.325,
+        "opaque": 0.422,
+        "partial": 0.253,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 4718
+    },
+    {
+      "key": "sm-gajah-b",
+      "file": "assets/sumatra/gajah-b.webp",
+      "size": [
+        93,
+        88
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/070_elephant_animation_candidate.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.308,
+        "opaque": 0.444,
+        "partial": 0.249,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 4366
+    },
+    {
+      "key": "sm-gajah-c",
+      "file": "assets/sumatra/gajah-c.webp",
+      "size": [
+        82,
+        86
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/072_elephant_animation_candidate.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.206,
+        "opaque": 0.445,
+        "partial": 0.349,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 4298
+    },
+    {
+      "key": "sm-gajah-d",
+      "file": "assets/sumatra/gajah-d.webp",
+      "size": [
+        86,
+        85
+      ],
+      "method": "l1",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Sumatra_Level1_Production_Sprites/sprites/073_elephant_animation_candidate.png",
+      "rect": null,
+      "alpha": {
+        "transparent": 0.295,
+        "opaque": 0.431,
+        "partial": 0.274,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 3972
+    },
+    {
+      "key": "sm-raft",
+      "file": "assets/sumatra/raft.webp",
+      "size": [
+        287,
+        154
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        305,
+        27,
+        287,
+        154
+      ],
+      "alpha": {
+        "transparent": 0.183,
+        "opaque": 0.547,
+        "partial": 0.27,
+        "extrema": [
+          0,
+          253
+        ]
+      },
+      "bytes": 25140
+    },
+    {
+      "key": "sm-raft-dry",
+      "file": "assets/sumatra/raft-dry.webp",
+      "size": [
+        292,
+        169
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        15,
+        12,
+        292,
+        169
+      ],
+      "alpha": {
+        "transparent": 0.213,
+        "opaque": 0.557,
+        "partial": 0.23,
+        "extrema": [
+          0,
+          253
+        ]
+      },
+      "bytes": 24522
+    },
+    {
+      "key": "sm-log-moss",
+      "file": "assets/sumatra/log-moss.webp",
+      "size": [
+        162,
+        78
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        906,
+        27,
+        162,
+        78
+      ],
+      "alpha": {
+        "transparent": 0.197,
+        "opaque": 0.403,
+        "partial": 0.4,
+        "extrema": [
+          0,
+          252
+        ]
+      },
+      "bytes": 7052
+    },
+    {
+      "key": "sm-log",
+      "file": "assets/sumatra/log.webp",
+      "size": [
+        136,
+        50
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        906,
+        119,
+        136,
+        50
+      ],
+      "alpha": {
+        "transparent": 0.017,
+        "opaque": 0.458,
+        "partial": 0.526,
+        "extrema": [
+          0,
+          252
+        ]
+      },
+      "bytes": 4604
+    },
+    {
+      "key": "sm-branch-log",
+      "file": "assets/sumatra/branch-log.webp",
+      "size": [
+        237,
+        108
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        616,
+        211,
+        237,
+        108
+      ],
+      "alpha": {
+        "transparent": 0.297,
+        "opaque": 0.306,
+        "partial": 0.398,
+        "extrema": [
+          0,
+          253
+        ]
+      },
+      "bytes": 13046
+    },
+    {
+      "key": "sm-winch",
+      "file": "assets/sumatra/winch.webp",
+      "size": [
+        193,
+        115
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        1249,
+        204,
+        193,
+        115
+      ],
+      "alpha": {
+        "transparent": 0.122,
+        "opaque": 0.424,
+        "partial": 0.454,
+        "extrema": [
+          0,
+          253
+        ]
+      },
+      "bytes": 13182
+    },
+    {
+      "key": "sm-hook",
+      "file": "assets/sumatra/hook.webp",
+      "size": [
+        43,
+        116
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        1465,
+        193,
+        43,
+        116
+      ],
+      "alpha": {
+        "transparent": 0.254,
+        "opaque": 0.041,
+        "partial": 0.705,
+        "extrema": [
+          0,
+          253
+        ]
+      },
+      "bytes": 3496
+    },
+    {
+      "key": "sm-rope-bridge",
+      "file": "assets/sumatra/rope-bridge.webp",
+      "size": [
+        230,
+        109
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        23,
+        340,
+        230,
+        109
+      ],
+      "alpha": {
+        "transparent": 0.155,
+        "opaque": 0.103,
+        "partial": 0.741,
+        "extrema": [
+          0,
+          254
+        ]
+      },
+      "bytes": 17062
+    },
+    {
+      "key": "sm-frame",
+      "file": "assets/sumatra/frame.webp",
+      "size": [
+        160,
+        151
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        635,
+        340,
+        160,
+        151
+      ],
+      "alpha": {
+        "transparent": 0.418,
+        "opaque": 0.228,
+        "partial": 0.355,
+        "extrema": [
+          0,
+          254
+        ]
+      },
+      "bytes": 10494
+    },
+    {
+      "key": "sm-float-ledge",
+      "file": "assets/sumatra/float-ledge.webp",
+      "size": [
+        192,
+        145
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        811,
+        341,
+        192,
+        145
+      ],
+      "alpha": {
+        "transparent": 0.142,
+        "opaque": 0.444,
+        "partial": 0.414,
+        "extrema": [
+          0,
+          253
+        ]
+      },
+      "bytes": 16112
+    },
+    {
+      "key": "sm-cliff",
+      "file": "assets/sumatra/cliff.webp",
+      "size": [
+        88,
+        153
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        1430,
+        336,
+        88,
+        153
+      ],
+      "alpha": {
+        "transparent": 0.04,
+        "opaque": 0.5,
+        "partial": 0.46,
+        "extrema": [
+          0,
+          254
+        ]
+      },
+      "bytes": 9276
+    },
+    {
+      "key": "sm-beam",
+      "file": "assets/sumatra/beam.webp",
+      "size": [
+        127,
+        42
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        495,
+        352,
+        127,
+        42
+      ],
+      "alpha": {
+        "transparent": 0.005,
+        "opaque": 0.432,
+        "partial": 0.562,
+        "extrema": [
+          0,
+          253
+        ]
+      },
+      "bytes": 3516
+    },
+    {
+      "key": "sm-falls-tall",
+      "file": "assets/sumatra/falls-tall.webp",
+      "size": [
+        199,
+        180
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        14,
+        627,
+        199,
+        180
+      ],
+      "alpha": {
+        "transparent": 0.004,
+        "opaque": 0.807,
+        "partial": 0.188,
+        "extrema": [
+          0,
+          253
+        ]
+      },
+      "bytes": 24416
+    },
+    {
+      "key": "sm-falls-small",
+      "file": "assets/sumatra/falls-small.webp",
+      "size": [
+        132,
+        126
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        224,
+        668,
+        132,
+        126
+      ],
+      "alpha": {
+        "transparent": 0.002,
+        "opaque": 0.715,
+        "partial": 0.283,
+        "extrema": [
+          0,
+          253
+        ]
+      },
+      "bytes": 12732
+    },
+    {
+      "key": "sm-river-rocks",
+      "file": "assets/sumatra/river-rocks.webp",
+      "size": [
+        152,
+        68
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        369,
+        637,
+        152,
+        68
+      ],
+      "alpha": {
+        "transparent": 0.11,
+        "opaque": 0.454,
+        "partial": 0.436,
+        "extrema": [
+          0,
+          253
+        ]
+      },
+      "bytes": 6664
+    },
+    {
+      "key": "sm-river-rocks-b",
+      "file": "assets/sumatra/river-rocks-b.webp",
+      "size": [
+        147,
+        91
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        565,
+        705,
+        147,
+        91
+      ],
+      "alpha": {
+        "transparent": 0.021,
+        "opaque": 0.493,
+        "partial": 0.486,
+        "extrema": [
+          0,
+          253
+        ]
+      },
+      "bytes": 9212
+    },
+    {
+      "key": "sm-tapir",
+      "file": "assets/sumatra/tapir.webp",
+      "size": [
+        151,
+        121
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        734,
+        673,
+        151,
+        121
+      ],
+      "alpha": {
+        "transparent": 0.106,
+        "opaque": 0.509,
+        "partial": 0.385,
+        "extrema": [
+          0,
+          253
+        ]
+      },
+      "bytes": 8106
+    },
+    {
+      "key": "sm-tapir-b",
+      "file": "assets/sumatra/tapir-b.webp",
+      "size": [
+        129,
+        128
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        899,
+        668,
+        129,
+        128
+      ],
+      "alpha": {
+        "transparent": 0.178,
+        "opaque": 0.518,
+        "partial": 0.305,
+        "extrema": [
+          0,
+          253
+        ]
+      },
+      "bytes": 6708
+    },
+    {
+      "key": "sm-tapir-c",
+      "file": "assets/sumatra/tapir-c.webp",
+      "size": [
+        184,
+        130
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        1033,
+        667,
+        184,
+        130
+      ],
+      "alpha": {
+        "transparent": 0.206,
+        "opaque": 0.473,
+        "partial": 0.321,
+        "extrema": [
+          0,
+          254
+        ]
+      },
+      "bytes": 8858
+    },
+    {
+      "key": "sm-palm-a",
+      "file": "assets/sumatra/palm-a.webp",
+      "size": [
+        228,
+        205
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        1086,
+        807,
+        228,
+        205
+      ],
+      "alpha": {
+        "transparent": 0.427,
+        "opaque": 0.097,
+        "partial": 0.476,
+        "extrema": [
+          0,
+          254
+        ]
+      },
+      "bytes": 25090
+    },
+    {
+      "key": "sm-palm-b",
+      "file": "assets/sumatra/palm-b.webp",
+      "size": [
+        219,
+        198
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        1297,
+        814,
+        219,
+        198
+      ],
+      "alpha": {
+        "transparent": 0.362,
+        "opaque": 0.167,
+        "partial": 0.471,
+        "extrema": [
+          0,
+          253
+        ]
+      },
+      "bytes": 26486
+    },
+    {
+      "key": "sm-vines",
+      "file": "assets/sumatra/vines.webp",
+      "size": [
+        211,
+        187
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        675,
+        805,
+        211,
+        187
+      ],
+      "alpha": {
+        "transparent": 0.45,
+        "opaque": 0.139,
+        "partial": 0.411,
+        "extrema": [
+          0,
+          253
+        ]
+      },
+      "bytes": 23056
+    },
+    {
+      "key": "sm-vine",
+      "file": "assets/sumatra/vine.webp",
+      "size": [
+        50,
+        200
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        893,
+        807,
+        50,
+        200
+      ],
+      "alpha": {
+        "transparent": 0.086,
+        "opaque": 0.029,
+        "partial": 0.885,
+        "extrema": [
+          0,
+          252
+        ]
+      },
+      "bytes": 8378
+    },
+    {
+      "key": "sm-jungle-bush",
+      "file": "assets/sumatra/jungle-bush.webp",
+      "size": [
+        248,
+        192
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        13,
+        817,
+        248,
+        192
+      ],
+      "alpha": {
+        "transparent": 0.255,
+        "opaque": 0.267,
+        "partial": 0.479,
+        "extrema": [
+          0,
+          253
+        ]
+      },
+      "bytes": 28178
+    },
+    {
+      "key": "sm-fern-root",
+      "file": "assets/sumatra/fern-root.webp",
+      "size": [
+        269,
+        202
+      ],
+      "method": "l2",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level2_Rakit_Penyelamat/sprites/sprite_sheet_source_rgba.png",
+      "rect": [
+        406,
+        809,
+        269,
+        202
+      ],
+      "alpha": {
+        "transparent": 0.313,
+        "opaque": 0.323,
+        "partial": 0.364,
+        "extrema": [
+          0,
+          254
+        ]
+      },
+      "bytes": 33484
+    },
+    {
+      "key": "sm-harimau",
+      "file": "assets/sumatra/harimau.webp",
+      "size": [
+        143,
+        71
+      ],
+      "method": "key",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level4_Pantulan_Semburan/sprites/08_satwa_sumatra/harimau_sumatra_reference.png",
+      "rect": [
+        7,
+        35,
+        143,
+        72
+      ],
+      "alpha": {
+        "transparent": 0.291,
+        "opaque": 0.603,
+        "partial": 0.106,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 6438
+    },
+    {
+      "key": "sm-harimau-b",
+      "file": "assets/sumatra/harimau-b.webp",
+      "size": [
+        107,
+        50
+      ],
+      "method": "key",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level4_Pantulan_Semburan/sprites/08_satwa_sumatra/harimau_sumatra_reference.png",
+      "rect": [
+        8,
+        108,
+        110,
+        54
+      ],
+      "alpha": {
+        "transparent": 0.334,
+        "opaque": 0.528,
+        "partial": 0.138,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 3670
+    },
+    {
+      "key": "sm-harimau-c",
+      "file": "assets/sumatra/harimau-c.webp",
+      "size": [
+        114,
+        50
+      ],
+      "method": "key",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level4_Pantulan_Semburan/sprites/08_satwa_sumatra/harimau_sumatra_reference.png",
+      "rect": [
+        117,
+        108,
+        116,
+        54
+      ],
+      "alpha": {
+        "transparent": 0.35,
+        "opaque": 0.492,
+        "partial": 0.158,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 3828
+    },
+    {
+      "key": "sm-rusa-sumatra",
+      "file": "assets/sumatra/rusa-sumatra.webp",
+      "size": [
+        82,
+        80
+      ],
+      "method": "key",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level8_Bendungan_Gambut/sprites/07_rusa_sumatra/rusa_sumatra_reference.png",
+      "rect": [
+        100,
+        30,
+        84,
+        84
+      ],
+      "alpha": {
+        "transparent": 0.579,
+        "opaque": 0.27,
+        "partial": 0.152,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 3440
+    },
+    {
+      "key": "sm-rusa-sumatra-b",
+      "file": "assets/sumatra/rusa-sumatra-b.webp",
+      "size": [
+        72,
+        80
+      ],
+      "method": "key",
+      "source": "referensiasset/BaraRimba_Sumatra_30_Level_Plan/BaraRimba_Level8_Bendungan_Gambut/sprites/07_rusa_sumatra/rusa_sumatra_reference.png",
+      "rect": [
+        18,
+        30,
+        76,
+        84
+      ],
+      "alpha": {
+        "transparent": 0.545,
+        "opaque": 0.286,
+        "partial": 0.169,
+        "extrema": [
+          0,
+          255
+        ]
+      },
+      "bytes": 3098
+    },
+    {
+      "key": "anak-gajah",
+      "file": "assets/animals/anak-gajah.webp",
+      "method": "portrait copy",
+      "source": "sumatra/gajah-a.webp",
+      "bytes": 4718
+    },
+    {
+      "key": "tapir",
+      "file": "assets/animals/tapir.webp",
+      "method": "portrait copy",
+      "source": "sumatra/tapir.webp",
+      "bytes": 8106
+    },
+    {
+      "key": "harimau",
+      "file": "assets/animals/harimau.webp",
+      "method": "portrait copy",
+      "source": "sumatra/harimau.webp",
+      "bytes": 6438
+    },
+    {
+      "key": "rusa-sumatra",
+      "file": "assets/animals/rusa-sumatra.webp",
+      "method": "portrait copy",
+      "source": "sumatra/rusa-sumatra.webp",
+      "bytes": 3440
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "project": "BaraRimba",
+  "region": "Sumatra",
+  "level": 9,
+  "mission": "Rantai Penyelamatan Gajah",
+  "rescue_target": "Anak Gajah Sumatra",
+  "difficulty": {
+    "relative_to_level_8": "lebih tinggi",
+    "new_complexity": [
+      "urutan tindakan wajib",
+      "api merusak penyangga kayu jika tidak dipadamkan dulu",
+      "kayu berengsel bisa menjatuhkan jalur",
+      "batu memicu katrol setelah berada di posisi tepat",
+      "jalur evakuasi berubah setelah mekanisme bergerak"
+    ],
+    "expected_solution_steps": 6
+  },
+  "objective": "Padamkan api pada kayu penopang rantai sebelum melepas pengunci; turunkan batang kayu menjadi jembatan sementara, dorong batu untuk mengaktifkan katrol, lalu selamatkan anak gajah.",
+  "reference": "reference/level9_full_visual_reference.png",
+  "category_crops": [
+    {
+      "category": "01_terrain_batu",
+      "file": "sprites/01_terrain_batu/terrain_batu_reference.png",
+      "source_crop_xyxy": [
+        0,
+        450,
+        320,
+        680
+      ],
+      "size_px": [
+        320,
+        230
+      ],
+      "description": "Terrain, batu fisika, tebing dan pijakan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "02_struktur_kayu_rantai",
+      "file": "sprites/02_struktur_kayu_rantai/struktur_kayu_rantai_reference.png",
+      "source_crop_xyxy": [
+        320,
+        450,
+        630,
+        680
+      ],
+      "size_px": [
+        310,
+        230
+      ],
+      "description": "Struktur kayu, rantai, penyangga dan jembatan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "03_mekanisme_platform",
+      "file": "sprites/03_mekanisme_platform/mekanisme_platform_reference.png",
+      "source_crop_xyxy": [
+        630,
+        450,
+        930,
+        680
+      ],
+      "size_px": [
+        300,
+        230
+      ],
+      "description": "Katrol, pengungkit, beban dan platform",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "04_api_asap_air",
+      "file": "sprites/04_api_asap_air/api_asap_air_reference.png",
+      "source_crop_xyxy": [
+        930,
+        450,
+        1240,
+        680
+      ],
+      "size_px": [
+        310,
+        230
+      ],
+      "description": "Api, asap, semburan dan efek air",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "05_vegetasi_sumatra",
+      "file": "sprites/05_vegetasi_sumatra/vegetasi_sumatra_reference.png",
+      "source_crop_xyxy": [
+        1240,
+        450,
+        1535,
+        680
+      ],
+      "size_px": [
+        295,
+        230
+      ],
+      "description": "Vegetasi tropis Sumatra",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "06_anak_gajah",
+      "file": "sprites/06_anak_gajah/anak_gajah_reference.png",
+      "source_crop_xyxy": [
+        0,
+        680,
+        410,
+        850
+      ],
+      "size_px": [
+        410,
+        170
+      ],
+      "description": "Anak gajah dan pose penyelamatan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "07_properti",
+      "file": "sprites/07_properti/properti_reference.png",
+      "source_crop_xyxy": [
+        410,
+        680,
+        780,
+        850
+      ],
+      "size_px": [
+        370,
+        170
+      ],
+      "description": "Peti, drum, kayu dan penanda aman",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "08_batu_dinding",
+      "file": "sprites/08_batu_dinding/batu_dinding_reference.png",
+      "source_crop_xyxy": [
+        780,
+        680,
+        1135,
+        850
+      ],
+      "size_px": [
+        355,
+        170
+      ],
+      "description": "Batu dinding dan blok penghalang",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "09_pintu_jalur",
+      "file": "sprites/09_pintu_jalur/pintu_jalur_reference.png",
+      "source_crop_xyxy": [
+        1135,
+        680,
+        1535,
+        850
+      ],
+      "size_px": [
+        400,
+        170
+      ],
+      "description": "Pintu, jalur akhir dan struktur tambahan",
+      "status": "category_reference_crop_not_individual_sprite"
+    }
+  ],
+  "qa_report": "reports/visual_qa.json",
+  "production_status": "visual reference pack; not final isolated sprites",
+  "implementation_notes": [
+    "Gunakan aset mobil pemadam BaraRimba yang sudah tersedia.",
+    "Level 9 lebih sulit daripada Level 8 karena urutan tindakan menentukan apakah jalur tetap aman.",
+    "Jika pemain menggeser kayu sebelum api padam, penyangga runtuh dan jalur utama tertutup; sediakan jalur pemulihan agar level tidak soft-lock.",
+    "Kayu berengsel harus memiliki pivot/hinge yang benar dan state utuh, turun, serta rusak.",
+    "Batu menjadi dynamic body dan mengaktifkan katrol hanya ketika berada di cekungan pemicu.",
+    "Jalur anak gajah harus bisa diselesaikan setelah mekanisme berhasil; animasi satwa dimulai setelah jalur stabil."
+  ]
+}

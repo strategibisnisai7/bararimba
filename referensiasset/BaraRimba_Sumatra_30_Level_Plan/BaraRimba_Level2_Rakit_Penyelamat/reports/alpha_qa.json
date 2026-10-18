@@ -1,0 +1,21 @@
+{
+  "sprite_sheet_dimensions_px": [
+    1536,
+    1024
+  ],
+  "mode": "RGBA",
+  "alpha_extrema": [
+    0,
+    254
+  ],
+  "fully_transparent_pixels": 432350,
+  "semi_transparent_pixels": 1140514,
+  "fully_opaque_pixels": 0,
+  "caveats": [
+    "Sprite sheet contains a true alpha channel with transparent pixels, but edge halos still require visual QA.",
+    "Category crops are grouped sprite sheets, not fully isolated individual game objects.",
+    "The full gameplay reference is RGB and is not a transparent sprite.",
+    "No fire truck sprite is included as a new asset; reuse the existing BaraRimba truck asset.",
+    "Pivots, collision polygons, animation frame order, raft buoyancy and water-jet force need configuration in the game engine."
+  ]
+}

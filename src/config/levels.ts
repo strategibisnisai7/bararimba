@@ -12,13 +12,19 @@ export interface HangDef { anchorX: number; anchorY: number; rope: number; postX
  * `base`: solid rock fills from the piece down past the river and the truck can drive on it;
  * `road`: drivable without the fill (a span over water). Other pieces are ledges/overhangs. */
 export interface TerrainStamp { key: string; x: number; y: number; s?: number; flip?: boolean; base?: boolean; road?: boolean; grass?: boolean }
-export interface AnimalDef { key: string; name: string; x: number; y: number; scale: number; flip?: boolean }
+/** `frames`: extra poses cycled while the animal walks to the rescue flag (Sumatra). */
+export interface AnimalDef { key: string; name: string; x: number; y: number; scale: number; flip?: boolean; frames?: string[] }
 import type { BossDef } from '../entities/Boss';
-export type Theme = 'forest' | 'ruins' | 'volcanic';
+import { SUMATRA_LEVELS, type SumatraDef } from './sumatraLevels';
+export type Theme = 'forest' | 'ruins' | 'volcanic' | 'cave';
 export interface LevelDef {
   id: number; code: string; name: string; width: number;
   /** Visual tile set; gameplay is unchanged. */
   theme?: Theme;
+  /** Campaign region (default Jawa). */
+  region?: RegionId;
+  /** Sumatra mechanisms and the walk-to-flag rescue (src/scenes/Sumatra.ts). */
+  sm?: SumatraDef;
   supply: number; waterBudget: number; burnRate: number; spreadDelay: number;
   truckX: number; driveMin: number;
   /** Furthest the truck may drive (keeps it on the starting hill when floating rock hangs ahead). */
@@ -47,7 +53,8 @@ export interface LevelDef {
   boss?: BossDef & { waterfall?: { x: number; y: number; w: number } };
   wheel?: { x: number; y: number; r: number; out?: { x: number; y: number; vx: number } };
   /** Wooden gates (vertical walls) opened by switches. */
-  gates?: { id: string; x: number; y0: number; y1: number }[];
+  /** `stone`: a carved cave door (Sumatra) instead of the wooden barricade. */
+  gates?: { id: string; x: number; y0: number; y1: number; style?: 'stone' }[];
   /** target: hit with water; button: pressed by a prop or dropped crate; wheel: spin the water wheel. */
   switches?: { kind: 'target' | 'button' | 'wheel'; x: number; y: number; opens: string; need?: number }[];
   /** Raised water tanks held by a stone plug (push it off) or a gate; released water floods downhill. */
@@ -55,10 +62,17 @@ export interface LevelDef {
   animal: AnimalDef; tutorial: number[]; brief: string;
 }
 
-/** Tile `boss` is the region boss level. */
-export const REGION = { name: 'JAWA', subtitle: 'Hutan Pegunungan', total: 15, boss: 15 };
+export type RegionId = 'jawa' | 'sumatra';
+/** Level ids `first`..`first + total - 1` belong to the region; tile `boss` is its boss level. */
+export interface RegionDef { id: RegionId; name: string; subtitle: string; first: number; total: number; boss: number; forest: string }
+export const REGIONS: Record<RegionId, RegionDef> = {
+  jawa: { id: 'jawa', name: 'JAWA', subtitle: 'Hutan Pegunungan', first: 1, total: 15, boss: 15, forest: 'Hutan Jawa' },
+  sumatra: { id: 'sumatra', name: 'SUMATRA', subtitle: 'Goa Karst & Hutan Hujan', first: 16, total: 10, boss: 25, forest: 'Goa Sumatra' },
+};
+export const REGION = REGIONS.jawa;
+export const regionOf = (def: LevelDef) => REGIONS[def.region ?? 'jawa'];
 
-export const LEVELS: LevelDef[] = [
+const JAWA_LEVELS: LevelDef[] = [
   {
     id: 1, code: '1-1', name: 'Api di Jembatan', width: 2480,
     supply: 100, waterBudget: 55, burnRate: .3, spreadDelay: 16,
@@ -552,6 +566,9 @@ export const LEVELS: LevelDef[] = [
   },
 ];
 
+export const LEVELS: LevelDef[] = [...JAWA_LEVELS, ...SUMATRA_LEVELS];
+
+/** `level` is the level id the animal is rescued in. */
 export const ANIMALS = [
   { key: 'rusa', name: 'Rusa Timor', level: 1 },
   { key: 'rangkong', name: 'Rangkong', level: 2 },
@@ -567,4 +584,8 @@ export const ANIMALS = [
   { key: 'komodo', name: 'Komodo', level: 12 },
   { key: 'ular', name: 'Ular Sanca', level: 13 },
   { key: 'berang', name: 'Berang-berang', level: 14 },
+  { key: 'anak-gajah', name: 'Anak Gajah Sumatra', level: 16 },
+  { key: 'tapir', name: 'Tapir', level: 17 },
+  { key: 'harimau', name: 'Harimau Sumatra', level: 19 },
+  { key: 'rusa-sumatra', name: 'Rusa Sambar', level: 23 },
 ];

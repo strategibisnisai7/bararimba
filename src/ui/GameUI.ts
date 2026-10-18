@@ -1,4 +1,4 @@
-import { LEVELS, ANIMALS, REGION, type LevelDef } from '../config/levels';
+import { LEVELS, ANIMALS, REGIONS, regionOf, type LevelDef, type RegionId } from '../config/levels';
 import { store, type Quality } from '../systems/Save';
 import type { ResultInfo } from '../scenes/LevelScene';
 
@@ -36,6 +36,8 @@ export class GameUI {
   private toastTimer: number | undefined;
   private level: LevelDef = LEVELS[0];
   private selected = 1;
+  /** Region whose level board is shown. */
+  private region: RegionId = 'jawa';
   private current: Screen = 'menu';
   private els: Record<string, HTMLElement> = {};
   private paused = false;
@@ -78,10 +80,16 @@ export class GameUI {
       case 'collection': this.show('collection'); break;
       case 'settings': this.openSettings(); break;
       case 'menu': this.show('menu'); break;
-      case 'region': v === 'jawa' ? this.show('levels') : this.toast('Wilayah ini segera hadir. Selesaikan Jawa dulu!'); break;
+      case 'region': {
+        const r = REGIONS[v as RegionId];
+        if (!r) { this.toast('Wilayah ini segera hadir. Selesaikan Jawa dulu!'); break; }
+        this.region = r.id;
+        if (regionOf(LEVELS[this.selected - 1] ?? LEVELS[0]).id !== r.id) this.selected = r.first;
+        this.show('levels'); break;
+      }
       case 'select': {
         const id = Number(v);
-        if (!store.unlocked(id) || id > LEVELS.length) { this.toast(id > LEVELS.length ? 'Level ini segera hadir.' : 'Selesaikan level sebelumnya untuk membuka.'); break; }
+        if (!this.isOpen(id) || id > LEVELS.length) { this.toast(id > LEVELS.length ? 'Level ini segera hadir.' : 'Selesaikan level sebelumnya untuk membuka.'); break; }
         this.selected = id; this.show('levels'); break;
       }
       case 'start': this.openTutorial(this.selected); break;
@@ -119,6 +127,11 @@ export class GameUI {
     } catch { this.toast('Layar penuh tidak didukung browser ini. Gunakan "Tambahkan ke layar utama".', 3000); }
   }
   private closeOverlay() { this.overlay.hidden = true; this.overlay.innerHTML = ''; }
+  /** Unlocked levels: the first level of every region is always open, then each needs the one before it. */
+  private isOpen(id: number) { return id <= LEVELS.length && (store.unlocked(id) || Object.values(REGIONS).some(r => r.first === id)); }
+  private regionStars(id: RegionId) {
+    return LEVELS.filter(l => regionOf(l).id === id).reduce((s, l) => s + (store.progress.stars[l.id] ?? 0), 0);
+  }
 
   // ---------- menu (Game Board main menu) ----------
   private menuHtml() {
@@ -139,8 +152,9 @@ export class GameUI {
 
   // ---------- Peta Indonesia (layers sliced from referensiasset/Indonesia Adventure Map.png) ----------
   private mapHtml() {
-    const jawaStars = LEVELS.reduce((s, l) => s + (store.progress.stars[l.id] ?? 0), 0);
-    const jawaMax = REGION.total * 3;
+    // Badge rects (reference px) over each open card's baked star counter, and over Sumatra's baked padlock.
+    const counts: Partial<Record<RegionId, number[]>> = { jawa: [421, 582, 60, 28], sumatra: [289, 300, 58, 26] };
+    const checks: Partial<Record<RegionId, number[]>> = { sumatra: [386, 284, 50, 52] };
     // Rects are [x, y, w, h] in reference pixels (1672x941); see MAP in scripts/prepare_ui_assets.py.
     const W = 1672, H = 941;
     const at = (x: number, y: number, w: number, h: number) => `left:${(x / W) * 100}%;top:${(y / H) * 100}%;width:${(w / W) * 100}%;height:${(h / H) * 100}%`;
@@ -155,11 +169,14 @@ export class GameUI {
       ['papua', 'Papua', [1407, 578, 245, 141], [1409, 580, 42, 52]],
     ];
     const cards = regions.map(([id, name, r, pin], k) => {
-      const open = id === 'jawa';
-      const label = open ? `${name}: terbuka, ${jawaStars} dari ${jawaMax} bintang` : `${name}: terkunci, segera hadir`;
+      const reg = REGIONS[id as RegionId], open = !!reg;
+      const got = open ? this.regionStars(reg.id) : 0, max = open ? reg.total * 3 : 0;
+      const label = open ? `${name}: terbuka, ${got} dari ${max} bintang` : `${name}: terkunci, segera hadir`;
+      const count = counts[id as RegionId], check = checks[id as RegionId];
       return `<button class="mreg ${open ? 'open' : 'locked'}" data-a="region" data-v="${id}" aria-label="${label}" style="${at(r[0], r[1], r[2], r[3])};--d:${k * -0.37}s">
         <img class="mreg-card" src="${A(`map-card-${id}`)}" alt="" draggable="false"/>
-        ${open ? `<span class="mreg-count" style="${inside(r, [421, 582, 60, 28])}">${jawaStars}/${jawaMax}</span>` : ''}
+        ${open && count ? `<span class="mreg-count" style="${inside(r, count)}">${got}/${max}</span>` : ''}
+        ${open && check ? `<img class="mreg-check" src="${A('round-check')}" alt="" draggable="false" style="${inside(r, check)}"/>` : ''}
         <img class="mreg-pin" src="${A(`map-pin-${id}`)}" alt="" draggable="false" style="${inside(r, pin)}"/>
       </button>`;
     }).join('');
@@ -182,24 +199,25 @@ export class GameUI {
 
   // ---------- level select (Game Board region panel) ----------
   private levelsHtml() {
-    const tiles = Array.from({ length: REGION.total }, (_, i) => {
-      const id = i + 1, exists = id <= LEVELS.length, open = exists && store.unlocked(id), s = store.progress.stars[id] ?? 0;
-      if (id === REGION.boss) return open ? `<button class="tile boss ${id === this.selected ? 'sel' : ''}" data-a="select" data-v="${id}" aria-label="Level boss"><img src="/assets/boss/boss.webp" alt=""/><small>BOSS</small><span class="tile-stars">${[0, 1, 2].map(k => `<i class="${k < s ? 'on' : ''}"></i>`).join('')}</span></button>`
+    const R = REGIONS[this.region];
+    const tiles = Array.from({ length: R.total }, (_, i) => {
+      const id = R.first + i, open = this.isOpen(id), s = store.progress.stars[id] ?? 0;
+      if (id === R.boss) return open ? `<button class="tile boss ${id === this.selected ? 'sel' : ''}" data-a="select" data-v="${id}" aria-label="Level boss"><img src="/assets/boss/boss.webp" alt=""/><small>BOSS</small><span class="tile-stars">${[0, 1, 2].map(k => `<i class="${k < s ? 'on' : ''}"></i>`).join('')}</span></button>`
         : `<button class="tile boss locked" data-a="select" data-v="${id}" aria-label="Level boss terkunci"><img src="/assets/boss/boss.webp" alt=""/><small>BOSS</small><em>Terkunci</em></button>`;
-      if (!open) return `<button class="tile locked" data-a="select" data-v="${id}" aria-label="Level ${id} terkunci"><img src="${A('lock')}" alt=""/></button>`;
-      return `<button class="tile ${id === this.selected ? 'sel' : ''}" data-a="select" data-v="${id}" aria-label="Level ${id}"><b>${id}</b><span class="tile-stars">${[0, 1, 2].map(k => `<i class="${k < s ? 'on' : ''}"></i>`).join('')}</span></button>`;
+      if (!open) return `<button class="tile locked" data-a="select" data-v="${id}" aria-label="Level ${i + 1} terkunci"><img src="${A('lock')}" alt=""/></button>`;
+      return `<button class="tile ${id === this.selected ? 'sel' : ''}" data-a="select" data-v="${id}" aria-label="Level ${i + 1}"><b>${i + 1}</b><span class="tile-stars">${[0, 1, 2].map(k => `<i class="${k < s ? 'on' : ''}"></i>`).join('')}</span></button>`;
     }).join('');
     const l = LEVELS[this.selected - 1];
     return `<div class="levels">
       <div class="board">
         <button class="wood-btn back" data-a="menu" aria-label="Kembali"><img src="${A('wood-left')}" alt=""/></button>
-        <div class="title-plank"><b>${REGION.name}</b><small>${REGION.subtitle}</small></div>
+        <div class="title-plank"><b>${R.name}</b><small>${R.subtitle}</small></div>
         <div class="grid">${tiles}</div>
         <div class="info-card">
           <img class="thumb" src="${A(`thumb-${l.id}`)}" alt="Pratinjau ${l.name}"/>
           <div class="info">
-            <b>Level ${l.id}</b><strong>${l.name}</strong>
-            <ul>${l.boss ? `<li>${star(true)}Kalahkan Pembakar Hutan</li><li>${star(true)}Nyawa truk tetap ≥ 50%</li><li>${star(true)}Jaga hutan terbakar &lt; 50%</li>` : `<li>${star(true)}Padamkan api &amp; selamatkan satwa</li><li>${star(true)}Hemat penggunaan air</li><li>${star(true)}Cegah api menjalar</li>`}</ul>
+            <b>Level ${l.code}</b><strong>${l.name}</strong>
+            <ul>${l.boss ? `<li>${star(true)}Kalahkan ${l.boss.name ?? 'Pembakar Hutan'}</li><li>${star(true)}Nyawa truk tetap ≥ 50%</li><li>${star(true)}Jaga hutan terbakar &lt; 50%</li>` : `<li>${star(true)}Padamkan api &amp; selamatkan satwa</li><li>${star(true)}Hemat penggunaan air</li><li>${star(true)}Cegah api menjalar</li>`}</ul>
             <button class="green-btn" data-a="start">${ico.play}<span>Main</span></button>
           </div>
         </div>
@@ -215,7 +233,7 @@ export class GameUI {
       return `<div class="animal-card ${has ? 'has' : ''}">
         <div class="animal-pic"><img src="/assets/animals/${a.key}.webp" alt="${has ? a.name : 'Belum diselamatkan'}"/></div>
         <b>${has ? a.name : '???'}</b>
-        <small>${has ? 'Terselamatkan ♥' : a.level ? `Selamatkan di Level 1-${a.level}` : 'Segera hadir'}</small>
+        <small>${has ? 'Terselamatkan ♥' : LEVELS[a.level - 1] ? `Selamatkan di Level ${LEVELS[a.level - 1].code}` : 'Segera hadir'}</small>
       </div>`;
     }).join('');
     return `<div class="levels">
@@ -340,7 +358,7 @@ export class GameUI {
     });
   }
   enterLevel(def: LevelDef) {
-    this.level = def; this.selected = def.id; this.paused = false;
+    this.level = def; this.selected = def.id; this.region = regionOf(def).id; this.paused = false;
     this.screen.hidden = true; this.screen.innerHTML = ''; this.closeOverlay();
     this.root.dataset.screen = 'game';
     this.els.code.textContent = def.code; this.els.name.textContent = def.name;
@@ -435,7 +453,7 @@ export class GameUI {
         <div class="rrows">${rows}</div>
         <div class="rscore"><span>Skor</span><b>${r.score.toLocaleString('id-ID')}</b>${r.record ? `<img src="${A('badge-record')}" alt="Rekor baru"/>` : ''}</div>
         <div class="animal-badge ${won ? 'happy' : 'sad'}"><img src="/assets/animals/${r.animal.key}.webp" alt="${r.animal.name} ${won ? 'senang' : 'menangis'}"/>${won ? '<i class="h1">♥</i><i class="h2">♥</i><i class="h3">♥</i>' : '<i class="t1"></i><i class="t2"></i>'}</div>
-        <p class="rnote">${won ? (r.boss ? 'Pembakar Hutan dikalahkan! Hutan Jawa selamat!' : `${r.animal.name} senang dan masuk Koleksi Satwa!`) : reason}</p>
+        <p class="rnote">${won ? (r.boss ? `${r.level.boss?.name ?? 'Pembakar Hutan'} dikalahkan! ${regionOf(r.level).forest} selamat!` : `${r.animal.name} senang dan masuk Koleksi Satwa!`) : reason}</p>
         ${won ? btn('to-map', [6.4, 85.3, 28.4, 11.2], 'Kembali ke peta') + btn('retry', [35.1, 85.3, 28.3, 11.2], 'Ulangi') + btn('next', [64.4, 85.3, 31.4, 11.2], 'Lanjut')
           : btn('to-map', [5.6, 86.6, 29.8, 11], 'Kembali ke peta') + btn('retry', [36.7, 86.6, 27.3, 11], 'Ulangi') + btn('retry', [65, 86.6, 30.7, 11], 'Coba lagi')}
       </div>`;

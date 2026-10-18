@@ -1,0 +1,1056 @@
+{
+  "project": "BaraRimba",
+  "campaign": "Sumatra",
+  "total_levels": 30,
+  "mission_groups": 10,
+  "levels_per_group": 3,
+  "important_constraint": "Extend the existing Java game. Do not rebuild the fire truck, water-jet system, HUD, camera, or core physics.",
+  "levels": [
+    {
+      "level_id": 1,
+      "mission_group": 1,
+      "mission_name": "Goa Sumatra — Penyelamatan Anak Gajah",
+      "title": "Batu Pembuka",
+      "biome": "Goa karst, akar hutan hujan, sungai bawah tanah",
+      "rescue_animal": "Anak gajah Sumatra",
+      "objective": "Dorong satu batu dengan semburan untuk membuka pintu goa.",
+      "core_assets": [
+        "batu_fisika",
+        "pintu_batu",
+        "api",
+        "anak_gajah"
+      ],
+      "difficulty": "Mudah",
+      "learning_or_challenge": "Mengenal dorongan air dan benda dinamis.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 2,
+      "mission_group": 1,
+      "mission_name": "Goa Sumatra — Penyelamatan Anak Gajah",
+      "title": "Akar Penyangga",
+      "biome": "Goa karst, akar hutan hujan, sungai bawah tanah",
+      "rescue_animal": "Anak gajah Sumatra",
+      "objective": "Padamkan api pada akar, lalu dorong batu agar akar yang menghalangi turun menjadi pijakan.",
+      "core_assets": [
+        "akar",
+        "batu_fisika",
+        "api",
+        "anak_gajah"
+      ],
+      "difficulty": "Mudah-menengah",
+      "learning_or_challenge": "Urutan pemadaman sebelum menggeser penghalang.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 3,
+      "mission_group": 1,
+      "mission_name": "Goa Sumatra — Penyelamatan Anak Gajah",
+      "title": "Jalur Runtuh",
+      "biome": "Goa karst, akar hutan hujan, sungai bawah tanah",
+      "rescue_animal": "Anak gajah Sumatra",
+      "objective": "Gunakan semburan untuk memindahkan dua batu dalam urutan tepat; satu batu menjadi stopper agar jalur tidak runtuh.",
+      "core_assets": [
+        "batu_fisika",
+        "kayu_berengsel",
+        "stopper",
+        "anak_gajah"
+      ],
+      "difficulty": "Menengah",
+      "learning_or_challenge": "Konsekuensi fisika dengan solusi pemulihan.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 4,
+      "mission_group": 2,
+      "mission_name": "Rakit Penyelamat",
+      "title": "Rakit Mulai Bergerak",
+      "biome": "Sungai bawah tanah, tebing karst, air terjun",
+      "rescue_animal": "Tapir",
+      "objective": "Dorong rakit kosong ke tepian aman dengan semburan air.",
+      "core_assets": [
+        "rakit",
+        "arus",
+        "batu"
+      ],
+      "difficulty": "Mudah",
+      "learning_or_challenge": "Belajar arah gaya dan momentum.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 5,
+      "mission_group": 2,
+      "mission_name": "Rakit Penyelamat",
+      "title": "Beban di Atas Rakit",
+      "biome": "Sungai bawah tanah, tebing karst, air terjun",
+      "rescue_animal": "Tapir",
+      "objective": "Geser batu ke rakit agar draft dan keseimbangannya berubah; kendalikan rakit supaya tidak menabrak dinding.",
+      "core_assets": [
+        "rakit",
+        "batu_fisika",
+        "arus",
+        "tapir"
+      ],
+      "difficulty": "Menengah",
+      "learning_or_challenge": "Momentum dan distribusi beban.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 6,
+      "mission_group": 2,
+      "mission_name": "Rakit Penyelamat",
+      "title": "Arus Berlawanan",
+      "biome": "Sungai bawah tanah, tebing karst, air terjun",
+      "rescue_animal": "Tapir",
+      "objective": "Atur dua dorongan dari posisi berbeda untuk melewati pusaran dan berhenti di dermaga penyelamatan.",
+      "core_assets": [
+        "rakit",
+        "arus",
+        "pilar_batu",
+        "tapir"
+      ],
+      "difficulty": "Sulit",
+      "learning_or_challenge": "Timing, momentum, dan pengereman.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 7,
+      "mission_group": 3,
+      "mission_name": "Katrol dan Beban Ganda",
+      "title": "Katrol Pertama",
+      "biome": "Tebing hutan dan ruang goa",
+      "rescue_animal": "Orangutan Sumatra",
+      "objective": "Dorong satu batu ke platform pemberat untuk mengangkat jembatan pendek.",
+      "core_assets": [
+        "katrol",
+        "tali",
+        "batu",
+        "platform"
+      ],
+      "difficulty": "Mudah-menengah",
+      "learning_or_challenge": "Pengenalan hubungan beban dan platform.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 8,
+      "mission_group": 3,
+      "mission_name": "Katrol dan Beban Ganda",
+      "title": "Dua Beban Berbeda",
+      "biome": "Tebing hutan dan ruang goa",
+      "rescue_animal": "Orangutan Sumatra",
+      "objective": "Pilih batu yang tepat untuk sisi katrol agar platform berhenti pada ketinggian sasaran.",
+      "core_assets": [
+        "katrol",
+        "dua_beban",
+        "platform",
+        "orangutan"
+      ],
+      "difficulty": "Menengah",
+      "learning_or_challenge": "Membandingkan berat dan posisi.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 9,
+      "mission_group": 3,
+      "mission_name": "Katrol dan Beban Ganda",
+      "title": "Keseimbangan Kritis",
+      "biome": "Tebing hutan dan ruang goa",
+      "rescue_animal": "Orangutan Sumatra",
+      "objective": "Atur dua beban dan geser stopper agar platform stabil sementara api di jalur dipadamkan.",
+      "core_assets": [
+        "katrol_ganda",
+        "stopper",
+        "batu",
+        "api",
+        "orangutan"
+      ],
+      "difficulty": "Sulit",
+      "learning_or_challenge": "Keseimbangan ditambah urutan tindakan.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 10,
+      "mission_group": 4,
+      "mission_name": "Pantulan Semburan",
+      "title": "Sudut Pertama",
+      "biome": "Celah batu, air terjun, ruang goa",
+      "rescue_animal": "Harimau Sumatra",
+      "objective": "Putar satu panel agar semburan mencapai api di balik dinding.",
+      "core_assets": [
+        "panel_pemantul",
+        "api",
+        "harimau"
+      ],
+      "difficulty": "Menengah",
+      "learning_or_challenge": "Belajar sudut pantulan.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 11,
+      "mission_group": 4,
+      "mission_name": "Pantulan Semburan",
+      "title": "Dua Pantulan",
+      "biome": "Celah batu, air terjun, ruang goa",
+      "rescue_animal": "Harimau Sumatra",
+      "objective": "Atur dua panel dengan sudut berbeda untuk memadamkan api dan membuka pengunci.",
+      "core_assets": [
+        "dua_panel_pemantul",
+        "api",
+        "pengunci"
+      ],
+      "difficulty": "Menengah-sulit",
+      "learning_or_challenge": "Rantai sudut dan target.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 12,
+      "mission_group": 4,
+      "mission_name": "Pantulan Semburan",
+      "title": "Pantulan Bergerak",
+      "biome": "Celah batu, air terjun, ruang goa",
+      "rescue_animal": "Harimau Sumatra",
+      "objective": "Gunakan panel yang terayun dan timing semburan untuk mengenai target saat terbuka.",
+      "core_assets": [
+        "panel_berengsel",
+        "api",
+        "pengunci",
+        "harimau"
+      ],
+      "difficulty": "Sulit",
+      "learning_or_challenge": "Akurasi dan timing tanpa pixel-perfect aim.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 13,
+      "mission_group": 5,
+      "mission_name": "Bak Air Pengangkat",
+      "title": "Isi Bak",
+      "biome": "Goa lembap, pipa kayu, bak penampung",
+      "rescue_animal": "Beruang madu",
+      "objective": "Isi satu bak sampai platform mencapai ketinggian yang dibutuhkan.",
+      "core_assets": [
+        "bak_air",
+        "platform_lift",
+        "katup"
+      ],
+      "difficulty": "Menengah",
+      "learning_or_challenge": "Air sebagai beban.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 14,
+      "mission_group": 5,
+      "mission_name": "Bak Air Pengangkat",
+      "title": "Dua Bak dan Katup",
+      "biome": "Goa lembap, pipa kayu, bak penampung",
+      "rescue_animal": "Beruang madu",
+      "objective": "Atur urutan katup untuk mengalirkan air ke bak kedua tanpa kehilangan tinggi air pertama.",
+      "core_assets": [
+        "dua_bak",
+        "katup",
+        "pipa",
+        "platform_lift"
+      ],
+      "difficulty": "Sulit",
+      "learning_or_challenge": "Pengelolaan volume dan urutan.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 15,
+      "mission_group": 5,
+      "mission_name": "Bak Air Pengangkat",
+      "title": "Beban Penyeimbang",
+      "biome": "Goa lembap, pipa kayu, bak penampung",
+      "rescue_animal": "Beruang madu",
+      "objective": "Kombinasikan volume air dan batu penyeimbang agar platform berhenti di antara dua batas.",
+      "core_assets": [
+        "dua_bak",
+        "batu",
+        "katrol",
+        "platform_lift",
+        "beruang_madu"
+      ],
+      "difficulty": "Sulit",
+      "learning_or_challenge": "Kontrol presisi dengan beberapa variabel.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 16,
+      "mission_group": 6,
+      "mission_name": "Kincir Arus Goa",
+      "title": "Putar Kincir",
+      "biome": "Goa berarus, air terjun, saluran batu",
+      "rescue_animal": "Orangutan Sumatra",
+      "objective": "Arahkan aliran ke kincir hingga mencapai ambang putaran untuk membuka pintu.",
+      "core_assets": [
+        "kincir",
+        "saluran",
+        "pintu"
+      ],
+      "difficulty": "Menengah",
+      "learning_or_challenge": "Hubungan aliran dan putaran.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 17,
+      "mission_group": 6,
+      "mission_name": "Kincir Arus Goa",
+      "title": "Atur Debit",
+      "biome": "Goa berarus, air terjun, saluran batu",
+      "rescue_animal": "Orangutan Sumatra",
+      "objective": "Atur katup agar kincir tidak terlalu lambat atau terlalu cepat ketika menarik rantai.",
+      "core_assets": [
+        "kincir",
+        "katup",
+        "rantai",
+        "platform"
+      ],
+      "difficulty": "Sulit",
+      "learning_or_challenge": "Debit dan momentum berkelanjutan.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 18,
+      "mission_group": 6,
+      "mission_name": "Kincir Arus Goa",
+      "title": "Putaran Berantai",
+      "biome": "Goa berarus, air terjun, saluran batu",
+      "rescue_animal": "Orangutan Sumatra",
+      "objective": "Jaga kincir tetap berputar sambil mengalihkan sebagian aliran untuk memadamkan api.",
+      "core_assets": [
+        "kincir",
+        "dua_saluran",
+        "katup",
+        "api",
+        "orangutan"
+      ],
+      "difficulty": "Sangat sulit",
+      "learning_or_challenge": "Trade-off antara mekanisme dan pemadaman.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 19,
+      "mission_group": 7,
+      "mission_name": "Jembatan yang Harus Dijatuhkan",
+      "title": "Lepas Pengunci",
+      "biome": "Jurang hutan, sungai bawah tanah, akar besar",
+      "rescue_animal": "Harimau Sumatra",
+      "objective": "Padamkan api di pengunci lalu lepaskan jembatan ke posisi melintang.",
+      "core_assets": [
+        "jembatan_berengsel",
+        "pengunci",
+        "api"
+      ],
+      "difficulty": "Menengah",
+      "learning_or_challenge": "Gravitasi dan urutan.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 20,
+      "mission_group": 7,
+      "mission_name": "Jembatan yang Harus Dijatuhkan",
+      "title": "Ayunan Jembatan",
+      "biome": "Jurang hutan, sungai bawah tanah, akar besar",
+      "rescue_animal": "Harimau Sumatra",
+      "objective": "Atur pelepasan dan stopper agar jembatan tidak berayun melewati titik lintas.",
+      "core_assets": [
+        "jembatan_berengsel",
+        "stopper",
+        "rantai"
+      ],
+      "difficulty": "Sulit",
+      "learning_or_challenge": "Momentum dan batas sudut.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 21,
+      "mission_group": 7,
+      "mission_name": "Jembatan yang Harus Dijatuhkan",
+      "title": "Jembatan Berantai",
+      "biome": "Jurang hutan, sungai bawah tanah, akar besar",
+      "rescue_animal": "Harimau Sumatra",
+      "objective": "Geser batu sebagai penahan, lepaskan dua pengunci dalam urutan tepat, lalu stabilkan jembatan.",
+      "core_assets": [
+        "jembatan_segmen",
+        "dua_pengunci",
+        "batu",
+        "harimau"
+      ],
+      "difficulty": "Sangat sulit",
+      "learning_or_challenge": "Beberapa mekanisme dan solusi pemulihan.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 22,
+      "mission_group": 8,
+      "mission_name": "Bendungan Gambut",
+      "title": "Kanal Pertama",
+      "biome": "Rawa gambut Sumatra, kanal gelap, akar dan vegetasi rawa",
+      "rescue_animal": "Rusa Sumatra",
+      "objective": "Buka satu pintu air untuk mengalirkan air ke titik api tanpa membanjiri pijakan.",
+      "core_assets": [
+        "bendungan",
+        "pintu_air",
+        "api",
+        "rusa"
+      ],
+      "difficulty": "Menengah",
+      "learning_or_challenge": "Aliran terarah dan tinggi air.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 23,
+      "mission_group": 8,
+      "mission_name": "Bendungan Gambut",
+      "title": "Dua Jalur",
+      "biome": "Rawa gambut Sumatra, kanal gelap, akar dan vegetasi rawa",
+      "rescue_animal": "Rusa Sumatra",
+      "objective": "Bagi aliran ke dua kanal dan tentukan api mana yang dipadamkan lebih dulu.",
+      "core_assets": [
+        "dua_kanal",
+        "dua_pintu_air",
+        "dua_api"
+      ],
+      "difficulty": "Sulit",
+      "learning_or_challenge": "Prioritas dan aliran bercabang.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 24,
+      "mission_group": 8,
+      "mission_name": "Bendungan Gambut",
+      "title": "Luapan Pemicu",
+      "biome": "Rawa gambut Sumatra, kanal gelap, akar dan vegetasi rawa",
+      "rescue_animal": "Rusa Sumatra",
+      "objective": "Kendalikan luapan agar mendorong batu ke pemicu, tetapi jangan sampai merendam jalur evakuasi.",
+      "core_assets": [
+        "dua_kanal",
+        "luapan",
+        "batu",
+        "platform",
+        "rusa"
+      ],
+      "difficulty": "Sangat sulit",
+      "learning_or_challenge": "Air mengubah posisi objek dan akses.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 25,
+      "mission_group": 9,
+      "mission_name": "Rantai Penyelamatan Gajah",
+      "title": "Padamkan Penyangga",
+      "biome": "Goa hutan, kayu tua, batu dan akar",
+      "rescue_animal": "Anak gajah Sumatra",
+      "objective": "Padamkan api sebelum menggeser kayu penyangga.",
+      "core_assets": [
+        "api",
+        "kayu_berengsel",
+        "rantai"
+      ],
+      "difficulty": "Menengah",
+      "learning_or_challenge": "Mempelajari konsekuensi urutan.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 26,
+      "mission_group": 9,
+      "mission_name": "Rantai Penyelamatan Gajah",
+      "title": "Jembatan Sementara",
+      "biome": "Goa hutan, kayu tua, batu dan akar",
+      "rescue_animal": "Anak gajah Sumatra",
+      "objective": "Turunkan kayu berengsel dan dorong batu untuk mengunci posisi jembatan.",
+      "core_assets": [
+        "kayu_berengsel",
+        "batu",
+        "stopper",
+        "anak_gajah"
+      ],
+      "difficulty": "Sulit",
+      "learning_or_challenge": "Kombinasi momentum dan penguncian.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 27,
+      "mission_group": 9,
+      "mission_name": "Rantai Penyelamatan Gajah",
+      "title": "Rantai Reaksi",
+      "biome": "Goa hutan, kayu tua, batu dan akar",
+      "rescue_animal": "Anak gajah Sumatra",
+      "objective": "Padamkan dua api dalam urutan yang benar, atur kayu dan batu, lalu buka jalur tanpa membuat soft-lock.",
+      "core_assets": [
+        "dua_api",
+        "dua_kayu",
+        "katrol",
+        "batu",
+        "anak_gajah"
+      ],
+      "difficulty": "Sangat sulit",
+      "learning_or_challenge": "Puzzle multi-langkah dengan pemulihan.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 28,
+      "mission_group": 10,
+      "mission_name": "Duel Tekanan — Penjaga Goa Api",
+      "title": "Penjaga Terbangun",
+      "biome": "Arena goa karst Sumatra dengan akar, pakis, dan batu berpendar",
+      "rescue_animal": "Orangutan Sumatra",
+      "objective": "Pelajari telegraph bola api dan belokkan satu proyektil dengan semburan air.",
+      "core_assets": [
+        "boss",
+        "bola_api",
+        "pressure_meter"
+      ],
+      "difficulty": "Sulit",
+      "learning_or_challenge": "Pengenalan bos yang terbaca.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 29,
+      "mission_group": 10,
+      "mission_name": "Duel Tekanan — Penjaga Goa Api",
+      "title": "Dua Ancaman",
+      "biome": "Arena goa karst Sumatra dengan akar, pakis, dan batu berpendar",
+      "rescue_animal": "Orangutan Sumatra",
+      "objective": "Hadapi dua bola api dengan jeda berbeda; gunakan batu pelindung dan arahkan satu proyektil ke mekanisme.",
+      "core_assets": [
+        "boss",
+        "dua_bola_api",
+        "batu_pelindung",
+        "gear"
+      ],
+      "difficulty": "Sangat sulit",
+      "learning_or_challenge": "Prioritas, momentum, dan perlindungan.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    },
+    {
+      "level_id": 30,
+      "mission_group": 10,
+      "mission_name": "Duel Tekanan — Penjaga Goa Api",
+      "title": "Inti Goa Api",
+      "biome": "Arena goa karst Sumatra dengan akar, pakis, dan batu berpendar",
+      "rescue_animal": "Orangutan Sumatra",
+      "objective": "Aktifkan dua mekanisme saat bertahan dari serangan, buka inti bos, padamkan inti, lalu selamatkan orangutan.",
+      "core_assets": [
+        "boss_multi_fase",
+        "dua_katup",
+        "gear",
+        "inti_api",
+        "orangutan"
+      ],
+      "difficulty": "Puncak",
+      "learning_or_challenge": "Gabungan seluruh keterampilan; pola adil dan bisa dipulihkan.",
+      "reuse_existing_java_systems": [
+        "fire_truck",
+        "water_jet",
+        "fire_extinguish",
+        "physics",
+        "camera",
+        "hud",
+        "pause",
+        "win_lose",
+        "reset"
+      ],
+      "asset_strategy": "reuse_existing_assets_and_variants; add_new_sprite_only_if_required",
+      "qa_requirements": [
+        "solvable",
+        "rescue_path_reachable",
+        "reset_restores_state",
+        "no_unrecoverable_softlock"
+      ]
+    }
+  ]
+}

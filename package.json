@@ -9,7 +9,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "test": "playwright test",
-    "assets": "python scripts/prepare_assets.py"
+    "assets": "python scripts/prepare_assets.py",
+    "assets:sumatra": "python scripts/prepare_sumatra.py"
   },
   "dependencies": { "phaser": "3.90.0" },
   "devDependencies": {

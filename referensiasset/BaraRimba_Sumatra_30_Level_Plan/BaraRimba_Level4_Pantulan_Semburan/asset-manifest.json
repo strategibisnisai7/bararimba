@@ -1,0 +1,167 @@
+{
+  "project": "BaraRimba",
+  "region": "Sumatra",
+  "level": 4,
+  "mission": "Pantulan Semburan",
+  "rescue_target": "Harimau Sumatra",
+  "objective": "Arahkan semburan ke panel pemantul pertama dan kedua untuk memadamkan api di balik penghalang, aktifkan pengunci jembatan, lalu pandu harimau ke titik aman.",
+  "references": [
+    "reference/level4_reference_1.png",
+    "reference/level4_reference_2.png"
+  ],
+  "category_crops": [
+    {
+      "category": "01_terrain_batu",
+      "file": "sprites/01_terrain_batu/terrain_batu_reference.png",
+      "source_crop_xyxy": [
+        0,
+        450,
+        320,
+        680
+      ],
+      "size_px": [
+        320,
+        230
+      ],
+      "description": "Terrain, batu, tebing dan pijakan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "02_struktur_kayu",
+      "file": "sprites/02_struktur_kayu/struktur_kayu_reference.png",
+      "source_crop_xyxy": [
+        320,
+        450,
+        630,
+        680
+      ],
+      "size_px": [
+        310,
+        230
+      ],
+      "description": "Balok, rangka kayu dan struktur",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "03_panel_pemantul",
+      "file": "sprites/03_panel_pemantul/panel_pemantul_reference.png",
+      "source_crop_xyxy": [
+        630,
+        450,
+        930,
+        680
+      ],
+      "size_px": [
+        300,
+        230
+      ],
+      "description": "Panel pemantul air dan dudukan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "04_mekanisme_pengunci",
+      "file": "sprites/04_mekanisme_pengunci/mekanisme_pengunci_reference.png",
+      "source_crop_xyxy": [
+        930,
+        450,
+        1240,
+        680
+      ],
+      "size_px": [
+        310,
+        230
+      ],
+      "description": "Katrol, tali, beban dan pengunci",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "05_api_asap",
+      "file": "sprites/05_api_asap/api_asap_reference.png",
+      "source_crop_xyxy": [
+        1240,
+        450,
+        1535,
+        680
+      ],
+      "size_px": [
+        295,
+        230
+      ],
+      "description": "Api, bara, asap dan kayu terbakar",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "06_air_efek",
+      "file": "sprites/06_air_efek/air_efek_reference.png",
+      "source_crop_xyxy": [
+        0,
+        680,
+        410,
+        850
+      ],
+      "size_px": [
+        410,
+        170
+      ],
+      "description": "Air terjun, semburan dan percikan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "07_vegetasi_sumatra",
+      "file": "sprites/07_vegetasi_sumatra/vegetasi_sumatra_reference.png",
+      "source_crop_xyxy": [
+        410,
+        680,
+        780,
+        850
+      ],
+      "size_px": [
+        370,
+        170
+      ],
+      "description": "Vegetasi tropis Sumatra",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "08_satwa_sumatra",
+      "file": "sprites/08_satwa_sumatra/harimau_sumatra_reference.png",
+      "source_crop_xyxy": [
+        780,
+        680,
+        1170,
+        850
+      ],
+      "size_px": [
+        390,
+        170
+      ],
+      "description": "Harimau Sumatra dan penanda penyelamatan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "09_properti",
+      "file": "sprites/09_properti/properti_reference.png",
+      "source_crop_xyxy": [
+        1170,
+        680,
+        1535,
+        850
+      ],
+      "size_px": [
+        365,
+        170
+      ],
+      "description": "Peti, drum, kayu dan properti tambahan",
+      "status": "category_reference_crop_not_individual_sprite"
+    }
+  ],
+  "qa_report": "reports/visual_qa.json",
+  "production_status": "visual reference pack; not final isolated sprite pack",
+  "implementation_notes": [
+    "Gunakan aset mobil pemadam BaraRimba yang sudah tersedia.",
+    "Panel pemantul harus punya pivot yang dapat diputar dan sudut pantulan yang dapat diprediksi.",
+    "Simulasikan semburan sebagai ray/particle stream yang bisa dibelokkan oleh panel, bukan CFD penuh.",
+    "Api yang menghalangi jalur harus padam saat terkena air selama durasi yang ditentukan.",
+    "Jalur harimau menuju bendera aman harus kontinu setelah penghalang terbuka."
+  ]
+}

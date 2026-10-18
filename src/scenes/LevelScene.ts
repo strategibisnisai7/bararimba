@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { ASSETS, ASSET_GROUPS, assetsFor, STEP, RENDER_SCALE, WATER_GRAVITY, WATER_SPEED, clamp } from '../config/level';
-import { LEVELS, type LevelDef } from '../config/levels';
+import { LEVELS, regionOf, type LevelDef } from '../config/levels';
 import { Truck } from '../entities/Truck';
 import { Animal } from '../entities/Animal';
 import { Boss } from '../entities/Boss';
@@ -69,6 +69,10 @@ export class LevelScene extends Phaser.Scene {
   private wheelPouring = false;
   private respawnT = 3;
   private pourAcc = 0;
+  /** Rescue walk (Sumatra): last blocker hinted, and its cooldown. */
+  private walkHint = '';
+  private walkHintT = 0;
+  private freed = false;
 
   constructor() { super('level'); }
   preload() {
@@ -77,9 +81,9 @@ export class LevelScene extends Phaser.Scene {
     const def = LEVELS[(data?.level ?? 1) - 1];
     // Temple-stone pieces (blocks, pillars) borrow the ruins set on any theme.
     const ruins = def.theme !== 'ruins' && (def.decor.some(d => d.key.startsWith('p-')) || (def.rocks ?? []).some(r => r.stone) || !!def.basin?.stone);
-    for (const key of [...assetsFor(def.theme, !!def.boss, !!def.terrain), ...(ruins ? ASSET_GROUPS.ruins : []), 'alert'])
+    for (const key of [...assetsFor(def.theme, !!def.boss, !!def.terrain, def.region === 'sumatra'), ...(ruins ? ASSET_GROUPS.ruins : []), 'alert'])
       if (!this.textures.exists(key)) this.load.image(key, `/assets/${key === 'alert' ? 'ui/alert' : ASSETS[key]}.webp`);
-    this.load.on('progress', (v: number) => { const el = document.querySelector('#load-progress'); if (el) el.textContent = `${Math.round(v * 100)}% · Hutan Jawa`; });
+    this.load.on('progress', (v: number) => { const el = document.querySelector('#load-progress'); if (el) el.textContent = `${Math.round(v * 100)}% · ${regionOf(def).forest}`; });
     this.load.on('loaderror', () => {
       const s = document.querySelector('#loading strong'); if (s) s.textContent = 'Aset belum berhasil dimuat';
       const p = document.querySelector('#load-progress'); if (p) p.textContent = 'Muat ulang halaman untuk mencoba lagi.';
@@ -89,7 +93,7 @@ export class LevelScene extends Phaser.Scene {
     this.ui = this.registry.get('ui');
     this.def = LEVELS[(data.level ?? 1) - 1];
     this.mode = data.mode === 'play' ? 'intro' : 'attract';
-    Object.assign(this, { truckHp: 100, idleWater: 0, refillToast: false, burnWarned: false, boss: undefined, pressure: 100, pressureLock: false, hitCool: 0, respawnT: 3, spreads: 0, acc: 0, matterAcc: 0, burn: 0, elapsed: 0, hudT: 0, endT: 0, result: undefined, introT: 0, pointerHeld: false, firing: false });
+    Object.assign(this, { walkHint: '', walkHintT: 0, freed: false, truckHp: 100, idleWater: 0, refillToast: false, burnWarned: false, boss: undefined, pressure: 100, pressureLock: false, hitCool: 0, respawnT: 3, spreads: 0, acc: 0, matterAcc: 0, burn: 0, elapsed: 0, hudT: 0, endT: 0, result: undefined, introT: 0, pointerHeld: false, firing: false });
     this.keys.clear();
     createParticleTextures(this);
     this.cameras.main.setZoom(RENDER_SCALE);
@@ -115,7 +119,11 @@ export class LevelScene extends Phaser.Scene {
     this.water = new WaterSystem(this, this.world.surfaces, () => this.fires.burning,
       (hit, d) => this.onWaterHit(hit, d), (f, x, y) => this.onWaterFire(f, x, y), (x, y) => this.effects.mist(x, y), this.def.supply);
     if (this.def.boss) this.boss = new Boss(this, this.def.boss, this.effects);
-    this.water.absorb = (x, y) => (!!this.world.basin && this.world.absorb(x, y)) || this.world.puzzles.absorb(x, y);
+    this.water.absorb = (x, y) => (!!this.world.basin && this.world.absorb(x, y)) || this.world.puzzles.absorb(x, y) || !!this.world.sm?.absorb(x, y);
+    if (this.world.sm) {
+      this.world.sm.animal = this.animal;
+      this.world.sm.onEvent = msg => { if (this.mode === 'playing') { this.ui.toast(msg, 2200); sound.click(); } };
+    }
     this.world.onPour = (x, y, vx, vy) => this.water.pour(x, y, vx, vy);
     this.world.puzzles.onOpen = (id, sw) => {
       this.world.swingRamps(id);
@@ -187,6 +195,7 @@ export class LevelScene extends Phaser.Scene {
       if (b.rope && !b.door && --b.hp <= 0) { this.world.breakRope(); this.ui.toast('Tali putus! Tong air jatuh…', 1800); sound.click(); }
     }
     if (s.kind === 'switch') this.world.puzzles.hit(s);
+    if (this.world.sm?.waterHit(s, d, i => !!this.fires.fires[i]?.lit)) { if (Math.random() < .4) this.effects.splash(hit.point.x, hit.point.y, 3); return; }
     if (s.kind === 'ramp') return;
     const wh = this.world.wheel;
     if (s.kind === 'wheel' && wh) {
@@ -204,8 +213,14 @@ export class LevelScene extends Phaser.Scene {
   }
   private onFireOut(f: Fire) {
     if (this.mode === 'attract') return;
+    this.world.sm?.fireOut(f.index);
     sound.chime(); this.effects.steam(f.def.x, f.def.y - 30, 6);
     const left = this.fires.burning.length;
+    if (this.def.sm) {
+      this.ui.toast(left ? `Api padam! Masih ${left} titik api lagi.` : this.animal.arrived ? `Semua api padam! ${this.def.animal.name} selamat!`
+        : this.world.sm!.free ? `Semua api padam! ${this.def.animal.name} menuju bendera.` : `Semua api padam! Buka jalan untuk ${this.def.animal.name}.`);
+      return;
+    }
     this.ui.toast(left ? `Api padam! Masih ${left} titik api lagi.` : this.world.cageOpen ? `Semua api padam! ${this.def.animal.name} selamat!` : 'Semua api padam! Sekarang buka kandang dengan tombol merah.');
   }
   private onSpread(f: Fire) {
@@ -496,14 +511,64 @@ export class LevelScene extends Phaser.Scene {
     }
     if (this.boss) {
       this.ui.bossHud(this.pressure, this.water.supply / this.water.capacity * 100, this.truckHp, this.boss.hp / this.boss.max * 100, this.boss.fuel, this.boss.reloading, this.pressureLock, this.idleWater >= 10 && this.water.supply < this.water.capacity);
-      if (this.boss.defeated) { for (const f of this.fires.burning) { f.extinguish(); } return this.finish(true); }
+      if (this.def.sm) {
+        // Sumatra arena: the shield drops once its mechanisms run; after the boss falls the animal still has to walk out.
+        const sm = this.world.sm!, was = this.boss.shielded;
+        this.boss.shielded = !(sm.def.shield ?? []).every(id => sm.isDone(id));
+        if (was && !this.boss.shielded) { sound.win(); this.ui.toast(`Perisai ${this.def.boss!.name ?? 'Pembakar Hutan'} runtuh! Semprot sekarang!`, 2600); }
+        if (this.boss.defeated) {
+          if (!sm.flags.has('boss')) { sm.flags.add('boss'); for (const f of this.fires.burning) f.extinguish(); }
+          this.updateRescue(dt);
+          if (this.animal.arrived) return this.finish(true);
+          return;
+        }
+      } else if (this.boss.defeated) { for (const f of this.fires.burning) { f.extinguish(); } return this.finish(true); }
       if (this.burn >= 70 && !this.burnWarned) { this.burnWarned = true; this.ui.toast('Hutan hampir habis terbakar! Padamkan api yang dilempar boss!', 2600); }
       if (this.truckHp <= 0) return this.finish(false, 'truck');
       if (this.burn >= 100) return this.finish(false, 'burn');
       return;   // no water loss here: the reserve refills itself after 10 s idle
     }
-    if (this.fires.burning.length === 0 && this.world.cageOpen) return this.finish(true);
+    if (this.def.sm) this.updateRescue(dt);
+    if (this.fires.burning.length === 0 && (this.def.sm ? this.animal.arrived : this.world.cageOpen)) return this.finish(true);
     if (this.water.supply <= 0 && this.water.active === 0 && !this.def.refill) return this.finish(false, 'water');
+  }
+  /** Sumatra rescue: once its way is opened the animal walks to the flag, waiting at whatever still blocks it. */
+  private updateRescue(dt: number) {
+    const sm = this.world.sm!;
+    if (!sm.free || this.animal.arrived) return;
+    if (!this.freed) { this.freed = true; this.ui.toast(`Jalan terbuka! ${this.def.animal.name} menuju bendera.`, 2400); }
+    const goal = sm.walkGoal();
+    if (goal === 'wait' || goal === 'ride') return;
+    const why = this.animal.walk(dt, goal, sm.def.rescue.speed ?? 70, x => this.world.groundAt(x), x => this.pathBlock(x));
+    if (this.animal.reached) { if (goal === sm.def.rescue.flagX) this.animal.arrived = true; else sm.reached(); }
+    if (this.animal.arrived) {
+      this.effects.hearts(this.animal.x, this.animal.headY, 6); sound.chime();
+      if (this.fires.burning.length) this.ui.toast(`${this.def.animal.name} aman di bendera! Padamkan sisa api.`, 2400);
+    }
+    this.walkHintT -= dt;
+    if (why && (why !== this.walkHint || this.walkHintT <= 0)) {
+      this.walkHint = why; this.walkHintT = 6;
+      const msg: Record<string, string> = {
+        fire: `${this.def.animal.name} takut api! Padamkan api di jalannya.`,
+        gate: 'Pintu masih tertutup.',
+        rock: 'Batu menghalangi jalan satwa. Dorong dengan semprotan air!',
+        gap: `${this.def.animal.name} tidak bisa menyeberang. Buat pijakan dulu!`,
+        wall: 'Jalur terlalu curam untuk satwa.',
+      };
+      this.ui.toast(msg[why] ?? 'Jalur terhalang.', 2200);
+    }
+  }
+  /** What stops the rescued animal stepping onto x: a gap, a steep step, a closed gate, a fire or a loose rock. */
+  private pathBlock(x: number) {
+    // Seams narrower than a stride (platform edge to cliff) are stepped over.
+    const w = this.world, top = w.surfaceAt(x) ?? w.surfaceAt(x - 12) ?? w.surfaceAt(x + 12);
+    if (top === null) return 'gap';
+    if (Math.abs(top - this.animal.py) > 40) return 'wall';
+    if (w.puzzles.gateBlocks(x, top) || w.sm?.blocks(x, top)) return 'gate';
+    if (this.fires.burning.some(f => Math.abs(f.def.x - x) < 46 + f.intensity * 30 && Math.abs(f.def.y - top) < 50)) return 'fire';
+    // A rock standing on the path blocks it; one sunk into a pit (top level with the path) is a stepping stone.
+    if (w.props.some(p => !p.gone && !p.floating && p.body.bounds.min.x - 10 < x && p.body.bounds.max.x + 10 > x && p.body.bounds.max.y > top - 30 && p.body.bounds.min.y < top - 12)) return 'rock';
+    return '';
   }
   private finish(won: boolean, reason?: ResultInfo['reason']) {
     this.mode = 'ended'; this.endT = won ? 2.6 : 2.8;
@@ -512,7 +577,7 @@ export class LevelScene extends Phaser.Scene {
     this.ui.showHud(false);
     this.animal.setMood(won ? 'happy' : 'crying');
     // Focus the camera on the animal so the player sees it celebrate or cry.
-    this.tweens.addCounter({ from: this.cam, to: this.camX(this.def.animal.x - 200), duration: 900, ease: 'sine.inOut',
+    this.tweens.addCounter({ from: this.cam, to: this.camX(this.animal.x - 200), duration: 900, ease: 'sine.inOut',
       onUpdate: tw => { this.cam = tw.getValue() ?? this.cam; } });
     won ? sound.win() : sound.fail();
     const waterOk = this.boss ? this.truckHp >= 50 : this.water.used <= this.def.waterBudget;
@@ -534,9 +599,11 @@ export class LevelScene extends Phaser.Scene {
       mode: this.mode, level: this.def.id, water: this.water.supply, used: this.water.used, burn: this.burn,
       fires: this.fires.fires.map(f => ({ lit: f.lit, i: +f.intensity.toFixed(3), x: f.def.x })),
       truck: { x: this.truck.x, y: this.truck.y }, nozzle: { ...this.truck.cannon.nozzle }, cam: this.cam,
-      animal: { hp: this.animal.hp, mood: this.animal.mood }, drops: this.water.active, avgFrame: this.frameAvg,
+      animal: { hp: this.animal.hp, mood: this.animal.mood, x: this.animal.x, arrived: this.animal.arrived }, drops: this.water.active, avgFrame: this.frameAvg,
       props: this.world.props.map(p => ({ x: p.body.position.x, y: p.body.position.y, gone: p.gone })),
       barrel: this.world.barrel ? { hp: this.world.barrel.hp, landed: this.world.barrel.landed } : null,
+      gates: this.world.puzzles.gates.map(g => ({ id: g.id, open: g.open })),
+      sm: this.world.sm?.status() ?? null,
     };
   }
 }

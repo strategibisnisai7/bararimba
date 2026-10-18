@@ -1,0 +1,177 @@
+{
+  "project": "BaraRimba",
+  "region": "Sumatra",
+  "level": 8,
+  "mission": "Bendungan Gambut",
+  "rescue_target": "Rusa Sumatra",
+  "difficulty": {
+    "relative_to_level_7": "lebih tinggi",
+    "new_complexity": [
+      "mengatur dua jalur air",
+      "menentukan urutan pintu air",
+      "mengelola tinggi air di dua cekungan",
+      "menghindari luapan yang mengubah momentum objek",
+      "memadamkan dua titik api dengan persediaan/aliran terbatas"
+    ],
+    "expected_solution_steps": 7
+  },
+  "objective": "Atur dua pintu air untuk mengalihkan aliran ke titik api berbeda, jaga ketinggian air agar platform tidak meluap, geser batu untuk membuka jalur, lalu selamatkan rusa Sumatra.",
+  "reference": "reference/level8_full_visual_reference.png",
+  "category_crops": [
+    {
+      "category": "01_terrain_batu",
+      "file": "sprites/01_terrain_batu/terrain_batu_reference.png",
+      "source_crop_xyxy": [
+        0,
+        450,
+        320,
+        680
+      ],
+      "size_px": [
+        320,
+        230
+      ],
+      "description": "Terrain, batu fisika, tebing dan pijakan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "02_struktur_bendungan",
+      "file": "sprites/02_struktur_bendungan/struktur_bendungan_reference.png",
+      "source_crop_xyxy": [
+        320,
+        450,
+        630,
+        680
+      ],
+      "size_px": [
+        310,
+        230
+      ],
+      "description": "Struktur kayu, bendungan, penyangga",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "03_saluran_pintu_air",
+      "file": "sprites/03_saluran_pintu_air/saluran_pintu_air_reference.png",
+      "source_crop_xyxy": [
+        630,
+        450,
+        930,
+        680
+      ],
+      "size_px": [
+        300,
+        230
+      ],
+      "description": "Saluran, pintu air dan aliran",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "04_platform_katrol",
+      "file": "sprites/04_platform_katrol/platform_katrol_reference.png",
+      "source_crop_xyxy": [
+        930,
+        450,
+        1240,
+        680
+      ],
+      "size_px": [
+        310,
+        230
+      ],
+      "description": "Platform, katrol, tali dan pemberat",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "05_api_asap_air",
+      "file": "sprites/05_api_asap_air/api_asap_air_reference.png",
+      "source_crop_xyxy": [
+        1240,
+        450,
+        1535,
+        680
+      ],
+      "size_px": [
+        295,
+        230
+      ],
+      "description": "Api, asap, semburan, percikan dan air terjun",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "06_vegetasi_rawa_sumatra",
+      "file": "sprites/06_vegetasi_rawa_sumatra/vegetasi_rawa_sumatra_reference.png",
+      "source_crop_xyxy": [
+        0,
+        680,
+        410,
+        850
+      ],
+      "size_px": [
+        410,
+        170
+      ],
+      "description": "Vegetasi rawa, akar, pakis dan tanaman air",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "07_rusa_sumatra",
+      "file": "sprites/07_rusa_sumatra/rusa_sumatra_reference.png",
+      "source_crop_xyxy": [
+        410,
+        680,
+        780,
+        850
+      ],
+      "size_px": [
+        370,
+        170
+      ],
+      "description": "Rusa Sumatra dan pose penyelamatan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "08_properti",
+      "file": "sprites/08_properti/properti_reference.png",
+      "source_crop_xyxy": [
+        780,
+        680,
+        1135,
+        850
+      ],
+      "size_px": [
+        355,
+        170
+      ],
+      "description": "Peti, drum, batu bata dan penanda aman",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "09_pintu_jalur",
+      "file": "sprites/09_pintu_jalur/pintu_jalur_reference.png",
+      "source_crop_xyxy": [
+        1135,
+        680,
+        1535,
+        850
+      ],
+      "size_px": [
+        400,
+        170
+      ],
+      "description": "Pintu, jalur akhir dan struktur tambahan",
+      "status": "category_reference_crop_not_individual_sprite"
+    }
+  ],
+  "qa_report": "reports/visual_qa.json",
+  "production_status": "visual reference pack; not final isolated sprites",
+  "implementation_notes": [
+    "Gunakan aset mobil pemadam BaraRimba yang sudah tersedia.",
+    "Level 8 lebih sulit daripada Level 7: dua jalur air dan dua titik api memerlukan urutan katup yang tepat.",
+    "Model air menggunakan volume diskret dan koneksi antar saluran, bukan simulasi fluida penuh.",
+    "Setiap pintu air memiliki state terbuka, tertutup, dan setengah terbuka.",
+    "Jika bak meluap, air mendorong objek kecil dan dapat menggeser batu; luapan harus dapat diprediksi dan tidak membuat level mustahil.",
+    "Api hanya padam jika menerima volume/semprotan air yang cukup.",
+    "Jalur rusa menuju titik aman harus kontinu dan bebas api setelah puzzle selesai."
+  ]
+}

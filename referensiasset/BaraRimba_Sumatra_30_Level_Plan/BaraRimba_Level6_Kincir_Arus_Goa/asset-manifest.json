@@ -1,0 +1,177 @@
+{
+  "project": "BaraRimba",
+  "region": "Sumatra",
+  "level": 6,
+  "mission": "Kincir Arus Goa",
+  "rescue_target": "Orangutan Sumatra",
+  "difficulty": {
+    "relative_to_level_5": "lebih tinggi",
+    "new_complexity": [
+      "mengatur debit melalui dua saluran",
+      "mengatur arah dan momentum aliran",
+      "kincir perlu mencapai ambang putaran",
+      "mekanisme rantai membuka penghalang",
+      "timing memadamkan api dan menyeberang"
+    ],
+    "expected_solution_steps": 6
+  },
+  "objective": "Arahkan air ke saluran agar kincir mencapai putaran yang cukup, aktifkan rantai mekanisme, geser batu untuk membuka jalur, padamkan api, lalu selamatkan orangutan.",
+  "reference": "reference/level6_full_visual_reference.png",
+  "category_crops": [
+    {
+      "category": "01_terrain_batu",
+      "file": "sprites/01_terrain_batu/terrain_batu_reference.png",
+      "source_crop_xyxy": [
+        0,
+        450,
+        320,
+        680
+      ],
+      "size_px": [
+        320,
+        230
+      ],
+      "description": "Terrain, batu fisika, tebing dan pijakan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "02_struktur_saluran",
+      "file": "sprites/02_struktur_saluran/struktur_saluran_reference.png",
+      "source_crop_xyxy": [
+        320,
+        450,
+        630,
+        680
+      ],
+      "size_px": [
+        310,
+        230
+      ],
+      "description": "Struktur kayu, saluran air dan sambungan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "03_kincir_mekanisme",
+      "file": "sprites/03_kincir_mekanisme/kincir_mekanisme_reference.png",
+      "source_crop_xyxy": [
+        630,
+        450,
+        930,
+        680
+      ],
+      "size_px": [
+        300,
+        230
+      ],
+      "description": "Kincir air, poros, roda gigi dan mekanisme",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "04_platform_katrol",
+      "file": "sprites/04_platform_katrol/platform_katrol_reference.png",
+      "source_crop_xyxy": [
+        930,
+        450,
+        1240,
+        680
+      ],
+      "size_px": [
+        310,
+        230
+      ],
+      "description": "Platform, katrol, tali, beban dan kandang",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "05_api_asap_air",
+      "file": "sprites/05_api_asap_air/api_asap_air_reference.png",
+      "source_crop_xyxy": [
+        1240,
+        450,
+        1535,
+        680
+      ],
+      "size_px": [
+        295,
+        230
+      ],
+      "description": "Api, asap, air dan efek",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "06_vegetasi_sumatra",
+      "file": "sprites/06_vegetasi_sumatra/vegetasi_sumatra_reference.png",
+      "source_crop_xyxy": [
+        0,
+        680,
+        410,
+        850
+      ],
+      "size_px": [
+        410,
+        170
+      ],
+      "description": "Vegetasi tropis Sumatra",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "07_orangutan",
+      "file": "sprites/07_orangutan/orangutan_reference.png",
+      "source_crop_xyxy": [
+        410,
+        680,
+        780,
+        850
+      ],
+      "size_px": [
+        370,
+        170
+      ],
+      "description": "Orangutan dan pose penyelamatan",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "08_properti",
+      "file": "sprites/08_properti/properti_reference.png",
+      "source_crop_xyxy": [
+        780,
+        680,
+        1135,
+        850
+      ],
+      "size_px": [
+        355,
+        170
+      ],
+      "description": "Peti, drum, batu bata dan penanda aman",
+      "status": "category_reference_crop_not_individual_sprite"
+    },
+    {
+      "category": "09_jalur_pintu",
+      "file": "sprites/09_jalur_pintu/jalur_pintu_reference.png",
+      "source_crop_xyxy": [
+        1135,
+        680,
+        1535,
+        850
+      ],
+      "size_px": [
+        400,
+        170
+      ],
+      "description": "Jalur, pintu batu dan struktur tambahan",
+      "status": "category_reference_crop_not_individual_sprite"
+    }
+  ],
+  "qa_report": "reports/visual_qa.json",
+  "production_status": "visual reference pack; not final isolated sprites",
+  "implementation_notes": [
+    "Gunakan aset mobil pemadam BaraRimba yang sudah tersedia.",
+    "Level 6 lebih sulit dari Level 5: pemain harus mengelola debit dan arah air, bukan hanya mengisi bak.",
+    "Kincir memakai pivot tetap dan torsi sederhana dari aliran; hindari simulasi fluida penuh.",
+    "Saluran memiliki gate/valve yang dapat mengubah debit dan arah.",
+    "Ambang putaran mengaktifkan rantai atau katrol setelah delay singkat; jika aliran terputus, kincir melambat.",
+    "Batu bergerak membuka jalur hanya setelah mekanisme aktif.",
+    "Padamkan api sebelum orangutan melewati jalur evakuasi."
+  ]
+}

@@ -88,8 +88,15 @@ export class WaterSystem {
   }
   /** Turn an impact into running water, a slide down a wall, or a merge with the river. */
   private land(p: Drop, hit: Hit) {
-    if (hit.surface.kind === 'river' || hit.surface.kind === 'switch') { this.kill(p); return; }
+    if (['river', 'switch', 'raft', 'handle'].includes(hit.surface.kind)) { this.kill(p); return; }
     const { normal: nrm, point } = hit;
+    if (hit.surface.kind === 'mirror') {
+      // Reflector panel: mirror the velocity about the struck face, losing a little speed.
+      const dot = p.vx * nrm.x + p.vy * nrm.y;
+      p.vx = (p.vx - 2 * dot * nrm.x) * .94; p.vy = (p.vy - 2 * dot * nrm.y) * .94;
+      p.x = point.x + nrm.x * 2; p.y = point.y + nrm.y * 2;
+      return;
+    }
     if (hit.surface.kind === 'ramp') {
       // Skim: keep only the speed along the plank, so a jet slides up it and launches off the end.
       let tx = -nrm.y, ty = nrm.x;
