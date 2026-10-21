@@ -80,6 +80,12 @@
 .title-plank b{display:block;font-size:2.3cqw;font-weight:900;letter-spacing:.04em;line-height:1.1}.title-plank small{display:block;font-size:1.25cqw;color:#ffe8c2}
 .title-plank.small{width:auto;display:inline-block;padding:.5cqw 2cqw}.title-plank.small b{font-size:1.9cqw}
 .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1.1cqw;width:43cqw;margin:1.6cqw auto 0}
+.board.expanded .grid{width:36cqw;gap:.75cqw;margin-top:1.1cqw}
+.board.expanded .tile b{font-size:2.5cqw}
+.board.expanded .tile-stars i{width:1.1cqw;height:1.1cqw}
+.board.huge .grid{grid-template-columns:repeat(8,1fr);width:42cqw;gap:.55cqw;margin-top:1cqw}
+.board.huge .tile b{font-size:2.1cqw}.board.huge .tile small{font-size:.9cqw}
+.board.huge .tile-stars i{width:.95cqw;height:.95cqw}
 .tile{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2cqw;border-radius:1cqw;border:.22cqw solid #2f7a1f;background:linear-gradient(#72d651,#3f9f2b);box-shadow:inset 0 .3cqw 0 #aaf084,0 .35cqw 0 #245c16,0 .5cqw .8cqw #0005;color:#fff;transition:transform .12s}
 .tile:hover{transform:translateY(-.15cqw)}
 .tile b{font-size:3cqw;font-weight:900;line-height:1;text-shadow:0 .2cqw 0 #1e5a12,0 0 .3cqw #1e5a12}
@@ -142,6 +148,7 @@
 .hud{position:absolute;inset:0}
 .hud-banner{position:absolute;left:1.5cqw;top:1.3cqw;height:4.4cqw;display:flex;align-items:center;gap:.9cqw;padding:0 1.3cqw;background:linear-gradient(#a26b3b,#7b4b25);border:.24cqw solid #4c2a10;border-radius:.8cqw;box-shadow:inset 0 .22cqw 0 #c78d55,0 .4cqw 1cqw #0006;color:#fff6e3;font-weight:900;text-shadow:0 .16cqw 0 #3a1f0a}
 .hud-banner .code{font-size:2cqw;color:#ffe08a}.hud-banner .name{font-size:1.8cqw}.hud-banner .hstars{display:flex;gap:.1cqw}.hud-banner .star{width:2.2cqw}
+.mission-progress{position:absolute;left:1.5cqw;top:11.2cqw;max-width:64cqw;padding:.6cqw 1cqw;border:.15cqw solid #a8ce98;border-radius:.6cqw;background:#183a2eef;color:#fff2ce;font:700 1.2cqw/1.45 "Segoe UI",sans-serif;pointer-events:none}
 .hud-status{position:absolute;left:1.5cqw;top:6.5cqw;display:flex;gap:.7cqw}
 .chip{display:flex;align-items:center;gap:.5cqw;padding:.3cqw .9cqw .3cqw .3cqw;background:#2a1a0ed0;border:.15cqw solid #7a5028;border-radius:3cqw}
 .chip img{width:2.7cqw;height:2.7cqw;border-radius:50%;object-fit:contain;background:#f6e6c6}.chip.burn img{background:none}
@@ -213,8 +220,8 @@
 .menu-orangutan{left:3cqw;top:9.2cqw;width:8.4cqw}
 .menu-rangkong{top:7cqw;width:11cqw}
 .board.wide{width:84cqw}
-.animal-grid{grid-template-columns:repeat(7,1fr);gap:.9cqw;width:80cqw;margin-top:1.6cqw}
-.animal-card{padding:.5cqw}.animal-pic{height:9.5cqw}.animal-card b{font-size:1.05cqw}.animal-card small{font-size:.78cqw}
+.animal-grid{grid-template-columns:repeat(8,1fr);gap:.7cqw;width:80cqw;margin-top:1.4cqw}
+.animal-card{padding:.45cqw}.animal-pic{height:8.4cqw}.animal-card b{font-size:1cqw}.animal-card small{font-size:.7cqw;white-space:nowrap}
 
 .zoom{position:absolute;right:1.5cqw;top:7.4cqw;display:flex;flex-direction:column;align-items:center;gap:.35cqw;padding:.45cqw;background:#2a1a0ed0;border:.15cqw solid #7a5028;border-radius:1.2cqw}
 .zbtn{width:3.6cqw;height:3.6cqw;padding:.55cqw;border-radius:50%;border:.2cqw solid #4c2a10;background:radial-gradient(circle at 40% 35%,#c98c52,#8a5527);box-shadow:inset 0 .2cqw 0 #e8b47a,0 .25cqw .4cqw #0006;color:#fff6e3}
@@ -323,3 +330,6 @@
 .set-extra{left:4%;right:4%;gap:.8cqw}.set-extra .set-zoom{min-width:0;gap:.4cqw;padding:.5cqw .9cqw}
 .set-extra .set-zoom>span:first-child{white-space:nowrap;font-size:1.2cqw}.set-extra .set-zoom .pill{min-width:6.5cqw}.set-extra .set-zoom button:not(.pill){font-size:2.6cqw;padding:0 .3cqw}.set-fs .pill{font-size:1.3cqw;padding:.45cqw 1cqw}
 .set-fs{flex:none}
+/* Lower quality: backdrop blur re-renders every frame over the moving canvas, and animated filters repaint on the CPU. */
+.lowfx .levels{backdrop-filter:none;background:#0b1f14b8}.lowfx .scrim{backdrop-filter:none}
+.lowfx .mreg.open{animation:none}.lowfx .map-glint{display:none}

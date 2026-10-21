@@ -19,7 +19,9 @@ export interface SceneData { level?: number; mode?: 'attract' | 'play' }
 export interface ResultInfo {
   won: boolean; level: LevelDef; stars: number; score: number; record: boolean;
   water: { ok: boolean; used: number; budget: number }; animal: { ok: boolean; name: string; key: string; hp: number };
-  fires: { out: number; total: number }; time: number; spread: number; reason?: 'water' | 'burn' | 'truck'; boss?: boolean; truckHp?: number;
+  fires: { out: number; total: number }; time: number; spread: number; reason?: 'water' | 'burn' | 'truck' | 'animal'; boss?: boolean; truckHp?: number;
+  /** What went wrong, when the level explains it itself (Sumatra rescues). */
+  note?: string;
 }
 
 export const sound = new Sound();
@@ -73,6 +75,8 @@ export class LevelScene extends Phaser.Scene {
   private walkHint = '';
   private walkHintT = 0;
   private freed = false;
+  /** Boss braziers (Sumatra finale): seconds until the boss relights one. */
+  private relightT = 0;
 
   constructor() { super('level'); }
   preload() {
@@ -81,7 +85,7 @@ export class LevelScene extends Phaser.Scene {
     const def = LEVELS[(data?.level ?? 1) - 1];
     // Temple-stone pieces (blocks, pillars) borrow the ruins set on any theme.
     const ruins = def.theme !== 'ruins' && (def.decor.some(d => d.key.startsWith('p-')) || (def.rocks ?? []).some(r => r.stone) || !!def.basin?.stone);
-    for (const key of [...assetsFor(def.theme, !!def.boss, !!def.terrain, def.region === 'sumatra'), ...(ruins ? ASSET_GROUPS.ruins : []), 'alert'])
+    for (const key of [...assetsFor(def.theme, !!def.boss, !!def.terrain, def.region === 'sumatra', def.region === 'kalimantan'), ...(ruins ? ASSET_GROUPS.ruins : []), 'alert'])
       if (!this.textures.exists(key)) this.load.image(key, `/assets/${key === 'alert' ? 'ui/alert' : ASSETS[key]}.webp`);
     this.load.on('progress', (v: number) => { const el = document.querySelector('#load-progress'); if (el) el.textContent = `${Math.round(v * 100)}% · ${regionOf(def).forest}`; });
     this.load.on('loaderror', () => {
@@ -93,7 +97,7 @@ export class LevelScene extends Phaser.Scene {
     this.ui = this.registry.get('ui');
     this.def = LEVELS[(data.level ?? 1) - 1];
     this.mode = data.mode === 'play' ? 'intro' : 'attract';
-    Object.assign(this, { walkHint: '', walkHintT: 0, freed: false, truckHp: 100, idleWater: 0, refillToast: false, burnWarned: false, boss: undefined, pressure: 100, pressureLock: false, hitCool: 0, respawnT: 3, spreads: 0, acc: 0, matterAcc: 0, burn: 0, elapsed: 0, hudT: 0, endT: 0, result: undefined, introT: 0, pointerHeld: false, firing: false });
+    Object.assign(this, { relightT: this.def.sm?.shield?.relight ?? 0, walkHint: '', walkHintT: 0, freed: false, truckHp: 100, idleWater: 0, refillToast: false, burnWarned: false, boss: undefined, pressure: 100, pressureLock: false, hitCool: 0, respawnT: 3, spreads: 0, acc: 0, matterAcc: 0, burn: 0, elapsed: 0, hudT: 0, endT: 0, result: undefined, introT: 0, pointerHeld: false, firing: false });
     this.keys.clear();
     createParticleTextures(this);
     this.cameras.main.setZoom(RENDER_SCALE);
@@ -122,6 +126,8 @@ export class LevelScene extends Phaser.Scene {
     this.water.absorb = (x, y) => (!!this.world.basin && this.world.absorb(x, y)) || this.world.puzzles.absorb(x, y) || !!this.world.sm?.absorb(x, y);
     if (this.world.sm) {
       this.world.sm.animal = this.animal;
+      this.world.sm.hooks = { fires: this.fires, effects: this.effects, hitWater: (x, y, r) => this.water.hitTest(x, y, r),
+        boss: () => this.boss && !this.boss.defeated ? { ...this.boss.core, shielded: this.boss.shielded } : null };
       this.world.sm.onEvent = msg => { if (this.mode === 'playing') { this.ui.toast(msg, 2200); sound.click(); } };
     }
     this.world.onPour = (x, y, vx, vy) => this.water.pour(x, y, vx, vy);
@@ -131,6 +137,7 @@ export class LevelScene extends Phaser.Scene {
       this.ui.toast(sw.kind === 'wheel' ? 'Kincir berputar! Pintu bendungan terbuka.' : sw.kind === 'button' ? 'Tombol tertekan! Pintu terbuka.' : 'Tepat sasaran! Pintu terbuka.', 2200);
     };
     this.world.puzzles.onRelease = () => { sound.splash(); this.ui.toast('Bendungan jebol! Air mengalir ke bawah.', 2400); };
+    this.world.puzzles.onErode = (_id, gone) => { sound.click(); if (gone) this.ui.toast('Lumpur tersapu habis!', 1800); };
     this.truck.update(0, 0, 0, 99999, x => this.world.groundAt(x), true);
     this.zoom = this.zoomTarget = this.mode === 'attract' ? 1 : store.settings.zoom / 100;
     this.ui.setZoomLevel(this.zoomTarget);
@@ -187,6 +194,8 @@ export class LevelScene extends Phaser.Scene {
   // ---------- events ----------
   private onWaterHit(hit: ReturnType<typeof firstHit> & {}, d: { vx: number; vy: number }) {
     const s = hit.surface;
+    if (s.kind !== 'river') this.world.sm?.splash(hit.point.x, hit.point.y);
+    if (this.world.puzzles.erode(s)) { if (Math.random() < .3) this.effects.dust(hit.point.x, hit.point.y); return; }
     if (s.kind === 'prop') this.world.push(s.body, hit.point, d.vx, d.vy);
     if (s.kind === 'barrel' && this.world.barrel) {
       const b = this.world.barrel;
@@ -195,7 +204,7 @@ export class LevelScene extends Phaser.Scene {
       if (b.rope && !b.door && --b.hp <= 0) { this.world.breakRope(); this.ui.toast('Tali putus! Tong air jatuh…', 1800); sound.click(); }
     }
     if (s.kind === 'switch') this.world.puzzles.hit(s);
-    if (this.world.sm?.waterHit(s, d, i => !!this.fires.fires[i]?.lit)) { if (Math.random() < .4) this.effects.splash(hit.point.x, hit.point.y, 3); return; }
+    if (this.world.sm?.waterHit(s, d, i => !!this.fires.fires[i]?.lit, hit.point)) { if (Math.random() < .4) this.effects.splash(hit.point.x, hit.point.y, 3); return; }
     if (s.kind === 'ramp') return;
     const wh = this.world.wheel;
     if (s.kind === 'wheel' && wh) {
@@ -288,7 +297,9 @@ export class LevelScene extends Phaser.Scene {
     if (this.mode !== 'ended') this.cam += (goal - this.cam) * Math.min(1, dt * (this.mode === 'intro' ? 1.6 : 4));
     this.cam = this.camX(this.cam);
     this.applyCamera();
+    if (this.world.sm) this.world.sm.playing = this.mode === 'playing';
     this.world.update(dt, this.cam, reduced);
+    // Bounded catch-up: below ~20 fps the game slows down instead of piling up ever more substeps.
     this.acc += dt; this.matterAcc += dt;
     while (this.acc >= STEP) { this.water.step(STEP, firing, this.truck.cannon.nozzle, this.mode === 'attract'); this.acc -= STEP; }
     while (this.matterAcc >= 1 / 60) { this.matter.world.step(1000 / 60); this.matterAcc -= 1 / 60; }
@@ -329,6 +340,8 @@ export class LevelScene extends Phaser.Scene {
     const half = this.viewHalfW / this.zoom;
     return this.def.width <= half * 2 ? this.def.width / 2 : clamp(x, half, this.def.width - half);
   }
+  /** Re-fit the camera after the render scale changes (also while paused, when update() is idle). */
+  refreshView() { if (this.world) this.applyCamera(); }
   private applyCamera() {
     const cam = this.cameras.main;
     cam.setZoom(RENDER_SCALE * this.zoom);
@@ -444,6 +457,22 @@ export class LevelScene extends Phaser.Scene {
       for (const f of this.fires.burning) f.intensity = Math.min(f.intensity, .2);
     }
   }
+  /** Sumatra finale: the boss is shielded while a brazier burns, and relights one now and then once wounded. */
+  private updateShield(sh: NonNullable<NonNullable<LevelDef['sm']>['shield']>, dt: number) {
+    const b = this.boss!, braziers = sh.fires.map(i => this.fires.fires[i]), sm = this.world.sm!;
+    const was = b.shielded, ready = (sh.needs ?? []).every(id => sm.wasDone(id));
+    // Exposure windows: once the shield's mechanisms are done the core opens and closes in turns.
+    const w = sh.windows, shut = !!w && ready && (this.elapsed % (w[0] + w[1])) >= w[0];
+    b.shielded = !b.defeated && (braziers.some(f => f.lit) || !ready || shut);
+    if (was && !b.shielded) { sound.win(); this.ui.toast(w ? `Inti ${this.def.boss!.name ?? 'Pembakar Hutan'} terbuka! Semprot sekarang!` : `Tungku padam — perisai ${this.def.boss!.name ?? 'Pembakar Hutan'} runtuh! Semprot sekarang!`, 2200); }
+    if (b.shielded || b.defeated || b.phase < 2 || !braziers.length) return;
+    if ((this.relightT -= dt) > 0) return;
+    this.relightT = sh.relight;
+    const f = braziers[(Math.random() * braziers.length) | 0];
+    f.ignite(.5);
+    this.effects.ash(f.def.x, f.def.y - 30, 16); sound.alarm();
+    this.ui.toast('Penjaga menyalakan tungku lagi! Perisainya kembali.', 2400);
+  }
   private updateBarrel() {
     const b = this.world.barrel;
     if (b?.door && !b.landed) return this.updateSwingCrate();
@@ -507,15 +536,15 @@ export class LevelScene extends Phaser.Scene {
         stars: [burning === 0, this.water.used <= this.def.waterBudget, this.spreads === 0],
         firing: this.firing, tip: this.truck.cannon.tipDegrees, boom: this.truck.cannon.boomPercent,
       });
+      this.ui.missionHud(this.world.sm?.hint ?? '');
       this.ui.indicators(this.fires.burning.filter(f => Math.abs(f.def.x - this.cam) > (this.viewHalfW - 40) / this.zoom).map(f => ({ side: f.def.x > this.cam ? 1 : -1, y: 720 - (720 - (f.def.y - 60)) * this.zoom })));
     }
     if (this.boss) {
       this.ui.bossHud(this.pressure, this.water.supply / this.water.capacity * 100, this.truckHp, this.boss.hp / this.boss.max * 100, this.boss.fuel, this.boss.reloading, this.pressureLock, this.idleWater >= 10 && this.water.supply < this.water.capacity);
       if (this.def.sm) {
-        // Sumatra arena: the shield drops once its mechanisms run; after the boss falls the animal still has to walk out.
-        const sm = this.world.sm!, was = this.boss.shielded;
-        this.boss.shielded = !(sm.def.shield ?? []).every(id => sm.isDone(id));
-        if (was && !this.boss.shielded) { sound.win(); this.ui.toast(`Perisai ${this.def.boss!.name ?? 'Pembakar Hutan'} runtuh! Semprot sekarang!`, 2600); }
+        // After the boss falls, the rescued family still walks to the flag.
+        const sm = this.world.sm!;
+        if (sm.def.shield) this.updateShield(sm.def.shield, dt);
         if (this.boss.defeated) {
           if (!sm.flags.has('boss')) { sm.flags.add('boss'); for (const f of this.fires.burning) f.extinguish(); }
           this.updateRescue(dt);
@@ -528,15 +557,18 @@ export class LevelScene extends Phaser.Scene {
       if (this.burn >= 100) return this.finish(false, 'burn');
       return;   // no water loss here: the reserve refills itself after 10 s idle
     }
-    if (this.def.sm) this.updateRescue(dt);
-    if (this.fires.burning.length === 0 && (this.def.sm ? this.animal.arrived : this.world.cageOpen)) return this.finish(true);
+    if (this.def.sm) {
+      if (this.world.sm!.failed) return this.finish(false, 'animal');
+      this.updateRescue(dt);
+    }
+    if (this.fires.burning.length === 0 && (this.def.sm ? this.animal.arrived && this.world.sm!.companionSafe : this.world.cageOpen)) return this.finish(true);
     if (this.water.supply <= 0 && this.water.active === 0 && !this.def.refill) return this.finish(false, 'water');
   }
   /** Sumatra rescue: once its way is opened the animal walks to the flag, waiting at whatever still blocks it. */
   private updateRescue(dt: number) {
     const sm = this.world.sm!;
     if (!sm.free || this.animal.arrived) return;
-    if (!this.freed) { this.freed = true; this.ui.toast(`Jalan terbuka! ${this.def.animal.name} menuju bendera.`, 2400); }
+    if (!this.freed) { this.freed = true; if (sm.freeMessage) this.ui.toast(sm.freeMessage, 2400); }
     const goal = sm.walkGoal();
     if (goal === 'wait' || goal === 'ride') return;
     const why = this.animal.walk(dt, goal, sm.def.rescue.speed ?? 70, x => this.world.groundAt(x), x => this.pathBlock(x));
@@ -567,7 +599,7 @@ export class LevelScene extends Phaser.Scene {
     if (w.puzzles.gateBlocks(x, top) || w.sm?.blocks(x, top)) return 'gate';
     if (this.fires.burning.some(f => Math.abs(f.def.x - x) < 46 + f.intensity * 30 && Math.abs(f.def.y - top) < 50)) return 'fire';
     // A rock standing on the path blocks it; one sunk into a pit (top level with the path) is a stepping stone.
-    if (w.props.some(p => !p.gone && !p.floating && p.body.bounds.min.x - 10 < x && p.body.bounds.max.x + 10 > x && p.body.bounds.max.y > top - 30 && p.body.bounds.min.y < top - 12)) return 'rock';
+    if (w.props.some(p => !p.gone && !p.floating && !w.sm?.seated(p.body.position.x) && p.body.bounds.min.x - 10 < x && p.body.bounds.max.x + 10 > x && p.body.bounds.max.y > top - 30 && p.body.bounds.min.y < top - 12)) return 'rock';
     return '';
   }
   private finish(won: boolean, reason?: ResultInfo['reason']) {
@@ -588,7 +620,7 @@ export class LevelScene extends Phaser.Scene {
       : this.fires.outCount * 450;
     const record = won ? store.record(this.def.id, stars, score, this.def.animal.key) : false;
     this.result = {
-      won, level: this.def, stars, score, record, reason, time: this.elapsed, spread: this.spreads, boss: !!this.boss, truckHp: Math.round(this.truckHp),
+      won, level: this.def, stars, score, record, reason, note: reason === 'animal' ? this.world.sm?.failed : undefined, time: this.elapsed, spread: this.spreads, boss: !!this.boss, truckHp: Math.round(this.truckHp),
       water: { ok: waterOk, used: this.water.used, budget: this.def.waterBudget },
       animal: { ok: won, name: this.def.animal.name, key: this.def.animal.key, hp: this.animal.hp },
       fires: { out: this.fires.outCount, total: this.fires.outCount + this.fires.burning.length },

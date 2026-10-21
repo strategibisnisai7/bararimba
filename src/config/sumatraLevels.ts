@@ -1,9 +1,13 @@
 import type { LevelDef } from './levels';
 import type { Point } from './level';
+import { SUMATRA_TRIALS } from './sumatraTrials';
+import type { KitDef } from './kalimantanKit';
 
 /** Raft on the underground river: pushed by the jet against the current. Docked slowly at `dock` it takes the animal
  * aboard, then the current ferries it back to `home`, where the animal steps off. Too fast and it bounces off the bank. */
-export interface RaftDef { x: number; w: number; dock: [number, number]; home: number; current: number; walls: [number, number] }
+export interface RaftDef { x: number; w: number; dock: [number, number]; home: number; current: number; walls: [number, number];
+  /** Held at its mooring (ignores water) until these ids are done. */
+  after?: string[] }
 /** Two platforms on one rope over pulleys at `pulleyY`: weight on one side lowers it and raises the other.
  * The `right` platform carries the animal; `done` when it reaches `topY`. */
 export interface BalanceDef { left: { x: number; w: number }; right: { x: number; w: number }; pulleyY: number; mid: number; travel: number; topY: number; animalLoad: number }
@@ -12,17 +16,47 @@ export interface MirrorDef { x: number; y: number; len: number; angles: number[]
 /** Hinged bridge held by `locks`. A lock wrapped in fire (`fire` index) cannot be released until that fire is out.
  * Released, the deck swings under gravity; a boulder resting in `stopper` (an x range on the hinge side) catches it
  * level, otherwise it swings down and is winched back up. `angle0` 0 = level toward `dir`. */
-export interface DrawbridgeDef { id: string; hingeX: number; hingeY: number; len: number; dir: 1 | -1; locks: { x: number; y: number; fire?: number }[];
+export interface DrawbridgeDef { id: string; hingeX: number; hingeY: number; len: number; dir: 1 | -1; locks: { x: number; y: number; fire?: number }[]; after?: string[];
   stopper?: { x0: number; x1: number }; gravity?: boolean; startAngle?: number }
 /** Open water tank. `spray`: filled by the jet. Valves are spray-toggled handles that drain it to `out`.
  * `lift`: the tank hangs on a counterweight lift; its water raises the platform `travel` px (latched at the top). */
 export interface BasinDef { id: string; x0: number; x1: number; floor: number; depth: number; spray?: boolean; leak?: number;
+  band?: [number, number];
   /** `sweep`: while the valve runs, its surge carries loose rocks in this box downstream (+x). */
   valves?: { id: string; handle: Point; out: { x: number; y: number; vx: number }; rate: number; pipe?: Point[]; sweep?: { x0: number; x1: number; y0: number; y1: number } }[];
   lift?: { x: number; w: number; y: number; travel: number; need: number } }
 /** Gate lifted by a chain from the water wheel: it rises while the wheel spins faster than `speed`, and locks open
  * once held fully up for `hold` s. */
 export interface ChainGateDef { id: string; x: number; y0: number; y1: number; speed: number; hold: number }
+/** Giant root seedling at the cliff edge (x, y): water on its growing tip extends it `len` px toward `dir`; left dry it
+ * withers back. `need` tip hits grow it fully, then it latches as a walkable bridge. No growth while fire `fire` burns. */
+export interface RootDef { id: string; x: number; y: number; len: number; dir: 1 | -1; need: number; fire?: number }
+/** Stalactite hanging from the cave roof at `top`; `need` hits break it loose. Where it lands it can fill a pit,
+ * `smash` a wooden gate it falls through, or press a stone that hauls gate `opens` up. */
+export interface StalactiteDef { x: number; top: number; len: number; need: number; smash?: string; opens?: string }
+/** Smouldering peat front: from the unquenchable `source` it ignites the next dry `cells` bush every `interval` s.
+ * It stalls when the next two bushes are wet (each splash keeps a bush wet `wetFor` s); reaching the last cell loses. */
+export interface FirebreakDef { id: string; source: Point; cells: number[]; interval: number; wetFor: number; first: number;
+  /** The front only starts creeping once these ids are done. */
+  after?: string[] }
+/** Honeycomb hanging on a rope from (x, y): `hp` hits snap the rope; it drops where it swings (`swing` px). */
+export interface LureDef { x: number; y: number; rope: number; hp: number; swing: number }
+/** Embers fall from glowing `cracks` in the roof at height `y` ahead of the walking animal, every `every` s. */
+export interface EmberDef { cracks: number[]; y: number; every: number; hp: number }
+/** Burning mine cart swinging in a U-shaped rail valley from x0 to x1 (rims at y, bottom `dip` lower). Doused and
+ * stopped over the slot in the middle it sinks into it, flush with the floor. `rims`: bushes its sparks can light. */
+export interface CartDef { id: string; x0: number; x1: number; y: number; dip: number; slot: number; start: number; period: number; fire: number; rims: Point[] }
+/** Hornbill nest: more than `limit` water hits soak it and the eggs fall. Done once every fire in `fires` is out. */
+export interface NestDef { id: string; x: number; y: number; limit: number; fires: number[] }
+/** Cable car between station `a` (low, near the wheel) and `b`: the water wheel winds it; spin forward (hit above the
+ * axle) to send it to b, backward to bring it home. Floor hangs `drop` px under the cable. A fire on `block` stops it at `at`. */
+export interface GondolaDef { a: Point; b: Point; sag: number; drop: number; speed: number; slide: number; block?: { fire: number; at: number };
+  /** Wound by this kit dial instead of the water wheel: above half sends it out, below half brings it home. */
+  driver?: string; after?: string[];
+  /** Drawn as a log raft riding the water (a winch-towed ferry) instead of a hanging car. */
+  look?: 'raft';
+  /** Mission id: `id` is done once it reached station b, `id:home` once it brought the animal back. */
+  id?: string }
 
 /** Sumatra-only level data. Every mechanism is driven by the same water jet, Matter bodies and fires as Jawa. */
 export interface SumatraDef {
@@ -45,9 +79,25 @@ export interface SumatraDef {
   pits?: { x0: number; x1: number; top: number }[];
   /** No soft-lock: while mechanism `unless` is not done, a level boulder that sank, rolled past `lostX` or fell
    * below `lostY` comes back at its start. */
-  respawn?: { lostX?: number; lostY?: number; unless: string };
-  /** Mechanism ids the boss shield waits for (Level 10). */
-  shield?: string[];
+  respawn?: { lostX?: number; lostY?: number; unless: string;
+    /** Also lost when washed back behind this x (out of the truck's reach). */
+    minX?: number };
+  root?: RootDef;
+  /** Panicked animal: a splash within `radius` sends it `push` px away from the splash (never left of `min`). */
+  herd?: { radius: number; push: number; min: number };
+  stalactites?: StalactiteDef[];
+  firebreak?: FirebreakDef;
+  /** The animal leaves its den only for dropped honey, eats each piece, and heads for the flag after the last. */
+  lures?: LureDef[];
+  embers?: EmberDef;
+  cart?: CartDef;
+  nest?: NestDef;
+  gondola?: GondolaDef;
+  /** Boss shield: up while any of these fires burns (it relights one every `relight` s once wounded) or any of these
+   * ids is not done. `windows` [open, shut] s: once those are done the core opens and closes in turns. */
+  shield?: { fires: number[]; relight: number; needs?: string[]; windows?: [number, number] };
+  /** Kalimantan mechanism kit and mission steps. */
+  kit?: KitDef;
 }
 
 const cave = { theme: 'cave' as const, region: 'sumatra' as const };
@@ -326,10 +376,10 @@ export const SUMATRA_LEVELS: LevelDef[] = [
     animal: { key: 'anak-gajah', name: 'Anak Gajah Sumatra', x: 1560, y: 548, scale: .9, flip: true, frames: ['sm-gajah-b', 'sm-gajah-c'] },
     tutorial: [4, 6], brief: 'Urutan penting! Padamkan api di tiang rantai di sungai sebelum melepas kayu berengsel — kayu jatuh menjadi jembatan. Dorong batu ke batu tekan di tebing untuk menarik pintu goa, padamkan api di jalur, lalu anak gajah menyeberang.',
   },
+  ...SUMATRA_TRIALS,
   {
-    // Mission 10 finale: Duel Tekanan. The boss is shielded until the arena's two mechanisms run: hit the valve
-    // target and spin the gear wheel. Then wear it down under fireballs (pressure meter), and walk the orangutans out.
-    ...cave, id: 25, code: '2-10', name: 'Duel Tekanan Goa Api', width: 3000,
+    // Finale: the Cave Fire Keeper is shielded while its two braziers burn on its own ledges. Douse both, wear it down between volleys; once wounded it relights a brazier now and then.
+    ...cave, id: 35, code: '2-20', name: 'Duel Tekanan Goa Api', width: 3000,
     supply: 200, waterBudget: 200, burnRate: .3, spreadDelay: 16,
     truckX: 230, driveMin: 160,
     lands: [
@@ -342,26 +392,27 @@ export const SUMATRA_LEVELS: LevelDef[] = [
     ],
     bridges: [{ x0: 888, x1: 1252, y: 540 }],
     rocks: [{ x0: 1300, x1: 1440, y0: 300, y1: 342 }],
-    gates: [{ id: 'valve', x: 1600, y0: 380, y1: 520, style: 'stone' }, { id: 'gear', x: 1620, y0: 220, y1: 300, style: 'stone' }],
-    switches: [{ kind: 'target', x: 1250, y: 330, opens: 'valve' }, { kind: 'wheel', x: 780, y: 400, opens: 'gear', need: 20 }],
-    wheel: { x: 780, y: 400, r: 46 },
     // The package has no Penjaga Goa sprite (its 07 crop holds orangutans only), so the Jawa boss art and HUD return here.
-    boss: { x: 2265, y: 395, hp: 110, arena: 1650, perches: [{ x: 2020, y: 470 }, { x: 2265, y: 395 }, { x: 2470, y: 330 }, { x: 2650, y: 430 }] },
+    boss: { x: 2265, y: 395, hp: 100, arena: 1650, name: 'Penjaga Goa Api', perches: [{ x: 2020, y: 470 }, { x: 2265, y: 395 }, { x: 2470, y: 330 }, { x: 2650, y: 430 }] },
     fires: [
       { x: 1500, y: 520, start: .55, growth: .0050, lit: true },
       { x: 600, y: 548, start: .45, growth: .0045, lit: true },
+      { x: 1960, y: 470, start: .6, growth: .004, lit: true, max: .9 },
+      { x: 2400, y: 330, start: .6, growth: .004, lit: true, max: .9 },
     ],
     props: [],
     decor: [
       { key: 'sm-palm-a', x: 60, y: 556, scale: 1 },
+      { key: 'sm-coals', x: 1960, y: 476, scale: .5 },
+      { key: 'sm-coals', x: 2400, y: 336, scale: .5 },
       { key: 'sm-spire-d', x: 2900, y: 436, scale: .9 },
       { key: 'sm-falls-tall', x: 1070, y: 660, scale: 1.5, back: true },
     ],
     sm: {
       rescue: { flagX: 2950, after: ['boss'] },
-      shield: ['valve', 'gear'],
+      shield: { fires: [2, 3], relight: 20 },
     },
     animal: { key: 'orangutan-sit', name: 'Keluarga Orangutan', x: 2820, y: 430, scale: .62, flip: true },
-    tutorial: [6], brief: 'Pembakar Hutan bersembunyi di goa api dan berperisai! Tembak target katup dan putar kincir roda gigi untuk meruntuhkan perisainya. Tahan bola api, jaga tekanan air, lalu semprot sampai ia kalah dan keluarga orangutan bisa keluar.',
+    tutorial: [6], brief: 'Penjaga Goa Api berlindung di balik perisai dari dua tungku api. Padamkan kedua tungku untuk meruntuhkan perisainya, lalu semprot tubuhnya sambil menahan bola api. Saat terluka ia menyalakan tungku lagi — padamkan lagi! Lepas semprotan 10 detik untuk mengisi cadangan.',
   },
 ];

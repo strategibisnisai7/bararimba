@@ -1,13 +1,13 @@
 import { test, expect, type Page } from '@playwright/test';
 
-/** Every Sumatra level replayed with a known solution. The scene's own loop is paused and stepped at 60 Hz for
+/** Sumatra levels 2-1 to 2-9 replayed with a known solution (2-10 to 2-20: sumatra-trials.spec.ts). The scene's own loop is paused and stepped at 60 Hz for
  * speed, but the only thing the test does is hold the player's keys: D drive, W/S nozzle, Q/E boom, Space spray.
  * No game state is written. A failing replay means a level became unsolvable (or its tuning drifted). */
 type Step = ['drive', number] | ['aim', number, number?] | ['spray', number] | ['wait', number] | ['duel'];
 
 const SOLUTIONS: Record<number, Step[]> = {
   16: [['drive', 1.2], ['aim', .15], ['spray', 2.5], ['wait', 1.5], ['aim', -.3], ['spray', 4]],
-  17: [['drive', 1.5], ['aim', .8], ['spray', 2], ['aim', .55], ['spray', 2], ['aim', .4], ['spray', 2], ['aim', .3], ['spray', 1], ['wait', 1.5],
+  17: [['drive', 1.5], ['aim', .8], ['spray', 2], ['aim', .55], ['spray', 2], ['aim', .4], ['spray', 2], ['aim', .3], ['spray', 1.4], ['wait', 1.5],
     ['aim', -.7], ['spray', 3], ['aim', -.55], ['spray', 3]],
   18: [['drive', 1.5], ['aim', -.05], ['spray', 2.5], ['wait', 2], ['aim', .05], ['spray', 2.5], ['wait', 3], ['aim', -.6], ['spray', 3], ['aim', -.45], ['spray', 3]],
   19: [['drive', 2], ['aim', .5, 0], ['wait', .5], ['spray', .45], ['wait', 1], ['aim', -.7, -1], ['wait', .5], ['spray', 15], ['wait', 2], ['aim', -.6, 0], ['spray', 6]],
@@ -18,7 +18,6 @@ const SOLUTIONS: Record<number, Step[]> = {
   23: [['drive', 2], ['aim', -.1, -1], ['spray', 2.5], ['aim', .5], ['spray', .4], ['wait', 3], ['aim', -.1], ['spray', 6], ['aim', .5], ['spray', .4],
     ['aim', -.1], ['spray', 3], ['aim', -.4], ['spray', .5], ['wait', 3], ['aim', -.1], ['spray', 6]],
   24: [['drive', 2], ['aim', -.35, -1], ['spray', 2.5], ['aim', -.5], ['spray', 3], ['aim', .1], ['spray', 6], ['aim', .3], ['spray', 1]],
-  25: [['drive', 1.2], ['aim', .2, 0], ['spray', 4], ['aim', -.45, -1], ['spray', 2.5], ['wait', 1], ['drive', 5], ['duel']],
 };
 
 async function open(page: Page, id: number) {
@@ -81,7 +80,7 @@ for (const [id, steps] of Object.entries(SOLUTIONS)) {
     const snap = await page.evaluate(() => window.__BARARIMBA__!.snapshot());
     expect(errors).toEqual([]);
     expect(end.mode).toBe('ended');
-    expect(snap.animal.arrived).toBe(true);
+    expect(snap.animal.arrived, JSON.stringify(snap)).toBe(true);
     expect(snap.fires.filter(f => f.lit)).toEqual([]);
   });
 }

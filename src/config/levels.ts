@@ -16,7 +16,8 @@ export interface TerrainStamp { key: string; x: number; y: number; s?: number; f
 export interface AnimalDef { key: string; name: string; x: number; y: number; scale: number; flip?: boolean; frames?: string[] }
 import type { BossDef } from '../entities/Boss';
 import { SUMATRA_LEVELS, type SumatraDef } from './sumatraLevels';
-export type Theme = 'forest' | 'ruins' | 'volcanic' | 'cave';
+import { KALIMANTAN_LEVELS } from './kalimantanLevels';
+export type Theme = 'forest' | 'ruins' | 'volcanic' | 'cave' | 'peat';
 export interface LevelDef {
   id: number; code: string; name: string; width: number;
   /** Visual tile set; gameplay is unchanged. */
@@ -53,8 +54,9 @@ export interface LevelDef {
   boss?: BossDef & { waterfall?: { x: number; y: number; w: number } };
   wheel?: { x: number; y: number; r: number; out?: { x: number; y: number; vx: number } };
   /** Wooden gates (vertical walls) opened by switches. */
-  /** `stone`: a carved cave door (Sumatra) instead of the wooden barricade. */
-  gates?: { id: string; x: number; y0: number; y1: number; style?: 'stone' }[];
+  /** `stone`: a carved cave door (Sumatra) instead of the wooden barricade. `mud`: a mud bank that water erodes
+   * away, `need` hits to wash it off. */
+  gates?: { id: string; x: number; y0: number; y1: number; style?: 'stone' | 'mud'; need?: number }[];
   /** target: hit with water; button: pressed by a prop or dropped crate; wheel: spin the water wheel. */
   switches?: { kind: 'target' | 'button' | 'wheel'; x: number; y: number; opens: string; need?: number }[];
   /** Raised water tanks held by a stone plug (push it off) or a gate; released water floods downhill. */
@@ -62,12 +64,13 @@ export interface LevelDef {
   animal: AnimalDef; tutorial: number[]; brief: string;
 }
 
-export type RegionId = 'jawa' | 'sumatra';
-/** Level ids `first`..`first + total - 1` belong to the region; tile `boss` is its boss level. */
-export interface RegionDef { id: RegionId; name: string; subtitle: string; first: number; total: number; boss: number; forest: string }
+export type RegionId = 'jawa' | 'sumatra' | 'kalimantan';
+/** Level ids `first`..`first + total - 1` belong to the region; tile `boss` is its boss level, `midBoss` a second one. */
+export interface RegionDef { id: RegionId; name: string; subtitle: string; first: number; total: number; boss: number; midBoss?: number; forest: string }
 export const REGIONS: Record<RegionId, RegionDef> = {
   jawa: { id: 'jawa', name: 'JAWA', subtitle: 'Hutan Pegunungan', first: 1, total: 15, boss: 15, forest: 'Hutan Jawa' },
-  sumatra: { id: 'sumatra', name: 'SUMATRA', subtitle: 'Goa Karst & Hutan Hujan', first: 16, total: 10, boss: 25, forest: 'Goa Sumatra' },
+  sumatra: { id: 'sumatra', name: 'SUMATRA', subtitle: 'Goa Karst & Hutan Hujan', first: 16, total: 20, boss: 35, forest: 'Goa Sumatra' },
+  kalimantan: { id: 'kalimantan', name: 'KALIMANTAN', subtitle: 'Hutan Gambut & Sungai Hitam', first: 36, total: 30, boss: 65, midBoss: 50, forest: 'Rawa Gambut Kalimantan' },
 };
 export const REGION = REGIONS.jawa;
 export const regionOf = (def: LevelDef) => REGIONS[def.region ?? 'jawa'];
@@ -566,7 +569,7 @@ const JAWA_LEVELS: LevelDef[] = [
   },
 ];
 
-export const LEVELS: LevelDef[] = [...JAWA_LEVELS, ...SUMATRA_LEVELS];
+export const LEVELS: LevelDef[] = [...JAWA_LEVELS, ...SUMATRA_LEVELS, ...KALIMANTAN_LEVELS];
 
 /** `level` is the level id the animal is rescued in. */
 export const ANIMALS = [
@@ -588,4 +591,8 @@ export const ANIMALS = [
   { key: 'tapir', name: 'Tapir', level: 17 },
   { key: 'harimau', name: 'Harimau Sumatra', level: 19 },
   { key: 'rusa-sumatra', name: 'Rusa Sambar', level: 23 },
+  { key: 'owa', name: 'Owa Kalimantan', level: 44 },
+  { key: 'pesut', name: 'Pesut Mahakam', level: 57 },
+  { key: 'kucing-bakau', name: 'Kucing Bakau', level: 58 },
+  { key: 'kucing-merah', name: 'Kucing Merah Kalimantan', level: 64 },
 ];

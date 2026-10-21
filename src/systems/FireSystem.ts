@@ -116,6 +116,12 @@ export class Fire {
     this.base.setTexture('coal-hot').setVisible(true).clearTint();
     this.setEmitting(true);
   }
+  /** Carry the fire along with what is burning (a rolling cart). */
+  moveTo(x: number, y: number) {
+    this.def.x = x; this.def.y = y;
+    for (const e of [this.flame, this.core, this.licks, this.embers, this.smoke]) e.setPosition(x, y);
+    this.light.setPosition(x, y); this.scorch.setPosition(x, y + 3); this.base.setPosition(x, y + 6);
+  }
   extinguish() {
     this.lit = false; this.intensity = 0; this.wet = 12; this.steamT = 3.5;
     this.setEmitting(false);
@@ -155,7 +161,8 @@ export class FireSystem {
   attract = false;
   constructor(private scene: Phaser.Scene, defs: FireDef[], private effects: Effects, private spreadDelay: number,
     private fuel: Map<number, Fuel>, private onOut: (f: Fire) => void, private onSpread: (f: Fire) => void) {
-    this.fires = defs.map((d, i) => new Fire(scene, d, i));
+    // Copies: a moving fire rewrites its own position, never the level data.
+    this.fires = defs.map((d, i) => new Fire(scene, { ...d }, i));
   }
   hit(f: Fire) {
     if (!f.lit) return;
@@ -198,13 +205,13 @@ export class FireSystem {
     }
     if (best) { best.ignite(best.def.start); this.onSpread(best); }
   }
-  /** Start a new fire at runtime (boss fireballs). Returns false if one already burns nearby. */
-  spawn(x: number, y: number) {
-    if (this.fires.some(f => f.lit && Math.hypot(f.def.x - x, f.def.y - y) < 70)) return false;
-    if (this.burning.length >= 10) return false;
-    const f = new Fire(this.scene, { x, y, start: .35, growth: .006, lit: true, max: 1.1 }, this.fires.length);
+  /** Start a new fire at runtime (boss fireballs, falling embers). Returns null if one already burns nearby. */
+  spawn(x: number, y: number, opts: Partial<FireDef> = {}) {
+    if (this.fires.some(f => f.lit && Math.hypot(f.def.x - x, f.def.y - y) < 70)) return null;
+    if (this.burning.length >= 10) return null;
+    const f = new Fire(this.scene, { x, y, start: .35, growth: .006, lit: true, max: 1.1, ...opts }, this.fires.length);
     this.fires.push(f);
-    return true;
+    return f;
   }
   get burning() { return this.fires.filter(f => f.lit); }
   get outCount() { return this.fires.filter(f => f.everLit && !f.lit).length; }

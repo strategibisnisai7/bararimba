@@ -6,7 +6,12 @@ import type { Effects } from '../systems/Effects';
 
 /** `perches` are ledges the boss leaps between; `arena` is the river bank x — fires only start on the truck's side. */
 /** `name`: shown in the level board and results (default "Pembakar Hutan"). */
-export interface BossDef { x: number; y: number; hp: number; perches: Point[]; arena: number; name?: string }
+/** `sprite`/`scale`: other boss art (Kalimantan); `muzzle`: where its attacks leave, relative to (x, y). */
+export interface BossDef { x: number; y: number; hp: number; perches: Point[]; arena: number; name?: string; sprite?: string; scale?: number; muzzle?: Point;
+  /** Attack interval multiplier while shielded (a sealed core only smoulders). */
+  sealedPace?: number;
+  /** Only ember balls (root guardians and peat hearts have no flamethrower). */
+  noJet?: boolean }
 interface Shot { kind: 'ball' | 'jet'; x: number; y: number; vx: number; vy: number; life: number; hp: number; img: Phaser.GameObjects.Image }
 
 const G = 500;            // projectile gravity, px/s^2
@@ -31,7 +36,7 @@ export class Boss {
   hp: number;
   readonly max: number;
   defeated = false;
-  /** Shielded: water bounces off as steam and does no damage (Sumatra arena mechanisms lower it). */
+  /** Shielded: water bounces off as steam and does no damage (Sumatra braziers keep it up). */
   shielded = false;
   private shieldG?: Phaser.GameObjects.Graphics;
   x: number;
@@ -63,7 +68,7 @@ export class Boss {
     this.x = def.x; this.y = def.y;
     this.perch = Math.max(0, def.perches.findIndex(p => p.x === def.x));
     this.glow = scene.add.image(def.x, def.y - 100, 'p-glow').setBlendMode(Phaser.BlendModes.ADD).setTint(0xff5a1a).setScale(3).setAlpha(.25).setDepth(31);
-    this.sprite = scene.add.image(def.x, def.y + 4, 'boss').setOrigin(.5, 1).setScale(SCALE).setDepth(33);
+    this.sprite = scene.add.image(def.x, def.y + 4, def.sprite ?? 'boss').setOrigin(.5, 1).setScale(def.scale ?? SCALE).setDepth(33);
     this.trail = scene.add.particles(0, 0, 'p-flame', {
       emitting: false, blendMode: Phaser.BlendModes.ADD, lifespan: { min: 220, max: 420 },
       speed: { min: 10, max: 50 }, scale: { start: .55, end: .1 }, alpha: { start: .85, end: 0 },
@@ -72,9 +77,9 @@ export class Boss {
   }
   get phase() { return this.hp > this.max * .66 ? 1 : this.hp > this.max * .33 ? 2 : 3; }
   get jumping() { return !!this.jump; }
-  get muzzle(): Point { return { x: this.x + MUZZLE.x * SCALE, y: this.y + MUZZLE.y * SCALE }; }
+  get muzzle(): Point { const m = this.def.muzzle; return m ? { x: this.x + m.x, y: this.y + m.y } : { x: this.x + MUZZLE.x * SCALE, y: this.y + MUZZLE.y * SCALE }; }
   /** Body hit zone for water. */
-  get core(): Point { return { x: this.x + 8, y: this.y - 105 }; }
+  get core(): Point { return this.def.sprite ? { x: this.x, y: this.y - this.sprite.displayHeight * .55 } : { x: this.x + 8, y: this.y - 105 }; }
   damage(n: number) {
     if (this.defeated) return;
     this.hp = Math.max(0, this.hp - n);
@@ -84,6 +89,7 @@ export class Boss {
   /** Leap to a different ledge along a parabola. */
   private leap() {
     const opts = this.def.perches.map((_, i) => i).filter(i => i !== this.perch);
+    if (!opts.length) { this.jumpT = 9; this.dodgeCool = 9; return; }   // rooted bosses never leap
     const next = opts[(Math.random() * opts.length) | 0];
     this.jump = { from: { x: this.x, y: this.y }, to: { ...this.def.perches[next] }, t: 0, dur: .75 + Math.random() * .2 };
     this.perch = next; this.hurtSinceJump = 0; this.jetT = 0;
@@ -139,7 +145,7 @@ export class Boss {
       const g = this.shieldG.clear();
       if (this.shielded) {
         const r = 92 + Math.sin(this.t * 4) * 4, c = this.core;
-        g.fillStyle(0x3fb7ff, .12).fillCircle(c.x, c.y, r).lineStyle(4, 0x8fe0ff, .55 + Math.sin(this.t * 6) * .2).strokeCircle(c.x, c.y, r);
+        g.fillStyle(0xff8a3a, .12).fillCircle(c.x, c.y, r).lineStyle(4, 0xffc070, .55 + Math.sin(this.t * 6) * .2).strokeCircle(c.x, c.y, r);
       }
     }
     const recoil = this.jetT > 0 ? Math.sin(this.t * 40) * 1.5 : 0;
@@ -171,8 +177,8 @@ export class Boss {
     // Wind-up: the gun glows for a moment before every attack, giving the player time to react.
     this.charge = this.attackT < .7 ? 1 - this.attackT / .7 : 0;
     if (this.attackT > 0) return;
-    this.attackT = [0, 3.8, 3.1, 2.5][ph] + Math.random() * .8;
-    if (Math.random() < [0, .15, .25, .35][ph]) { this.jetT = 1.2; return; }
+    this.attackT = ([0, 3.8, 3.1, 2.5][ph] + Math.random() * .8) * (this.shielded ? this.def.sealedPace ?? 1 : 1);
+    if (!this.def.noJet && Math.random() < [0, .15, .25, .35][ph]) { this.jetT = 1.2; return; }
     const n = ph === 3 ? 2 : 1;
     for (let i = 0; i < n; i++) {
       const aimTruck = i === 0 && Math.random() < .5;

@@ -1,4 +1,4 @@
-# Integrasi Sumatra Level 1–10
+# Integrasi Sumatra Level 1–20
 
 Sumber: `referensiasset/BaraRimba_Sumatra_30_Level_Plan/`. Game Jawa (Phaser 3 + Matter, data-driven `LevelDef`) diperluas; tidak ada game paralel.
 
@@ -40,7 +40,17 @@ Hasil: `scripts/prepare_sumatra.py` → 72 sprite `public/assets/sumatra/*.webp`
 | 2-7 Jembatan Jatuh | dua pengunci, batu penahan, ayunan | jembatan tali, harimau | — |
 | 2-8 Bendungan Gambut | bendungan, dua katup, parit | rusa sambar (2 pose), pintu batu | tombol |
 | 2-9 Rantai Penyelamatan Gajah | urutan api → kayu berengsel → batu | anak gajah, pintu batu | tombol |
-| 2-10 Duel Tekanan Goa Api | perisai boss + dua mekanisme | latar goa | boss, bola api, HUD boss, kincir, target, orangutan-sit |
+| 2-10 Akar Jembatan | siram ujung akar yang tumbuh menyeberang; layu bila kering | akar digambar, batu tebing | trenggiling |
+| 2-11 Giring Rusa | rusa lari menjauhi cipratan; giring dari belakang | lorong goa rendah | — |
+| 2-12 Runtuhan Stalaktit | runtuhkan 3 stalaktit: timbun lubang, hancurkan barikade, tekan batu pemicu | stalaktit, tumpukan batu | babi hutan, tombol |
+| 2-13 Sekat Bakar Gambut | bara gambut merambat; basahi 2 semak di depannya | bara, semak | — |
+| 2-14 Pancing Madu | putuskan tali sarang madu yang berayun untuk memancing beruang | sarang madu digambar | beruang madu |
+| 2-15 Hujan Bara | kawal gajah; tembak bara jatuh / padamkan api yang ditimbulkan | retakan atap digambar | — |
+| 2-16 Tanggul Lumpur | kikis tanggul lumpur → banjir memadamkan api terowongan | gundukan lumpur | tangki (reservoir) Jawa, berang-berang |
+| 2-17 Lori Terbakar | padamkan api pada lori yang berayun di lembah rel | lori & rel digambar | — |
+| 2-18 Sarang Rangkong | padamkan api tanpa membasahi sarang | sarang digambar | rangkong |
+| 2-19 Kereta Gantung | kincir dua arah: kirim kereta, jemput orangutan, tarik pulang | kabel, kereta, tiang | kincir |
+| 2-20 Duel Tekanan Goa Api | perisai dari dua tungku api yang dinyalakan ulang | bara | boss, bola api, HUD boss, orangutan-sit |
 
 ## 4. Kekurangan aset (tidak diganti aset fiktif)
 
@@ -64,6 +74,7 @@ Semua level diuji pada scene asli: `tests/sumatra-solutions.spec.ts` memutar ula
 
 | Level | Status |
 | --- | --- |
-| 2-1 … 2-10 | dapat dimainkan dan diselesaikan (solusi teruji) |
+| 2-1 … 2-9 | dapat dimainkan dan diselesaikan (`tests/sumatra-solutions.spec.ts`) |
+| 2-10 … 2-20 | dapat dimainkan dan diselesaikan (`tests/sumatra-trials.spec.ts`, pemain berskrip yang hanya menekan tombol) |
 
 Batasan: keseimbangan kesulitan dan rasa permainan belum diuji pemain manusia; solusi teruji membuktikan dapat diselesaikan, bukan bahwa tingkat kesulitannya ideal.

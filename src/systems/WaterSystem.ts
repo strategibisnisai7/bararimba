@@ -18,6 +18,7 @@ const LAYER = 3.5;         // depth one running drop adds to its column, px
 const MAX_DEPTH = 96;      // deepest a column of running water stacks, px
 const PRESS = 700;         // acceleration per unit of water-surface gradient, px/s^2
 const BAND = 40;           // drops whose ground differs by more than this belong to separate layers
+const GRID = 96;           // broad-phase column width, px
 /** Water at one height in one column (a ledge and the ground below it are separate cells). */
 interface Cell { gy: number; sum: number; n: number }
 
@@ -36,6 +37,8 @@ export class WaterSystem {
   private groundCache = new Map<number, number | null>();
   private cacheT = 0;
   private t = 0;
+  /** Surfaces overlapping each GRID column (in `surfaces` order, so tie-breaks match a full scan). */
+  private grid = new Map<number, Surface[]>();
   private liquid: Phaser.GameObjects.Graphics;
   /** Optional sink (e.g. a basin) that swallows drops entering its water. */
   absorb?: (x: number, y: number) => boolean;
@@ -56,6 +59,7 @@ export class WaterSystem {
     } else this.emission = 0;
     const fires = this.fires();
     this.t += dt;
+    this.buildGrid();
     if ((this.cacheT -= dt) <= 0) { this.cacheT = .3; this.groundCache.clear(); }
     // Pooling: running drops per column and layer form a water column; its surface drives the flow.
     this.cells.clear();
@@ -79,12 +83,31 @@ export class WaterSystem {
       for (const f of fires) if (f.contains(next.x, next.y)) { burning = f; break; }
       if (burning) { this.onFire(burning, next.x, next.y); this.kill(p); continue; }
       if (this.absorb?.(next.x, next.y)) { this.kill(p); continue; }
-      const hit = firstHit(p, next, this.surfaces);
+      const hit = this.hit(p, next);
       if (hit) { this.onHit(hit, p); this.land(p, hit); continue; }
       p.x = next.x; p.y = next.y;
       if (p.age > .28 && Math.random() < .006) this.onMist(p.x, p.y);
       if (p.y > 760 || p.life <= 0) this.kill(p);
     }
+  }
+  private buildGrid() {
+    this.grid.clear();
+    for (const s of this.surfaces) {
+      if (!s.body.vertices) continue;
+      const b = s.body.bounds;
+      for (let k = Math.floor(b.min.x / GRID); k <= Math.floor(b.max.x / GRID); k++) {
+        const list = this.grid.get(k);
+        if (list) list.push(s); else this.grid.set(k, [s]);
+      }
+    }
+  }
+  /** Ray test against only the surfaces near the segment (almost every drop step stays in one column). */
+  private hit(from: { x: number; y: number }, to: { x: number; y: number }) {
+    const k0 = Math.floor(Math.min(from.x, to.x) / GRID), k1 = Math.floor(Math.max(from.x, to.x) / GRID);
+    if (k0 === k1) return firstHit(from, to, this.grid.get(k0) ?? []);
+    const near = new Set<Surface>();
+    for (let k = k0; k <= k1; k++) for (const s of this.grid.get(k) ?? []) near.add(s);
+    return firstHit(from, to, [...near]);
   }
   /** Turn an impact into running water, a slide down a wall, or a merge with the river. */
   private land(p: Drop, hit: Hit) {
@@ -126,7 +149,7 @@ export class WaterSystem {
     const key = c * 4096 + Math.round(gy / 16);
     if (this.groundCache.has(key)) return this.groundCache.get(key)!;
     const x = c * COL + COL / 2;
-    const hit = firstHit({ x, y: gy - 36 }, { x, y: gy + 140 }, this.surfaces);
+    const hit = this.hit({ x, y: gy - 36 }, { x, y: gy + 140 });
     const y = hit && hit.surface.kind !== 'river' && hit.normal.y < 0 ? hit.point.y : null;
     this.groundCache.set(key, y);
     return y;
@@ -152,7 +175,7 @@ export class WaterSystem {
     const top = p.gy - d;
     for (const f of fires) if (f.contains(nx, top - 4)) { this.onFire(f, nx, top - 4); this.kill(p); return; }
     // Wall ahead below the current water surface: the drop is held back, so the pool fills up.
-    const wall = firstHit({ x: p.x, y: top - 1 }, { x: nx + Math.sign(p.vx) * 2, y: top - 1 }, this.surfaces);
+    const wall = this.hit({ x: p.x, y: top - 1 }, { x: nx + Math.sign(p.vx) * 2, y: top - 1 });
     if (wall && wall.surface.kind !== 'river') {
       // Running water carries momentum: it shoves loose objects it piles against.
       if (wall.surface.kind === 'prop') this.onHit(wall, { vx: p.vx * 2.5, vy: 0 });
@@ -161,7 +184,7 @@ export class WaterSystem {
     p.x = nx;
     if (this.absorb?.(p.x, top)) { this.kill(p); return; }
     // Follow the ground (small rises included); with nothing beneath, pour over the edge as a falling drop.
-    const ground = firstHit({ x: p.x, y: top - 6 }, { x: p.x, y: p.gy + 10 }, this.surfaces);
+    const ground = this.hit({ x: p.x, y: top - 6 }, { x: p.x, y: p.gy + 10 });
     if (!ground) { p.flow = 0; p.y = top; p.vy = 20; p.life = Math.max(p.life, 3); return; }
     if (ground.surface.kind === 'river') { this.kill(p); return; }
     p.gy = ground.point.y;

@@ -1,10 +1,12 @@
 import { LEVELS, ANIMALS, REGIONS, regionOf, type LevelDef, type RegionId } from '../config/levels';
 import { store, type Quality } from '../systems/Save';
+import { ASSETS } from '../config/level';
 import type { ResultInfo } from '../scenes/LevelScene';
 
 export interface Controller {
   startLevel(id: number): void; restart(): void; exitToMenu(screen: Screen): void;
   pause(): void; resume(): void; unlockAudio(): void; click(): void;
+  setQuality(): void; backdrop(visible: boolean): void;
 }
 export type Screen = 'menu' | 'map' | 'levels' | 'collection';
 export interface HudData {
@@ -63,6 +65,7 @@ export class GameUI {
   show(s: Screen) {
     this.current = s; this.hudEl.hidden = true; this.overlay.hidden = true; this.screen.hidden = false;
     this.root.dataset.screen = s;
+    this.c.backdrop(s !== 'map');
     if (s === 'menu') this.screen.innerHTML = this.menuHtml();
     if (s === 'map') this.screen.innerHTML = this.mapHtml();
     if (s === 'levels') this.screen.innerHTML = this.levelsHtml();
@@ -74,7 +77,7 @@ export class GameUI {
     this.c.unlockAudio(); this.c.click();
     const a = t.dataset.a!, v = t.dataset.v;
     switch (a) {
-      case 'play': this.show('levels'); break;
+      case 'play': this.show('map'); break;
       case 'fullscreen': this.toggleFullscreen(); break;
       case 'map': this.show('map'); break;
       case 'collection': this.show('collection'); break;
@@ -153,8 +156,8 @@ export class GameUI {
   // ---------- Peta Indonesia (layers sliced from referensiasset/Indonesia Adventure Map.png) ----------
   private mapHtml() {
     // Badge rects (reference px) over each open card's baked star counter, and over Sumatra's baked padlock.
-    const counts: Partial<Record<RegionId, number[]>> = { jawa: [421, 582, 60, 28], sumatra: [289, 300, 58, 26] };
-    const checks: Partial<Record<RegionId, number[]>> = { sumatra: [386, 284, 50, 52] };
+    const counts: Partial<Record<RegionId, number[]>> = { jawa: [421, 582, 60, 28], sumatra: [289, 300, 58, 26], kalimantan: [852, 307, 58, 26] };
+    const checks: Partial<Record<RegionId, number[]>> = { sumatra: [386, 284, 50, 52], kalimantan: [949, 291, 50, 52] };
     // Rects are [x, y, w, h] in reference pixels (1672x941); see MAP in scripts/prepare_ui_assets.py.
     const W = 1672, H = 941;
     const at = (x: number, y: number, w: number, h: number) => `left:${(x / W) * 100}%;top:${(y / H) * 100}%;width:${(w / W) * 100}%;height:${(h / H) * 100}%`;
@@ -200,16 +203,18 @@ export class GameUI {
   // ---------- level select (Game Board region panel) ----------
   private levelsHtml() {
     const R = REGIONS[this.region];
+    // A boss tile shows that boss's own art (Kalimantan bosses are not the Pembakar Hutan).
+    const bossImg = (id: number) => { const k = LEVELS[id - 1]?.boss?.sprite; return k ? `/assets/${ASSETS[k]}.webp` : '/assets/boss/boss.webp'; };
     const tiles = Array.from({ length: R.total }, (_, i) => {
       const id = R.first + i, open = this.isOpen(id), s = store.progress.stars[id] ?? 0;
-      if (id === R.boss) return open ? `<button class="tile boss ${id === this.selected ? 'sel' : ''}" data-a="select" data-v="${id}" aria-label="Level boss"><img src="/assets/boss/boss.webp" alt=""/><small>BOSS</small><span class="tile-stars">${[0, 1, 2].map(k => `<i class="${k < s ? 'on' : ''}"></i>`).join('')}</span></button>`
-        : `<button class="tile boss locked" data-a="select" data-v="${id}" aria-label="Level boss terkunci"><img src="/assets/boss/boss.webp" alt=""/><small>BOSS</small><em>Terkunci</em></button>`;
+      if (id === R.boss || id === R.midBoss) return open ? `<button class="tile boss ${id === this.selected ? 'sel' : ''}" data-a="select" data-v="${id}" aria-label="Level boss"><img src="${bossImg(id)}" alt=""/><small>BOSS</small><span class="tile-stars">${[0, 1, 2].map(k => `<i class="${k < s ? 'on' : ''}"></i>`).join('')}</span></button>`
+        : `<button class="tile boss locked" data-a="select" data-v="${id}" aria-label="Level boss terkunci"><img src="${bossImg(id)}" alt=""/><small>BOSS</small><em>Terkunci</em></button>`;
       if (!open) return `<button class="tile locked" data-a="select" data-v="${id}" aria-label="Level ${i + 1} terkunci"><img src="${A('lock')}" alt=""/></button>`;
       return `<button class="tile ${id === this.selected ? 'sel' : ''}" data-a="select" data-v="${id}" aria-label="Level ${i + 1}"><b>${i + 1}</b><span class="tile-stars">${[0, 1, 2].map(k => `<i class="${k < s ? 'on' : ''}"></i>`).join('')}</span></button>`;
     }).join('');
     const l = LEVELS[this.selected - 1];
     return `<div class="levels">
-      <div class="board">
+      <div class="board ${R.total > 20 ? 'expanded huge' : R.total > 15 ? 'expanded' : ''}">
         <button class="wood-btn back" data-a="menu" aria-label="Kembali"><img src="${A('wood-left')}" alt=""/></button>
         <div class="title-plank"><b>${R.name}</b><small>${R.subtitle}</small></div>
         <div class="grid">${tiles}</div>
@@ -275,7 +280,7 @@ export class GameUI {
     const opts: Record<string, string[]> = { quality: ['Rendah', 'Sedang', 'Tinggi'], control: ['Sentuh', 'Mouse'], language: ['Indonesia'] };
     const list = opts[k]; const cur = (store.settings as unknown as Record<string, string>)[k];
     const next = list[(list.indexOf(cur) + dir + list.length) % list.length];
-    if (k === 'quality') store.settings.quality = next as Quality;
+    if (k === 'quality') { store.settings.quality = next as Quality; store.settings.qualitySet = true; this.c.setQuality(); }
     if (k === 'control') store.settings.control = next as 'Sentuh' | 'Mouse';
     store.save(); this.openSettings();
     this.hudEl.classList.toggle('touch', store.settings.control === 'Sentuh');
@@ -304,6 +309,7 @@ export class GameUI {
     this.hudEl.className = `hud ${store.settings.control === 'Sentuh' ? 'touch' : ''}`;
     this.hudEl.innerHTML = `
       <div class="hud-banner"><span class="code"></span><span class="name"></span><span class="hstars"></span></div>
+      <div class="mission-progress" hidden></div>
       <div class="hud-status">
         <div class="chip animal"><img class="ani" alt=""/><div class="bar"><span></span></div></div>
       </div>
@@ -339,7 +345,7 @@ export class GameUI {
       <div class="ind right"><img src="${A('round-fire')}" alt="Api di kanan"/></div>`;
     const q = (s: string) => this.hudEl.querySelector<HTMLElement>(s)!;
     this.els = {
-      code: q('.code'), name: q('.name'), hstars: q('.hstars'), aniImg: q('.ani'), aniBar: q('.animal .bar span'), aniChip: q('.chip.animal'),
+      code: q('.code'), name: q('.name'), mission: q('.mission-progress'), hstars: q('.hstars'), aniImg: q('.ani'), aniBar: q('.animal .bar span'), aniChip: q('.chip.animal'),
       count: q('.count'), wfill: q('.wtrack span'), refill: q('.refill'), tipV: q('.tip-v'), boomV: q('.boom-v'),
       spray: q('.spray'), bossSpray: q('.bh-spray'), pres: q('.bh-pressure span'), resv: q('.bh-reserve span'), life: q('.bh-life span'), fuel: q('.bh-fuel span'), fuelWrap: q('.bh-fuel'), waitWrap: q('.bh-reserve'), bhp: q('.bh-boss span'), indL: q('.ind.left'), indR: q('.ind.right'), wtrack: q('.wtrack'),
     };
@@ -358,9 +364,10 @@ export class GameUI {
     });
   }
   enterLevel(def: LevelDef) {
+    this.missionHud('');
     this.level = def; this.selected = def.id; this.region = regionOf(def).id; this.paused = false;
     this.screen.hidden = true; this.screen.innerHTML = ''; this.closeOverlay();
-    this.root.dataset.screen = 'game';
+    this.root.dataset.screen = 'game'; this.c.backdrop(true);
     this.els.code.textContent = def.code; this.els.name.textContent = def.name;
     (this.els.aniImg as HTMLImageElement).src = `/assets/animals/${def.animal.key}.webp`;
     this.els.refill.hidden = true;
@@ -369,6 +376,7 @@ export class GameUI {
     this.releaseControls();
   }
   setZoomLevel(z: number) { const v = this.hudEl.querySelector('.zval'); if (v) v.textContent = `${Math.round(z * 100)}%`; }
+  missionHud(text: string) { this.els.mission.textContent = text; this.els.mission.hidden = !text; }
   showHud(on: boolean) { this.hudEl.hidden = !on; if (!on) this.releaseControls(); }
   private releaseControls() {
     this.driveDir = this.tipDir = this.boomDir = 0; this.sprayHeld = false;
@@ -437,7 +445,7 @@ export class GameUI {
     this.overlay.hidden = false;
     const won = r.won;
     const mark = (ok: boolean) => `<img class="mark" src="${A(ok ? 'round-check' : 'round-x')}" alt="${ok ? 'berhasil' : 'gagal'}"/>`;
-    const reason = r.reason === 'water' ? 'Air habis sebelum api padam.' : r.reason === 'burn' ? 'Hutan habis terbakar oleh Pembakar Hutan!' : r.reason === 'truck' ? 'Truk rusak parah terkena serangan boss!' : '';
+    const reason = r.reason === 'water' ? 'Air habis sebelum api padam.' : r.reason === 'burn' ? 'Hutan habis terbakar oleh Pembakar Hutan!' : r.reason === 'truck' ? 'Truk rusak parah terkena serangan boss!' : r.note ?? '';
     const rows = `
       ${r.boss ? `<div class="rrow"><span>Nyawa truk ≥ 50%</span><em>${r.truckHp ?? 0}%</em>${mark(won && r.water.ok)}</div>`
         : `<div class="rrow"><span>Hemat air (maks ${r.water.budget} L)</span><em>${Math.round(r.water.used)} L</em>${mark(won && r.water.ok)}</div>`}

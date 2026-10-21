@@ -3,7 +3,9 @@ import type { LevelDef } from '../config/levels';
 import type { Surface } from '../physics/collision';
 import type { World } from './World';
 
-interface Gate { id: string; x: number; y0: number; y1: number; open: boolean; body: MatterJS.BodyType; surface: Surface; sprite: Phaser.GameObjects.TileSprite | Phaser.GameObjects.Image; beam: Phaser.GameObjects.Image }
+interface Gate { id: string; x: number; y0: number; y1: number; open: boolean; body: MatterJS.BodyType; surface: Surface; sprite: Phaser.GameObjects.TileSprite | Phaser.GameObjects.Image; beam: Phaser.GameObjects.Image;
+  /** Mud bank: worn down by water hits instead of switched open. */
+  mud?: { need: number; hits: number; shown: number } }
 interface Switch { kind: 'target' | 'button' | 'wheel'; x: number; y: number; opens: string; need: number; hits: number; done: boolean;
   surface?: Surface; sprite?: Phaser.GameObjects.Image; disc?: Phaser.GameObjects.Graphics }
 interface Tank { x0: number; x1: number; floor: number; depth: number; left: number; released: boolean; drained: number; amount: number;
@@ -26,15 +28,22 @@ export class Puzzles {
 
   constructor(private scene: Phaser.Scene, private world: World, def: LevelDef) {
     this.g = scene.add.graphics().setDepth(13.5);
-    for (const d of def.gates ?? []) this.makeGate(d.id, d.x, d.y0, d.y1, d.style);
+    for (const d of def.gates ?? []) this.makeGate(d.id, d.x, d.y0, d.y1, d.style, d.need);
     for (const d of def.reservoirs ?? []) this.makeTank(d);
     for (const d of def.switches ?? []) this.makeSwitch(d);
   }
-  private makeGate(id: string, x: number, y0: number, y1: number, style?: 'stone') {
+  private makeGate(id: string, x: number, y0: number, y1: number, style?: 'stone' | 'mud', need = 60) {
     const s = this.scene, h = y1 - y0;
     const body = s.matter.add.rectangle(x, y0 + h / 2, GATE_W, h, { isStatic: true, label: 'gate' });
     const surface: Surface = { body, kind: 'terrain', enabled: true };
     this.world.surfaces.push(surface);
+    if (style === 'mud') {
+      // Mud bank: the cave rock heap stained with wet earth, sunk to the ground it stands on.
+      const sprite = s.add.image(x, y1 + 6, 'sm-rock-heap').setOrigin(.5, 1).setDisplaySize(GATE_W * 2.6, h + 14).setTint(0x8a6440).setDepth(14);
+      const beam = s.add.image(x, y0, 'sm-fern-a').setOrigin(.5, .9).setScale(.35).setTint(0x9a8a50).setDepth(14.5);
+      this.gates.push({ id, x, y0, y1, open: false, body, surface, sprite, beam, mud: { need, hits: 0, shown: 1 } });
+      return;
+    }
     if (style === 'stone') {
       // Carved Sumatra cave door (sheet cutout 023), hung from a pulley rope; it slides up into the roof.
       const sprite = s.add.image(x, y0, 'sm-gate').setOrigin(.5, 0).setDisplaySize(h * .9, h + 6).setDepth(14);
@@ -72,7 +81,9 @@ export class Puzzles {
       this.world.surfaces.push({ body, kind: 'terrain', enabled: true });
       s.add.tileSprite(x, top, 16, d.floor - top, this.world.theme.fill).setOrigin(0, 0).setTileScale(.8).setDepth(14);
     };
-    wall(d.x0 - 16);
+    // The retaining wall stands opposite the gate that holds the water back.
+    const gate = d.gate ? this.gate(d.gate) : undefined;
+    wall(gate && gate.x < d.x0 ? d.x1 : d.x0 - 16);
     const tank: Tank = { x0: d.x0, x1: d.x1, floor: d.floor, depth: d.depth, left: 1, released: false, drained: 0, amount: d.amount, out: d.out, gate: d.gate };
     if (d.plug) {
       const r = d.plug.r, x = d.x1 + r;
@@ -106,9 +117,31 @@ export class Puzzles {
       if (g.id !== id || g.open) continue;
       g.open = true; g.surface.enabled = false;
       this.scene.matter.world.remove(g.body);
-      this.scene.tweens.add({ targets: [g.sprite, g.beam], y: `-=${g.y1 - g.y0 + 30}`, alpha: 0, duration: 1100, ease: 'cubic.in' });
+      if (g.mud) this.scene.tweens.add({ targets: [g.sprite, g.beam], scaleY: 0, alpha: 0, duration: 700, ease: 'quad.in' });
+      else this.scene.tweens.add({ targets: [g.sprite, g.beam], y: `-=${g.y1 - g.y0 + 30}`, alpha: 0, duration: 1100, ease: 'cubic.in' });
     }
   }
+  /** A water drop struck `surface`: if it is a mud bank, wash some of it away. True when the drop was used. */
+  erode(surface: Surface) {
+    const g = this.gates.find(q => q.surface === surface && q.mud && !q.open);
+    if (!g) return false;
+    const m = g.mud!;
+    if (++m.hits >= m.need) { this.openGate(g.id); this.onErode?.(g.id, true); return true; }
+    // The bank sinks in steps; its collision follows so water spills over the lower crest.
+    const left = 1 - m.hits / m.need, step = Math.ceil(left * 5) / 5;
+    if (step < m.shown) {
+      m.shown = step;
+      const h = Math.max(8, (g.y1 - g.y0) * step), M = this.scene.matter;
+      M.world.remove(g.body);
+      g.body = M.add.rectangle(g.x, g.y1 - h / 2, GATE_W, h, { isStatic: true, label: 'gate' });
+      g.surface.body = g.body;
+      this.scene.tweens.add({ targets: g.sprite, displayHeight: h + 14, duration: 300, ease: 'quad.out' });
+      this.scene.tweens.add({ targets: g.beam, y: g.y1 - h, duration: 300, ease: 'quad.out' });
+      this.onErode?.(g.id, false);
+    }
+    return true;
+  }
+  onErode?: (id: string, gone: boolean) => void;
   /** Smash a gate apart (a flung crate): its planks scatter instead of sliding up. */
   blastGate(id: string) {
     for (const g of this.gates) {
@@ -124,7 +157,7 @@ export class Puzzles {
   isOpen(id: string) { return this.gates.filter(g => g.id === id).every(g => g.open); }
   /** A closed gate standing across the road at x (used to stop the truck). */
   gateBlocks(x: number, groundTop: number) {
-    return this.gates.some(g => !g.open && Math.abs(x - g.x) < GATE_W / 2 + 4 && g.y1 >= groundTop - 8 && g.y0 < groundTop - 40);
+    return this.gates.some(g => !g.open && Math.abs(x - g.x) < GATE_W / 2 + 4 && g.y1 >= groundTop - 8 && (!!g.mud || g.y0 < groundTop - 40));
   }
   /** Drops falling into a full, unreleased reservoir just merge with it. */
   absorb = (x: number, y: number) => this.tanks.some(t => x > t.x0 && x < t.x1 && y < t.floor && y > t.floor - t.depth * t.left);

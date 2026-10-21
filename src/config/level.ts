@@ -1,6 +1,9 @@
 export const WIDTH = 1280;
 export const HEIGHT = 720;
-export const RENDER_SCALE = Math.min(window.devicePixelRatio || 1, 2);
+import { renderScale } from '../systems/Save';
+/** Follows the quality setting; reassigned live by setRenderScale (imports see the new value). */
+export let RENDER_SCALE = renderScale();
+export const setRenderScale = (s: number) => { RENDER_SCALE = s; };
 export const STEP = 1 / 120;
 export const WATER_SPEED = 680;
 export const WATER_GRAVITY = 560;
@@ -48,6 +51,13 @@ export const SUMATRA_SPRITES = ['ledge', 'slope', 'stalactite-a', 'stalactite-b'
 for (const k of SUMATRA_SPRITES) ASSETS[`sm-${k}`] = `sumatra/${k}`;
 for (const k of ['anak-gajah', 'tapir', 'harimau', 'rusa-sumatra']) ASSETS[k] = `animals/${k}`;
 
+/** Kalimantan: painted mechanism art and bosses from the level packs (scripts/prepare_kalimantan.py), species with no
+ * earlier sprite, and the Sumatra mechanism parts its peat swamp reuses (posts, pulleys, beams, rope bridge, flag, raft). */
+for (const k of ['sluice', 'waterwheel', 'raft', 'boss-akar', 'boss-heart']) ASSETS[`k-${k}`] = `kalimantan/${k}`;
+for (const k of ['owa', 'pesut', 'kucing-bakau', 'kucing-merah']) ASSETS[k] = `animals/${k}`;
+const KALIMANTAN_REUSE = ['post', 'pulley', 'pulley-single', 'beam', 'rope-bridge', 'flag', 'raft', 'gate', 'coals', 'rock-pile', 'aframe', 'hook',
+  'winch', 'bush-red', 'jungle-bush', 'fern-a', 'fern-root', 'log-moss', 'falls', 'falls-tall', 'falls-small', 'palm-a', 'palm-b', 'vines'].map(k => `sm-${k}`);
+
 /** Assets only some levels need; everything else in ASSETS is loaded for every level. Keeps the first load small. */
 export const ASSET_GROUPS: Record<string, string[]> = {
   volcanic: Object.keys(ASSETS).filter(k => k.startsWith('v-') || k.startsWith('vp-')),
@@ -55,13 +65,15 @@ export const ASSET_GROUPS: Record<string, string[]> = {
   boss: ['boss', 'fireball', 'boss-tower', 'orangutan-sit'],
   earthy: Object.keys(ASSETS).filter(k => k.startsWith('et-')),
   sumatra: [...Object.keys(ASSETS).filter(k => k.startsWith('sm-')), 'anak-gajah', 'tapir', 'harimau', 'rusa-sumatra'],
+  kalimantan: [...Object.keys(ASSETS).filter(k => k.startsWith('k-')), 'owa', 'pesut', 'kucing-bakau', 'kucing-merah', 'anak-gajah', ...KALIMANTAN_REUSE],
 };
-export function assetsFor(theme?: string, boss?: boolean, earthy?: boolean, sumatra?: boolean) {
+export function assetsFor(theme?: string, boss?: boolean, earthy?: boolean, sumatra?: boolean, kalimantan?: boolean) {
   const grouped = new Set(Object.values(ASSET_GROUPS).flat());
   const keys = Object.keys(ASSETS).filter(k => !grouped.has(k));
   if (theme && ASSET_GROUPS[theme]) keys.push(...ASSET_GROUPS[theme]);
   if (boss) keys.push(...ASSET_GROUPS.boss);
   if (earthy) keys.push(...ASSET_GROUPS.earthy);
   if (sumatra) keys.push(...ASSET_GROUPS.sumatra);
+  if (kalimantan) keys.push(...ASSET_GROUPS.kalimantan.filter(k => !keys.includes(k)));
   return keys;
 }

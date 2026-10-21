@@ -23,7 +23,7 @@ test('Peta Indonesia opens the Sumatra board; its first level is open, the rest 
   await page.locator('[data-a=map]').click();
   await page.locator('[data-a=region][data-v=sumatra]').click({ force: true });
   await expect(page.locator('.title-plank b')).toHaveText('SUMATRA');
-  await expect(page.locator('.tile')).toHaveCount(10);
+  await expect(page.locator('.tile')).toHaveCount(20);
   await expect(page.locator('.tile.boss')).toHaveCount(1);
   await expect(page.locator('[data-a=select][data-v="16"]')).not.toHaveClass(/locked/);
   await expect(page.locator('[data-a=select][data-v="17"]')).toHaveClass(/locked/);

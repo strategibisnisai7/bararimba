@@ -6,7 +6,10 @@ async function startLevel(page: Page, level = 1) {
   await page.goto('/');
   await page.evaluate(() => localStorage.setItem('bararimba.v2', JSON.stringify({ progress: { stars: { 1: 1, 2: 1 }, best: {}, animals: [], tutorialSeen: true } })));
   await page.reload();
+  // "Main" opens Peta Indonesia first; the island card leads to its level board.
   await page.locator('[data-a=play]').click();
+  await expect(page.locator('[data-a=region]')).toHaveCount(7);
+  await page.locator('[data-a=region][data-v=jawa]').click({ force: true });
   await page.locator(`[data-a=select][data-v="${level}"]`).click();
   await page.locator('[data-a=start]').click();
   await page.locator('[data-a=go]').dispatchEvent('click');
@@ -24,7 +27,7 @@ test('menu shows all Game Board entries and every screen opens', async ({ page }
   await expect(page.locator('.tile.boss')).toContainText('BOSS');
   await page.locator('[data-a=menu]').click();
   await page.locator('[data-a=collection]').click();
-  await expect(page.locator('.animal-card')).toHaveCount(18);
+  await expect(page.locator('.animal-card')).toHaveCount(22);
   await page.locator('[data-a=menu]').click();
   await page.locator('[data-a=settings]').click();
   await expect(page.getByRole('dialog', { name: 'Pengaturan' })).toBeVisible();

@@ -11,7 +11,7 @@ interface ThemeStyle {
   top: string[]; fill: string; fillTint?: number; topScale: number; topLift: number;
   props: { key: string; scale: number; lift?: number }[]; particles?: 'embers' | 'snow';
   /** Replace the jungle backdrop with the volcanic parallax sheet layers. */
-  parallax?: 'volcano' | 'temple' | 'cave';
+  parallax?: 'volcano' | 'temple' | 'cave' | 'peat';
   /** Texture for pushable boulders. */
   boulder?: { key: string; scale: number };
 }
@@ -22,9 +22,12 @@ const THEMES: Record<string, ThemeStyle> = {
     props: [{ key: 'p-pillar', scale: .55 }, { key: 'p-stupa', scale: .6 }, { key: 'p-gate', scale: .6 }, { key: 'p-guardian', scale: .6 }], parallax: 'temple' },
   volcanic: { sky: [0x6a5a6e, 0xf0a070], bed: [0xff8a2a, 0x9a2a0a], far: 0x8a6a5a, mid: 0xb08a70, haze: 0xd89070, top: ['v-top'], fill: 'v-fill', topScale: .9, topLift: 12, parallax: 'volcano',
     props: [{ key: 'v-rock', scale: .8 }, { key: 'v-spire', scale: .8 }, { key: 'v-tree', scale: .8 }], particles: 'embers' },
-  // Sumatra karst cave: mossy ledge stone, stalactite ceiling, waterfalls and rainforest beyond the cave mouth.
+  // Sumatra karst cave (its grass strip's solid lip sits 50 px down, under sparse blades): mossy ledge stone, stalactite ceiling, waterfalls and rainforest beyond the cave mouth.
   cave: { sky: [0x1f3b36, 0x7fb3a0], bed: [0x46c2cf, 0x125468], far: 0x41675d, mid: 0x6d9a7c, haze: 0xa8d6c4, top: ['sm-top'], fill: 'sm-fill',
-    topScale: .78, topLift: 22, props: [], parallax: 'cave', boulder: { key: 'sm-boulder', scale: .54 } },
+    topScale: .78, topLift: 52, props: [], parallax: 'cave', boulder: { key: 'sm-boulder', scale: .54 } },
+  // Kalimantan peat swamp: tannin-black river, dark peat soil under moss, misty rainforest rows.
+  peat: { sky: [0x3f6a5c, 0xc4dcc4], bed: [0x5a4226, 0x150e07], far: 0x47695a, mid: 0x6a8a62, haze: 0xc8dcc8, top: ['top-a', 'top-b'], fill: 'dirt', fillTint: 0x6e5444,
+    topScale: .86, topLift: 16, props: [], parallax: 'peat' },
 };
 
 export interface Prop { kind: string; body: MatterJS.BodyType; sprite: Phaser.GameObjects.Image; surface: Surface; gone: boolean; floating?: { x: number; y: number; t: number }; plug?: boolean }
@@ -74,7 +77,7 @@ export class World {
     if (T.parallax === 'cave') this.ensureCaveStone();
     const sky = scene.add.graphics().setDepth(0);
     sky.fillGradientStyle(T.sky[0], T.sky[0], T.sky[1], T.sky[1], 1).fillRect(-2400, -1200, W + 4800, 2400);
-    if (T.parallax !== 'cave') sky.fillStyle(0xfff7d6, .25).fillCircle(980, 150, 80);
+    if (T.parallax !== 'cave' && T.parallax !== 'peat') sky.fillStyle(0xfff7d6, .25).fillCircle(980, 150, 80);
     for (let i = 0; T.parallax !== 'cave' && i * 520 < W + 600; i++) {
       const c = scene.add.image(200 + i * 520, 110 + (i % 3) * 38, 'cloud').setScale(.45 + (i % 2) * .3).setAlpha(.85).setDepth(1);
       this.clouds.push(c); this.layers.push({ image: c, x: c.x, factor: .1 });
@@ -99,6 +102,17 @@ export class World {
       const far = ['tree-a', 'tree-b', 'tree-c', 'tree-large'], mid = ['tree-b', 'tree-a', 'tree-small', 'tree-c', 'tree-flower'];
       for (let i = 0, x = -900; x < span(.5); i++, x += 150 + (i * 37) % 70) this.layer(far[i % far.length], x, 590, .62 + (i % 3) * .08, 4, .5, 1, T.far);
       for (let i = 0, x = -900; x < span(.75); i++, x += 230 + (i * 53) % 90) this.layer(mid[i % mid.length], x, 610, .78 + (i % 2) * .12, 5, .75, 1, T.mid);
+      if (T.parallax === 'peat') {
+        // Swamp mist drifting between the tree rows.
+        // Soft bands: each fades in from above and out below.
+        const band = (g: Phaser.GameObjects.Graphics, y: number, h: number, a: number) => {
+          g.fillGradientStyle(0xe4f0e4, 0xe4f0e4, 0xe4f0e4, 0xe4f0e4, 0, 0, a, a).fillRect(-2400, y, W + 4800, h / 2);
+          g.fillGradientStyle(0xe4f0e4, 0xe4f0e4, 0xe4f0e4, 0xe4f0e4, a, a, 0, 0).fillRect(-2400, y + h / 2, W + 4800, h / 2);
+        };
+        const mist = scene.add.graphics().setDepth(4.5);
+        band(mist, 280, 140, .3); band(mist, 410, 120, .35);
+        band(scene.add.graphics().setDepth(5.2), 460, 130, .3);
+      }
     }
     const haze = scene.add.graphics().setDepth(5.5);
     haze.fillGradientStyle(T.haze, T.haze, T.haze, T.haze, 0, 0, .4, .4).fillRect(-200, 380, W + 400, 240);
@@ -243,7 +257,8 @@ export class World {
     const w = x1 - x0;
     this.add(x0 + w / 2, top + (760 - top) / 2, w, 760 - top, 'terrain');
     const T = this.theme;
-    s.add.tileSprite(x0, top + (T.fill === 'dirt' ? 70 : 34), w, 1100 - top, T.fill).setOrigin(0, 0).setTileScale(T.fill === 'dirt' ? .9 : 1.1).setDepth(10);
+    const fill = s.add.tileSprite(x0, top + (T.fill === 'dirt' ? 70 : 34), w, 1100 - top, T.fill).setOrigin(0, 0).setTileScale(T.fill === 'dirt' ? .9 : 1.1).setDepth(10);
+    if (T.fillTint) fill.setTint(T.fillTint);
     const keys = T.top;
     const sc = T.topScale;
     for (let x = x0 - 6, i = 0; x < x1 - 10; i++) {
@@ -265,7 +280,8 @@ export class World {
   respawnFloatable() {
     const fg = this.def.floatGap;
     if (!fg || this.bridged) return false;
-    const left = this.props.some(p => !p.gone && !p.floating && p.kind !== 'boulder' && p.body.position.x < fg.x0 + 20 && p.body.position.y < 560);
+    // Any loose floatable still in play (on the near bank or tumbling into the gap) can still complete the raft.
+    const left = this.props.some(p => !p.gone && !p.floating && p.kind !== 'boulder' && p.body.position.x < fg.x1 && p.body.position.y < 640);
     if (left) return false;
     const src = this.def.props.find(p => p.kind !== 'boulder' && p.x < fg.x0)!;
     const p = this.prop(src.kind, src.x, src.y);
@@ -320,7 +336,8 @@ export class World {
       return;
     }
     const T = this.theme;
-    s.add.tileSprite(r.x0, r.y0, w, h, T.fill).setOrigin(0, 0).setTileScale(T.fill === 'dirt' ? .9 : 1.1).setDepth(15);
+    const fill = s.add.tileSprite(r.x0, r.y0, w, h, T.fill).setOrigin(0, 0).setTileScale(T.fill === 'dirt' ? .9 : 1.1).setDepth(15);
+    if (T.fillTint) fill.setTint(T.fillTint);
     // Grass lip on top and a dark underside so the slab reads as an overhang.
     for (let x = r.x0 - 6, i = 0; x < r.x1 - 10; i++) {
       const img = s.add.image(x, r.y0 - T.topLift, T.top[i % T.top.length]).setOrigin(0, 0).setScale(T.topScale).setDepth(15);
@@ -438,7 +455,8 @@ export class World {
     const slot = this.rafts++;
     const w = (fg.x1 - fg.x0) / fg.need;
     // Float so the top sits level with the road (bodies are ~64-66 px tall).
-    const tx = fg.x0 + w * (slot + .5), ty = p.kind === 'log' ? 572 : 574;
+    // Slots fill from the far side, so a log already floating never blocks the next one dropping in.
+    const tx = fg.x1 - w * (slot + .5), ty = p.kind === 'log' ? 572 : 574;
     this.scene.matter.body.setStatic(p.body, true);
     this.scene.matter.body.setAngle(p.body, 0);
     this.scene.matter.body.setPosition(p.body, { x: tx, y: ty });
@@ -569,7 +587,8 @@ export class World {
     for (const c of this.clouds) c.x += Math.sin(this.time * .05) * .05;
     this.river.clear();
     const left = camCenter - 2200, right = camCenter + 2200, lava = this.def.theme === 'volcanic';
-    const crest = lava ? 0xffe08a : 0xe8fbff, glint = lava ? 0xfff2b0 : 0xffffff;
+    const peat = this.def.theme === 'peat';
+    const crest = lava ? 0xffe08a : peat ? 0xd8b888 : 0xe8fbff, glint = lava ? 0xfff2b0 : peat ? 0xffe8c0 : 0xffffff;
     // Rolling surface: two layered waves along the river's top edge.
     for (const [amp, len, spd, y0, col, al, wdt] of [[3, 90, 1.4, 588, crest, .75, 3], [2, 55, -2.1, 595, glint, .45, 2]] as const) {
       this.river.lineStyle(wdt, col, al).beginPath();

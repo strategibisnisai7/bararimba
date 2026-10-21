@@ -5,6 +5,8 @@ import type { Point } from '../config/level';
 import type { Surface } from '../physics/collision';
 import type { Animal } from '../entities/Animal';
 import type { World } from './World';
+import { SumatraTrials, type TrialHooks } from './SumatraTrials';
+import { KalimantanKit, type Focus } from './KalimantanKit';
 
 const DEG = Math.PI / 180;
 /** Spray-operated handle (valve wheel, lock pin, panel lever): `need` drop hits trigger it. */
@@ -33,6 +35,7 @@ export class SumatraWorld {
   onEvent?: (msg: string) => void;
   private ropeG: Phaser.GameObjects.Graphics;
   private fx: Phaser.GameObjects.Graphics;
+  private marker?: Phaser.GameObjects.Graphics;
   private handles: Handle[] = [];
   private raft?: Raft;
   private bal?: { def: NonNullable<SumatraDef['balance']>; l: Plat; r: Plat; offset: number; latched: boolean };
@@ -42,6 +45,11 @@ export class SumatraWorld {
   private chain?: { def: NonNullable<SumatraDef['chainGate']>; f: number; held: number; latched: boolean; body: MatterJS.BodyType; surface: Surface; sprite: Phaser.GameObjects.Image };
   private t = 0;
   private lostT = 0;
+  readonly trials: SumatraTrials;
+  readonly kit?: KalimantanKit;
+  /** Fires, effects and water hit tests of the running scene (set once they exist). */
+  hooks?: TrialHooks;
+  playing = false;
 
   constructor(private scene: Phaser.Scene, private world: World, private level: LevelDef) {
     this.def = level.sm!;
@@ -59,6 +67,9 @@ export class SumatraWorld {
     for (const b of d.bridges ?? []) this.makeBridge(b);
     for (const b of d.basins ?? []) this.makeBasin(b);
     if (d.chainGate) this.makeChain();
+    if (d.kit) this.kit = new KalimantanKit(s, world, d.kit, { hooks: () => this.hooks, done: id => this.isDone(id), event: msg => this.onEvent?.(msg) });
+    this.trials = new SumatraTrials(s, world, d, { animal: () => this.animal, hooks: () => this.hooks, event: msg => this.onEvent?.(msg), flagX: d.rescue.flagX,
+      dial: id => this.kit?.value(id) ?? 0, done: id => this.isDone(id) });
     const fx = d.rescue.flagX;
     this.flag = s.add.image(fx, world.groundAt(fx) + 8, 'sm-flag').setOrigin(.3, 1).setScale(.62).setDepth(17);
   }
@@ -173,6 +184,11 @@ export class SumatraWorld {
   /** Mechanism id done: a gate open, a docked raft, a raised lift, a lowered bridge, a latched chain gate, or a flag. */
   isDone(id: string): boolean {
     if (this.flags.has(id)) return true;
+    // "fire:N" is done once fire N of the level is out.
+    if (id.startsWith('fire:')) { const f = this.hooks?.fires.fires[+id.slice(5)]; return !!f && !f.lit; }
+    if (id === 'floatgap') return this.world.bridged;
+    const trial = this.trials.isDone(id) ?? this.kit?.isDone(id);
+    if (trial !== undefined) return trial;
     const gates = this.world.puzzles.gates.filter(g => g.id === id);
     if (gates.length) return gates.every(g => g.open);
     if (id === 'raft') return !!this.raft && this.raft.phase !== 'free';
@@ -182,12 +198,92 @@ export class SumatraWorld {
     const br = this.bridges.find(b => b.def.id === id);
     if (br) return br.state === 'down';
     const bs = this.basins.find(b => b.def.id === id);
-    if (bs) return !!bs.lift?.latched;
+    if (bs) {
+      if (bs.lift) return bs.lift.latched;
+      // Filled into its band (a channel kept between two marks), or 70% full without one.
+      const f = bs.volume / ((bs.def.x1 - bs.def.x0) * bs.def.depth / 60), band = bs.def.band ?? [.7, 1];
+      return f >= band[0] && f <= band[1] + .001;
+    }
+    // A basin valve id is done while that valve runs.
+    const vb = this.basins.find(b => (b.def.valves ?? []).some(v => v.id === id));
+    if (vb) return vb.open.has(id);
     return false;
   }
+  /** Where to aim for the current mission step (the yellow marker; the scripted test player reads it too). */
+  focus(): Focus | null {
+    const steps = this.kit?.steps, step = this.kit?.def.steps.find((_, i) => !steps![i].done);
+    for (const id of step?.need ?? []) { const f = this.focusFor(id, 0); if (f) return f; }
+    return null;
+  }
+  private focusFor(id: string, depth: number): Focus | null {
+    if (depth > 4 || this.isDone(id)) return null;
+    const dep = (ids: string[]) => { for (const d of ids) { const f = this.focusFor(d, depth + 1); if (f) return f; } return null; };
+    if (id.startsWith('fire:')) { const f = this.hooks?.fires.fires[+id.slice(5)]; return f?.lit ? { x: f.def.x, y: f.def.y - 30, how: 'spray', what: id } : null; }
+    const fg = this.level.floatGap;
+    if (id === 'floatgap' && fg) {
+      const log = this.world.props.filter(p => !p.gone && !p.floating && p.kind !== 'boulder' && p.body.position.x < fg.x0).sort((a, b) => b.body.position.x - a.body.position.x)[0];
+      return log ? { x: log.body.bounds.min.x + 12, y: log.body.position.y, how: 'push', what: id } : null;
+    }
+    const k = this.kit;
+    if (k) {
+      const pre = dep(k.after(id));
+      if (pre) return pre;
+      const f = k.focusFor(id);
+      if (f !== undefined) return f;
+      const z = k.zone(id);
+      if (z) {
+        // Push the nearest loose log/boulder: into a socket from behind it, out of an intake downstream.
+        const props = this.world.props.filter(p => !p.gone && !p.floating && p.body.position.y < 640);
+        const pick = z.into ? props.filter(p => p.body.position.x < z.x0).sort((a, b) => b.body.position.x - a.body.position.x)[0]
+          : props.find(p => p.body.position.x > z.x0 - 40 && p.body.position.x < z.x1);
+        return pick ? { x: pick.body.bounds.min.x + 12, y: pick.body.position.y, how: 'push', what: id } : null;
+      }
+    }
+    const gate = this.world.puzzles.gates.find(g => g.id === id);
+    if (gate) {
+      const sw = this.world.puzzles.switches.find(s => s.opens === id && !s.done);
+      const wh = this.world.wheel;
+      if (sw?.kind === 'target') return { x: sw.x, y: sw.y, how: 'spray', what: id };
+      if (sw?.kind === 'wheel' && wh) return { x: wh.cx - wh.r * .2, y: wh.cy - wh.r * .75, how: 'up', what: id };
+      const opener = this.kit?.opener(id);
+      return opener ? this.focusFor(opener, depth + 1) : null;
+    }
+    const br = this.bridges.find(b => b.def.id === id);
+    if (br) { const l = br.locks.find(h => !h.done); return l ? { x: l.x, y: l.y, how: 'spray', what: id } : dep(br.def.after ?? []); }
+    if (id === 'chain' && this.chain && this.world.wheel) { const wh = this.world.wheel; return { x: wh.cx - wh.r * .2, y: wh.cy - wh.r * .75, how: 'up', what: id }; }
+    if (id === 'raft' && this.raft) return this.moored ? dep(this.raft.def.after ?? []) : { x: this.raft.x - this.raft.def.w * .3, y: RAFT_TOP, how: 'spray', what: id };
+    const bs = this.basins.find(b => b.def.id === id);
+    if (bs) {
+      // A banded channel already full enough: stop and let it settle (or let the leak bring it down).
+      const f = bs.volume / ((bs.def.x1 - bs.def.x0) * bs.def.depth / 60), hi = bs.def.band?.[1] ?? 1;
+      return { x: (bs.def.x0 + bs.def.x1) / 2, y: bs.def.floor - bs.def.depth, how: f >= (bs.def.band?.[0] ?? .7) || f > hi ? 'hold' : 'spray', what: id };
+    }
+    const vb = this.basins.find(b => (b.def.valves ?? []).some(v => v.id === id));
+    if (vb) { const h = vb.def.valves!.find(v => v.id === id)!.handle; return { x: h.x, y: h.y, how: 'spray', what: id }; }
+    const ferry = this.trials.ferry(id);
+    if (ferry) return this.kit?.steer(ferry.dial, ferry.dir) ?? null;
+    if (id === 'boss') { const b = this.hooks?.boss?.(); return b ? { x: b.x, y: b.y, how: b.shielded ? 'hold' : 'spray', what: id } : null; }
+    const tf = this.trials.focus(id);
+    if (tf) return { ...tf, how: 'spray', what: id };
+    return null;
+  }
+  /** Done at least once (a boss shield stays down for mechanisms the player already completed). */
+  private everDone = new Set<string>();
+  wasDone(id: string) { if (!this.everDone.has(id) && this.isDone(id)) this.everDone.add(id); return this.everDone.has(id); }
   get free() { return (this.def.rescue.after ?? []).every(id => this.isDone(id)); }
+  get failed() { return this.trials.failed; }
+  get hint() { return this.kit ? this.kit.hint(this.focus()) : this.trials.hint; }
+  /** The level's second rescued animal (if any) reached its flag too. */
+  get companionSafe() { return this.kit?.companionSafe ?? true; }
+  seated(x: number) { return !!this.kit?.seated(x); }
+  /** Toast when the way opens; none where the animal is steered step by step from the start. */
+  get freeMessage() { return this.trials.quietFree ? '' : `Jalan terbuka! ${this.level.animal.name} menuju bendera.`; }
+  /** Every drop impact point: herding and the firebreak react to splashes, not only to what they hit. */
+  splash(x: number, y: number) { this.trials.splash(x, y); }
   /** Where the rescued animal heads now, 'wait' (stay put) or 'ride' (carried by the raft). */
   walkGoal(): number | 'wait' | 'ride' {
+    const trial = this.trials.walkGoal();
+    if (trial !== undefined) return trial;
     const r = this.raft;
     if (r && !this.animal?.arrived) {
       if (r.phase === 'docked') return r.x;
@@ -198,6 +294,7 @@ export class SumatraWorld {
   }
   /** The walking animal reached an intermediate goal (it stepped onto the docked raft). */
   reached() {
+    if (this.trials.reached()) return;
     const r = this.raft;
     if (r && r.phase === 'docked') { r.boarded = true; r.phase = 'ferry'; this.onEvent?.(`${this.level.animal.name} naik rakit! Arus membawanya pulang.`); }
   }
@@ -217,10 +314,14 @@ export class SumatraWorld {
     }
     for (const b of this.basins) if (b.lift && Math.abs(x - b.lift.x) <= b.lift.w / 2) take(b.lift.top);
     for (const p of this.def.pits ?? []) if (x >= p.x0 && x <= p.x1 && this.filled(p)) take(p.top);
+    const tr = this.trials.surfaceAt(x);
+    if (tr !== null) take(tr);
+    const kt = this.kit?.surfaceAt(x) ?? null;
+    if (kt !== null) take(kt);
     return top;
   }
   private filled(p: { x0: number; x1: number; top: number }) {
-    return this.world.props.some(q => !q.gone && q.body.position.x > p.x0 - 10 && q.body.position.x < p.x1 + 10 && q.body.position.y > p.top - 10);
+    return this.trials.fills(p) || this.world.props.some(q => !q.gone && q.body.position.x > p.x0 - 10 && q.body.position.x < p.x1 + 10 && q.body.position.y > p.top - 10);
   }
   /** Animal path blockers owned by mechanisms. */
   blocks(x: number, top: number) {
@@ -241,8 +342,10 @@ export class SumatraWorld {
     for (const l of this.def.fireLocks ?? []) if (l.fire === index) { this.world.puzzles.openGate(l.gate); this.onEvent?.('Pengunci terbakar padam — terbuka!'); }
   }
   /** Water drop hits a surface; returns true when a mechanism handled it. `lit(i)` tells whether fire i burns. */
-  waterHit(s: Surface, d: { vx: number; vy: number }, lit: (i: number) => boolean) {
-    if (s.kind === 'raft' && this.raft && this.raft.phase === 'free') { this.raft.vx += d.vx * 1.2e-3; return true; }
+  waterHit(s: Surface, d: { vx: number; vy: number }, lit: (i: number) => boolean, at: Point = { x: 0, y: 0 }) {
+    if (this.trials.waterHit(s, d)) return true;
+    if (this.kit?.waterHit(s, at)) return true;
+    if (s.kind === 'raft' && this.raft && this.raft.phase === 'free') { if (this.moored) return true; this.raft.vx += d.vx * 1.2e-3; return true; }
     if (s.kind === 'handle') {
       const h = this.handles.find(q => q.surface === s);
       if (!h || h.done || h.cool > 0) return true;
@@ -253,7 +356,7 @@ export class SumatraWorld {
     return false;
   }
   status() {
-    return { free: this.free, raft: this.raft ? `${Math.round(this.raft.x)}:${this.raft.phase}` : undefined, balance: this.bal ? Math.round(this.bal.r.top) : undefined,
+    return { free: this.free, trials: this.trials.status(), kit: this.kit?.status(), raft: this.raft ? `${Math.round(this.raft.x)}:${this.raft.phase}` : undefined, balance: this.bal ? Math.round(this.bal.r.top) : undefined,
       mirrors: this.mirrors.map(m => m.idx), bridges: this.bridges.map(b => `${b.def.id}:${b.state}:${Math.round(b.a / DEG)}`),
       basins: this.basins.map(b => `${b.def.id}:${Math.round(b.volume)}:${[...b.open].join('+')}${b.lift ? ':' + b.lift.f.toFixed(2) : ''}`),
       chain: this.chain ? `${this.chain.f.toFixed(2)}${this.chain.latched ? ' latched' : ''}` : undefined };
@@ -275,19 +378,34 @@ export class SumatraWorld {
     for (const m of this.mirrors) this.drawMirror(m);
     for (const b of this.bridges) this.updateBridge(b, dt);
     for (const b of this.basins) this.updateBasin(b, dt);
+    this.trials.update(dt, this.playing);
+    this.kit?.update(dt);
+    if (this.kit) this.drawMarker();
     if (this.chain) this.updateChain(dt);
     if (this.def.respawn) this.updateRespawn(dt);
+  }
+  /** Bobbing arrow over the current step's target; it points down at what to spray, or up/down beside a dial. */
+  private drawMarker() {
+    const g = (this.marker ??= this.scene.add.graphics().setDepth(46)).clear(), f = this.focus();
+    if (!f) return;
+    const y = f.y - 64 + Math.sin(this.t * 5) * 6;
+    g.fillStyle(0xffe066, .95).fillTriangle(f.x - 13, y - 16, f.x + 13, y - 16, f.x, y + 4).lineStyle(2, 0x5a3a10, 1).strokeTriangle(f.x - 13, y - 16, f.x + 13, y - 16, f.x, y + 4);
+    if (f.how === 'hold') { g.lineStyle(4, 0x7be88c, .95).strokeCircle(f.x, y - 6, 15).lineBetween(f.x - 9, y - 6, f.x + 9, y - 6); return; }
+    if (f.how === 'up' || f.how === 'down') {
+      const s = f.how === 'up' ? -1 : 1, cx = f.x - 34, cy = f.y - 14 * s;
+      g.fillStyle(0x6fd0ff, .95).fillTriangle(cx - 9, cy - 6 * s, cx + 9, cy - 6 * s, cx, cy + 10 * s);
+    }
   }
   /** Bring back a level boulder lost before its job was done (sunk in the river, rolled off or overshot). */
   private updateRespawn(dt: number) {
     const r = this.def.respawn!;
     if (this.isDone(r.unless)) return;
     this.level.props.forEach((d, i) => {
-      if (d.kind !== 'boulder') return;
+      if (d.kind !== 'boulder' && d.kind !== 'log') return;
       const pr = this.world.props.filter(p => !p.plug)[i];
       if (!pr) return;
       const { x, y } = pr.body.position;
-      const lost = pr.gone || x > (r.lostX ?? Infinity) || y > (r.lostY ?? 640);
+      const lost = pr.gone || x > (r.lostX ?? Infinity) || x < (r.minX ?? -Infinity) || y > (r.lostY ?? 640);
       if (!lost) return;
       this.lostT += dt;
       if (this.lostT < 1.5) return;
@@ -302,7 +420,7 @@ export class SumatraWorld {
       list.splice(list.indexOf(pr), 1, fresh);
       fresh.sprite.setAlpha(0);
       this.scene.tweens.add({ targets: fresh.sprite, alpha: 1, duration: 500 });
-      this.onEvent?.('Batu baru muncul di tempat semula. Coba lagi!');
+      this.onEvent?.(d.kind === 'log' ? 'Gelondongan kembali ke kantong arus tenang. Coba lagi!' : 'Batu baru muncul di tempat semula. Coba lagi!');
     });
   }
   private updateRopes() {
@@ -350,9 +468,15 @@ export class SumatraWorld {
       if (wh) rope([{ x: wh.cx, y: wh.cy }, { x: c.def.x, y: c.def.y0 - 40 }, { x: c.def.x, y: c.sprite.y + 4 }]);
     }
   }
+  /** A raft still waiting for its `after` ids stays tied up; once let go it stays free. */
+  private unmoored = false;
+  private get moored() {
+    if (!this.unmoored && (this.raft?.def.after ?? []).every(id => this.isDone(id))) this.unmoored = true;
+    return !this.unmoored;
+  }
   private updateRaft(dt: number) {
     const r = this.raft!, d = r.def, M = this.scene.matter.body;
-    if (r.phase === 'free' || r.phase === 'ferry') {
+    if ((r.phase === 'free' && !this.moored) || r.phase === 'ferry') {
       r.vx += d.current * (r.phase === 'ferry' ? 1.8 : 1) * dt;
       r.vx *= 1 - Math.min(1, .35 * dt);
       r.x += r.vx * dt;
@@ -414,7 +538,7 @@ export class SumatraWorld {
   private updateBridge(b: Bridge, dt: number) {
     b.t += dt;
     if (b.state === 'locked') {
-      if (b.locks.every(l => l.done)) { b.state = 'falling'; b.w = -.35; this.onEvent?.('Semua pengunci lepas — jembatan jatuh!'); }
+      if (b.locks.every(l => l.done) && (b.def.after ?? []).every(id => this.isDone(id))) { b.state = 'falling'; b.w = -.35; this.onEvent?.('Semua pengunci lepas — jembatan jatuh!'); }
     }
     if (b.state === 'falling') {
       // Rod about its hinge: gravity torque ~ cos(a); light damping keeps the swing readable.
@@ -452,6 +576,10 @@ export class SumatraWorld {
     const target = d.floor - d.depth * b.volume / cap;
     b.level += (target - b.level) * Math.min(1, dt * 4);
     const g = b.g.clear();
+    if (d.band) {
+      g.fillStyle(0x8ee3a2, .25).fillRect(d.x0, d.floor - d.depth * d.band[1], d.x1 - d.x0, d.depth * (d.band[1] - d.band[0]));
+      for (const f of d.band) g.lineStyle(3, 0xa8f2b4, .9).lineBetween(d.x0 - 8, d.floor - d.depth * f, d.x1 + 8, d.floor - d.depth * f);
+    }
     if (d.floor - b.level > 1) {
       g.fillStyle(0x2f9ee8, .75).fillRect(d.x0, b.level, d.x1 - d.x0, d.floor - b.level);
       g.lineStyle(3, 0xd8f5ff, .9).beginPath();

@@ -1,0 +1,92 @@
+{
+ "kalimantan/sluice": {
+  "source": "referensiasset/BaraRimba_Kalimantan_All_Levels/Level_01/BaraRimba_Kalimantan_Level1_HD/assets/structures/sluice_gate_composite_candidate.png",
+  "size": [
+   360,
+   294
+  ],
+  "bytes": 40444,
+  "transparent_px": 42512,
+  "opaque_px": 1561
+ },
+ "kalimantan/waterwheel": {
+  "source": "referensiasset/BaraRimba_Kalimantan_All_Levels/Level_01/BaraRimba_Kalimantan_Level1_HD/assets/structures/waterwheel_composite_candidate.png",
+  "size": [
+   320,
+   306
+  ],
+  "bytes": 42170,
+  "transparent_px": 30895,
+  "opaque_px": 1493
+ },
+ "kalimantan/raft": {
+  "source": "referensiasset/BaraRimba_Kalimantan_All_Levels/Level_01/BaraRimba_Kalimantan_Level1_HD/assets/objects/raft_bundle_candidate.png",
+  "size": [
+   420,
+   106
+  ],
+  "bytes": 19506,
+  "transparent_px": 6251,
+  "opaque_px": 35155
+ },
+ "kalimantan/boss-akar": {
+  "source": "referensiasset/BaraRimba_Kalimantan_All_Levels/Level_15/BaraRimba_Kalimantan_Level15_HD/effects/png/boss_phase_01.png",
+  "size": [
+   346,
+   420
+  ],
+  "bytes": 23112,
+  "transparent_px": 65388,
+  "opaque_px": 57593
+ },
+ "kalimantan/boss-heart": {
+  "source": "referensiasset/BaraRimba_Kalimantan_All_Levels/Level_30/BaraRimba_Kalimantan_Level30_HD/assets/boss/boss_01_core_heart.png",
+  "size": [
+   347,
+   360
+  ],
+  "bytes": 26814,
+  "transparent_px": 33140,
+  "opaque_px": 84448
+ },
+ "animals/owa": {
+  "source": "referensiasset/BaraRimba_Kalimantan_All_Levels/Level_09/BaraRimba_Kalimantan_Level9_HD/characters/png/gibbon_side_idle.png",
+  "size": [
+   256,
+   300
+  ],
+  "bytes": 10536,
+  "transparent_px": 34157,
+  "opaque_px": 38386
+ },
+ "animals/pesut": {
+  "source": "referensiasset/BaraRimba_Kalimantan_All_Levels/Level_22/BaraRimba_Kalimantan_Level22_HD/assets/png/wildlife_pesut_calf.png",
+  "size": [
+   300,
+   163
+  ],
+  "bytes": 6594,
+  "transparent_px": 17861,
+  "opaque_px": 28783
+ },
+ "animals/kucing-bakau": {
+  "source": "referensiasset/BaraRimba_Kalimantan_All_Levels/Level_23/BaraRimba_Kalimantan_Level23_HD/assets/png/wildlife_fishing_cat.png",
+  "size": [
+   300,
+   191
+  ],
+  "bytes": 10286,
+  "transparent_px": 22970,
+  "opaque_px": 31001
+ },
+ "animals/kucing-merah": {
+  "source": "referensiasset/BaraRimba_Kalimantan_All_Levels/Level_29/BaraRimba_Kalimantan_Level29_HD/assets/fauna/fauna_01_adult_bornean_bay_cat.png",
+  "size": [
+   300,
+   200
+  ],
+  "bytes": 11380,
+  "transparent_px": 28903,
+  "opaque_px": 27332
+ }
+}
