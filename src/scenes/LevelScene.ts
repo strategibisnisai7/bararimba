@@ -85,7 +85,8 @@ export class LevelScene extends Phaser.Scene {
     const def = LEVELS[(data?.level ?? 1) - 1];
     // Temple-stone pieces (blocks, pillars) borrow the ruins set on any theme.
     const ruins = def.theme !== 'ruins' && (def.decor.some(d => d.key.startsWith('p-')) || (def.rocks ?? []).some(r => r.stone) || !!def.basin?.stone);
-    for (const key of [...assetsFor(def.theme, !!def.boss, !!def.terrain, def.region === 'sumatra', def.region === 'kalimantan'), ...(ruins ? ASSET_GROUPS.ruins : []), 'alert'])
+    const mud = def.gates?.some(g => g.style === 'mud');
+    for (const key of [...assetsFor(def.theme, !!def.boss, !!def.terrain, def.region === 'sumatra', def.region === 'kalimantan'), ...(ruins ? ASSET_GROUPS.ruins : []), ...(mud ? ['sm-rock-heap', 'sm-fern-a'] : []), 'alert'])
       if (!this.textures.exists(key)) this.load.image(key, `/assets/${key === 'alert' ? 'ui/alert' : ASSETS[key]}.webp`);
     this.load.on('progress', (v: number) => { const el = document.querySelector('#load-progress'); if (el) el.textContent = `${Math.round(v * 100)}% · ${regionOf(def).forest}`; });
     this.load.on('loaderror', () => {
@@ -131,6 +132,7 @@ export class LevelScene extends Phaser.Scene {
       this.world.sm.onEvent = msg => { if (this.mode === 'playing') { this.ui.toast(msg, 2200); sound.click(); } };
     }
     this.world.onPour = (x, y, vx, vy) => this.water.pour(x, y, vx, vy);
+    if (this.world.papua) this.world.papua.onEvent = msg => { if (this.mode === 'playing') { this.ui.toast(msg, 2600); sound.click(); } };
     this.world.puzzles.onOpen = (id, sw) => {
       this.world.swingRamps(id);
       sound.win();
@@ -204,7 +206,7 @@ export class LevelScene extends Phaser.Scene {
       if (b.rope && !b.door && --b.hp <= 0) { this.world.breakRope(); this.ui.toast('Tali putus! Tong air jatuh…', 1800); sound.click(); }
     }
     if (s.kind === 'switch') this.world.puzzles.hit(s);
-    if (this.world.sm?.waterHit(s, d, i => !!this.fires.fires[i]?.lit, hit.point)) { if (Math.random() < .4) this.effects.splash(hit.point.x, hit.point.y, 3); return; }
+    if (this.world.papua?.waterHit(s) || this.world.sm?.waterHit(s, d, i => !!this.fires.fires[i]?.lit, hit.point)) { if (Math.random() < .4) this.effects.splash(hit.point.x, hit.point.y, 3); return; }
     if (s.kind === 'ramp') return;
     const wh = this.world.wheel;
     if (s.kind === 'wheel' && wh) {
@@ -279,6 +281,9 @@ export class LevelScene extends Phaser.Scene {
       firing = (this.attractT % 7) < 5.2;
     }
     this.firing = firing;
+    if (this.world.truckCarryX && (this.world.truckOnFerry(this.truck.x) || this.world.truckOnShuttle(this.truck.x))) {
+      this.truck.x += this.world.truckCarryX;
+    }
     const lim = this.mode === 'playing' ? this.driveLimits(drive) : { min: this.truck.x, max: this.truck.x };
     this.truck.update(dt, drive, lim.min, lim.max, x => this.world.groundAt(x));
     // Camera: intro flies over all fires and the animal, then settles behind the truck.
@@ -352,11 +357,11 @@ export class LevelScene extends Phaser.Scene {
   private solveTip(tx: number, ty: number, high = false) {
     const n = this.truck.cannon.nozzle;
     let best = this.truck.cannon.tip, err = Infinity;
-    if (high) for (let a = -1.25; a <= .2; a += .01) {
+    if (high) for (let a = -1.38; a <= .2; a += .01) {
       const vx = Math.cos(a) * WATER_SPEED, t = (tx - n.x) / vx;
       if (t > 0 && Math.abs(n.y + Math.sin(a) * WATER_SPEED * t + .5 * WATER_GRAVITY * t * t - ty) < 12) return a;
     }
-    for (let a = -1.1; a <= .6; a += .01) {
+    for (let a = -1.38; a <= .6; a += .01) {
       const vx = Math.cos(a) * WATER_SPEED; if (vx <= 0) continue;
       const t = (tx - n.x) / vx; if (t <= 0) continue;
       const y = n.y + Math.sin(a) * WATER_SPEED * t + .5 * WATER_GRAVITY * t * t;
@@ -413,7 +418,25 @@ export class LevelScene extends Phaser.Scene {
       }
       front(b.min.x - 8 - half, p.kind === 'boulder' ? 'boulder' : 'prop');
     }
-    if (w.seesaw) front(w.seesaw.x - 140 - half, 'mechanism');
+    if (w.seesaw && !w.seesaw.launched && Math.abs(w.groundAt(w.seesaw.x) - w.seesaw.y) < 70) front(w.seesaw.x - 140 - half, 'mechanism');
+    if (w.ferry && w.truckOnFerry(x)) {
+      min = Math.max(min, w.ferry.x - w.ferry.w / 2 + half + 10);
+      if (w.ferry.x < w.ferry.x1 - 15) {
+        max = Math.min(max, w.ferry.x + w.ferry.w / 2 - half - 10);
+      }
+    }
+    if (w.shuttle && w.truckOnShuttle(x)) {
+      min = Math.max(min, w.shuttle.x - w.shuttle.w / 2 + half + 10);
+      if (w.shuttle.x < w.shuttle.x1 - 15) {
+        max = Math.min(max, w.shuttle.x + w.shuttle.w / 2 - half - 10);
+      }
+    }
+    if (w.lift && w.truckOnLift(x)) {
+      min = Math.max(min, w.lift.x - w.lift.w / 2 + half + 10);
+      if (Math.abs(w.lift.currentY - w.lift.y1) > 8) {
+        max = Math.min(max, w.lift.x + w.lift.w / 2 - half - 10);
+      }
+    }
     max = Math.max(max, x - .01); min = Math.min(min, x + .01);
     this.warnT -= 1 / 60;
     if (drive > 0 && x >= max - 2 && blocker && this.warnT <= 0) {
@@ -483,7 +506,15 @@ export class LevelScene extends Phaser.Scene {
       b.landed = true;
       const { x, y } = b.body.position;
       this.effects.bigSplash(x, y + 20); sound.splash();
-      if (b.load === 'barrel') this.fires.douse(x, y, 175, 1.6);
+      if (b.load === 'barrel') {
+        this.fires.douse(x, y, 175, 1.6);
+        if (this.boss && Math.hypot(this.boss.x - x, this.boss.y - y) < 220) {
+          this.boss.damage(35);
+          this.cameras.main.shake(250, .01);
+          this.effects.steam(this.boss.x, this.boss.y, 6);
+          this.ui.toast('HANTAMAN TONG AIR! Boss terkena 35 damage!', 2200);
+        }
+      }
       const onButton = b.load === 'crate' && (this.def.switches ?? []).some(sw => sw.kind === 'button' && Math.abs(sw.x - x) < 70);
       if (onButton) { this.matter.body.setStatic(b.body, true); return; }
       this.matter.world.remove(b.body); b.surface.enabled = false;
@@ -521,6 +552,23 @@ export class LevelScene extends Phaser.Scene {
   private updateRules(dt: number) {
     this.elapsed += dt;
     this.burn = Math.min(100, this.burn + this.fires.heat * this.def.burnRate * dt);
+    // Sliding ice blocks cool and douse fires
+    for (const p of this.world.props) {
+      if (p.gone || (p.kind !== 'ice' && p.kind !== 'ice-block')) continue;
+      const px = p.body.position.x, py = p.body.position.y;
+      const near = this.fires.burning.some(f => Math.hypot(px - f.def.x, py - f.def.y) < 85);
+      if (near) {
+        this.fires.douse(px, py, 85, 2.4 * dt);
+        this.effects.steam(px, py - 10, 2);
+        p.sprite.setScale(Math.max(0, p.sprite.scale - 0.22 * dt));
+        if (p.sprite.scale < 0.25) {
+          p.gone = true;
+          this.matter.world.remove(p.body);
+          p.surface.enabled = false;
+          this.tweens.add({ targets: p.sprite, alpha: 0, scale: 0, duration: 250 });
+        }
+      }
+    }
     const r = this.def.refill;
     const refilling = !!r && Math.abs(this.truck.x - r.x) < r.half && !this.firing && this.water.supply < this.water.capacity;
     if (refilling) this.water.refill(24 * dt);
@@ -636,6 +684,7 @@ export class LevelScene extends Phaser.Scene {
       barrel: this.world.barrel ? { hp: this.world.barrel.hp, landed: this.world.barrel.landed } : null,
       gates: this.world.puzzles.gates.map(g => ({ id: g.id, open: g.open })),
       sm: this.world.sm?.status() ?? null,
+      papua: this.world.papua?.status() ?? null,
     };
   }
 }

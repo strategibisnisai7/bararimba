@@ -43,6 +43,7 @@ export class GameUI {
   private current: Screen = 'menu';
   private els: Record<string, HTMLElement> = {};
   private paused = false;
+  private guideTimer: number | undefined;
 
   constructor(private c: Controller) {
     this.root.innerHTML = `
@@ -68,7 +69,16 @@ export class GameUI {
     this.c.backdrop(s !== 'map');
     if (s === 'menu') this.screen.innerHTML = this.menuHtml();
     if (s === 'map') this.screen.innerHTML = this.mapHtml();
-    if (s === 'levels') this.screen.innerHTML = this.levelsHtml();
+    if (s === 'levels') {
+      // Selecting a tile re-renders the board, so keep the grid's scroll and bring the selection into view.
+      const top = this.screen.querySelector('.grid')?.scrollTop ?? 0;
+      this.screen.innerHTML = this.levelsHtml();
+      const grid = this.screen.querySelector<HTMLElement>('.grid'), sel = grid?.querySelector<HTMLElement>('.tile.sel');
+      if (grid) {
+        grid.scrollTop = top;
+        if (sel && (sel.offsetTop < grid.scrollTop || sel.offsetTop + sel.offsetHeight > grid.scrollTop + grid.clientHeight)) grid.scrollTop = sel.offsetTop - grid.clientHeight / 2 + sel.offsetHeight / 2;
+      }
+    }
     if (s === 'collection') this.screen.innerHTML = this.collectionHtml();
   }
   private onClick = (e: MouseEvent) => {
@@ -132,8 +142,8 @@ export class GameUI {
   private closeOverlay() { this.overlay.hidden = true; this.overlay.innerHTML = ''; }
   /** Unlocked levels: the first level of every region is always open, then each needs the one before it. */
   private isOpen(id: number) { return id <= LEVELS.length && (store.unlocked(id) || Object.values(REGIONS).some(r => r.first === id)); }
-  private regionStars(id: RegionId) {
-    return LEVELS.filter(l => regionOf(l).id === id).reduce((s, l) => s + (store.progress.stars[l.id] ?? 0), 0);
+  private regionCompletedLevels(id: RegionId) {
+    return LEVELS.filter(l => regionOf(l).id === id && (store.progress.stars[l.id] ?? 0) > 0).length;
   }
 
   // ---------- menu (Game Board main menu) ----------
@@ -155,9 +165,9 @@ export class GameUI {
 
   // ---------- Peta Indonesia (layers sliced from referensiasset/Indonesia Adventure Map.png) ----------
   private mapHtml() {
-    // Badge rects (reference px) over each open card's baked star counter, and over Sumatra's baked padlock.
-    const counts: Partial<Record<RegionId, number[]>> = { jawa: [421, 582, 60, 28], sumatra: [289, 300, 58, 26], kalimantan: [852, 307, 58, 26] };
-    const checks: Partial<Record<RegionId, number[]>> = { sumatra: [386, 284, 50, 52], kalimantan: [949, 291, 50, 52] };
+    // Badge rects (reference px) over each open card's baked progress counter, and over Sumatra's baked padlock.
+    const counts: Partial<Record<RegionId, number[]>> = { jawa: [421, 582, 60, 28], sumatra: [289, 300, 58, 26], kalimantan: [852, 307, 58, 26], papua: [1515, 663, 58, 26] };
+    const checks: Partial<Record<RegionId, number[]>> = { sumatra: [386, 284, 50, 52], kalimantan: [949, 291, 50, 52], papua: [1595, 654, 50, 52] };
     // Rects are [x, y, w, h] in reference pixels (1672x941); see MAP in scripts/prepare_ui_assets.py.
     const W = 1672, H = 941;
     const at = (x: number, y: number, w: number, h: number) => `left:${(x / W) * 100}%;top:${(y / H) * 100}%;width:${(w / W) * 100}%;height:${(h / H) * 100}%`;
@@ -173,8 +183,8 @@ export class GameUI {
     ];
     const cards = regions.map(([id, name, r, pin], k) => {
       const reg = REGIONS[id as RegionId], open = !!reg;
-      const got = open ? this.regionStars(reg.id) : 0, max = open ? reg.total * 3 : 0;
-      const label = open ? `${name}: terbuka, ${got} dari ${max} bintang` : `${name}: terkunci, segera hadir`;
+      const got = open ? this.regionCompletedLevels(reg.id) : 0, max = open ? reg.total : 0;
+      const label = open ? `${name}: terbuka, ${got} dari ${max} level selesai` : `${name}: terkunci, segera hadir`;
       const count = counts[id as RegionId], check = checks[id as RegionId];
       return `<button class="mreg ${open ? 'open' : 'locked'}" data-a="region" data-v="${id}" aria-label="${label}" style="${at(r[0], r[1], r[2], r[3])};--d:${k * -0.37}s">
         <img class="mreg-card" src="${A(`map-card-${id}`)}" alt="" draggable="false"/>
@@ -188,7 +198,7 @@ export class GameUI {
     return `<div class="map">
       <div class="map-blur" style="background-image:url(${A('map-blur')})"></div>
       <div class="map-box">
-        <img class="map-img" src="${A('map-base')}" alt="Peta Indonesia" draggable="false"/>
+        <img class="map-img" src="/assets/ui/mapnew.jpg" alt="Peta Indonesia" draggable="false"/>
         <div class="map-glint" aria-hidden="true"></div>
         ${clouds.map(([k, r]) => `<img class="map-cloud c-${k}" src="${A(`map-cloud-${k}`)}" alt="" aria-hidden="true" style="${at(r[0], r[1], r[2], r[3])}"/>`).join('')}
         ${dots.map(([x, y], k) => `<i class="map-dot" aria-hidden="true" style="${at(x - 4, y - 4, 22, 22)};--d:${k * 0.28}s"></i>`).join('')}
@@ -286,7 +296,7 @@ export class GameUI {
     this.hudEl.classList.toggle('touch', store.settings.control === 'Sentuh');
   }
 
-  // ---------- tutorial (sheet 16 cards) ----------
+  // ---------- tutorial (onboarding + sheet 16 cards) ----------
   openTutorial(id: number, fromHud = false) {
     const l = LEVELS[id - 1];
     const cards = (store.progress.tutorialSeen || fromHud) && !fromHud ? l.tutorial : [...new Set([1, 2, 3, ...l.tutorial])];
@@ -296,10 +306,42 @@ export class GameUI {
       <div class="panel tutorial" role="dialog" aria-labelledby="tut-title">
         <div class="title-plank small"><b id="tut-title">${l.code} · ${l.name}</b></div>
         <p class="brief">${l.brief}</p>
-        <div class="cards">${cards.map(n => `<img src="${A(`tutorial-${n}`)}" alt="Petunjuk ${n}"/>`).join('')}</div>
-        <p class="keys">Tombol: ◀ ▶ / A D gerak truk · Lengan ▲▼ / Q E · Nozzle ▲▼ / W S · Semprot / Spasi</p>
-        ${fromHud ? `<button class="green-btn" data-a="close-help">${ico.play}<span>Lanjut</span></button>`
-          : `<button class="img-btn mulai" data-a="go" data-v="${id}"><img src="${A('btn-mulai')}" alt="Mulai"/></button>`}
+        <div class="onboarding-guide">
+          <div class="ob-card">
+            <div class="ob-badge drive">🚚 KEMUDI TRUK</div>
+            <div class="ob-body">
+              <p>Panah <b>◀ Mundur</b> & <b>Maju ▶</b> di kiri bawah layar untuk menggerakkan damkar.</p>
+              <small class="ob-keys">Keyboard: <b>A / D</b></small>
+            </div>
+          </div>
+          <div class="ob-card">
+            <div class="ob-badge boom">🏗️ LENGAN TANGGA</div>
+            <div class="ob-body">
+              <p>Panah <b>▲ Naik</b> & <b>▼ Turun</b> pada grup LENGAN untuk atur tinggi semprotan.</p>
+              <small class="ob-keys">Keyboard: <b>Q / E</b></small>
+            </div>
+          </div>
+          <div class="ob-card">
+            <div class="ob-badge tip">🎯 ARAH NOZZLE</div>
+            <div class="ob-body">
+              <p>Panah <b>▲ Naik</b> & <b>▼ Turun</b> pada grup NOZZLE untuk sudut bidik moncong air.</p>
+              <small class="ob-keys">Keyboard: <b>W / S</b></small>
+            </div>
+          </div>
+          <div class="ob-card ob-hero">
+            <div class="ob-badge spray">💧 TAHAN SEMPROT</div>
+            <div class="ob-body">
+              <p><b>Tahan tombol SEMPROT</b> untuk menembakkan air deras & aktifkan fisika rintangan!</p>
+              <small class="ob-keys">Keyboard: <b>Spasi</b></small>
+            </div>
+          </div>
+        </div>
+        ${cards.length ? `<div class="cards">${cards.map(n => `<img src="${A(`tutorial-${n}`)}" alt="Petunjuk ${n}"/>`).join('')}</div>` : ''}
+        <div class="ob-footer">
+          <p class="ob-tip">🚰 <i>Tips: Air berkurang saat menyemprot. Dekati sungai atau air terjun untuk isi ulang tangki otomatis!</i></p>
+          ${fromHud ? `<button class="green-btn" data-a="close-help">${ico.play}<span>Lanjut Main</span></button>`
+            : `<button class="img-btn mulai" data-a="go" data-v="${id}"><img src="${A('btn-mulai')}" alt="Mulai"/></button>`}
+        </div>
       </div>`;
   }
 
@@ -313,7 +355,7 @@ export class GameUI {
       <div class="hud-status">
         <div class="chip animal"><img class="ani" alt=""/><div class="bar"><span></span></div></div>
       </div>
-      <div class="hud-objective"><img src="${A('objective-panel')}" alt=""/><b class="count">0/0</b></div>
+      <div class="hud-objective"><img src="${A('objective-panel')}" alt=""/><span class="expedition-subgoal">BARA DI JALUR</span><b class="count">0/0</b></div>
       <div class="hud-actions">
         <button class="round" data-a="help" aria-label="Petunjuk"><img src="${A('gb-hint')}" alt=""/></button>
         <button class="round" data-a="ask-restart" aria-label="Ulang level"><img src="${A('gb-reset')}" alt=""/></button>
@@ -321,15 +363,25 @@ export class GameUI {
       </div>
       <div class="water-ind"><img src="${A('gb-drop')}" alt=""/><div class="wtrack"><span></span></div><small class="refill">Mengisi air…</small></div>
       <div class="drive">
+        <div class="ctl-hint tt-drive"><span>🚚 MAJU / MUNDUR</span><i></i></div>
         <button class="wood-btn" data-ctl="drive" ${hold(-1)} aria-label="Mundur"><img src="${A('wood-left')}" alt=""/></button>
         <button class="wood-btn" data-ctl="drive" ${hold(1)} aria-label="Maju"><img src="${A('wood-right')}" alt=""/></button>
       </div>
       <div class="aim">
-        <div class="aim-group"><span>LENGAN <b class="boom-v">50%</b></span>
-          <div><button class="wood-btn up" data-ctl="boom" ${hold(-1)} aria-label="Naikkan lengan"><img src="${A('wood-left')}" alt=""/></button><button class="wood-btn down" data-ctl="boom" ${hold(1)} aria-label="Turunkan lengan"><img src="${A('wood-left')}" alt=""/></button></div></div>
-        <div class="aim-group"><span>NOZZLE <b class="tip-v">30°</b></span>
-          <div><button class="wood-btn up" data-ctl="tip" ${hold(-1)} aria-label="Naikkan nozzle"><img src="${A('wood-left')}" alt=""/></button><button class="wood-btn down" data-ctl="tip" ${hold(1)} aria-label="Turunkan nozzle"><img src="${A('wood-left')}" alt=""/></button></div></div>
-        <button class="spray" data-ctl="spray" ${hold(1)} aria-label="Tahan untuk menyemprot"><img src="${A('round-drop')}" alt=""/><span>SEMPROT</span></button>
+        <div class="aim-group">
+          <div class="ctl-hint tt-boom"><span>🏗️ LENGAN</span><i></i></div>
+          <span>LENGAN <b class="boom-v">50%</b></span>
+          <div><button class="wood-btn up" data-ctl="boom" ${hold(-1)} aria-label="Naikkan lengan"><img src="${A('wood-left')}" alt=""/></button><button class="wood-btn down" data-ctl="boom" ${hold(1)} aria-label="Turunkan lengan"><img src="${A('wood-left')}" alt=""/></button></div>
+        </div>
+        <div class="aim-group">
+          <div class="ctl-hint tt-tip"><span>🎯 NOZZLE</span><i></i></div>
+          <span>NOZZLE <b class="tip-v">30°</b></span>
+          <div><button class="wood-btn up" data-ctl="tip" ${hold(-1)} aria-label="Naikkan nozzle"><img src="${A('wood-left')}" alt=""/></button><button class="wood-btn down" data-ctl="tip" ${hold(1)} aria-label="Turunkan nozzle"><img src="${A('wood-left')}" alt=""/></button></div>
+        </div>
+        <button class="spray" data-ctl="spray" ${hold(1)} aria-label="Tahan untuk menyemprot">
+          <div class="ctl-hint tt-spray"><span>💧 SEMPROT</span><i></i></div>
+          <img src="${A('round-drop')}" alt=""/><span>SEMPROT</span>
+        </button>
       </div>
       <div class="boss-hud">
         <div class="bh-bar bh-pressure"><img loading="lazy" src="/assets/boss/hud-pressure.webp" alt=""/><div class="bh-track" style="left:24.9%;width:69.4%;top:45.5%;height:34.4%"><span></span></div></div>
@@ -357,6 +409,10 @@ export class GameUI {
         if (ctl === 'boom') this.boomDir = on ? dir : (this.boomDir === dir ? 0 : this.boomDir);
         if (ctl === 'spray') this.sprayHeld = on;
         b.classList.toggle('held', on);
+        if (on) {
+          this.hudEl.classList.remove('guide-active');
+          if (this.guideTimer) window.clearTimeout(this.guideTimer);
+        }
       };
       b.addEventListener('pointerdown', e => { e.preventDefault(); b.setPointerCapture(e.pointerId); this.c.unlockAudio(); set(true); });
       for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) b.addEventListener(ev, () => set(false));
@@ -372,8 +428,14 @@ export class GameUI {
     (this.els.aniImg as HTMLImageElement).src = `/assets/animals/${def.animal.key}.webp`;
     this.els.refill.hidden = true;
     this.hudEl.classList.toggle('boss-mode', !!def.boss);
+    this.hudEl.classList.toggle('papua-mode', !!def.papua);
     this.root.classList.toggle('boss', !!def.boss);
     this.releaseControls();
+    if (!store.progress.tutorialSeen || def.id === 1) {
+      this.hudEl.classList.add('guide-active');
+      if (this.guideTimer) window.clearTimeout(this.guideTimer);
+      this.guideTimer = window.setTimeout(() => this.hudEl.classList.remove('guide-active'), 8000);
+    }
   }
   setZoomLevel(z: number) { const v = this.hudEl.querySelector('.zval'); if (v) v.textContent = `${Math.round(z * 100)}%`; }
   missionHud(text: string) { this.els.mission.textContent = text; this.els.mission.hidden = !text; }

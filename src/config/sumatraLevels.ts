@@ -48,6 +48,8 @@ export interface EmberDef { cracks: number[]; y: number; every: number; hp: numb
 export interface CartDef { id: string; x0: number; x1: number; y: number; dip: number; slot: number; start: number; period: number; fire: number; rims: Point[] }
 /** Hornbill nest: more than `limit` water hits soak it and the eggs fall. Done once every fire in `fires` is out. */
 export interface NestDef { id: string; x: number; y: number; limit: number; fires: number[] }
+/** Spring deck raised by a water jet; the compressed start pose leaves the ravine impassable. */
+export interface SpringDeckDef { id: string; x: number; y: number; w: number; travel: number; handle: Point; need: number }
 /** Cable car between station `a` (low, near the wheel) and `b`: the water wheel winds it; spin forward (hit above the
  * axle) to send it to b, backward to bring it home. Floor hangs `drop` px under the cable. A fire on `block` stops it at `at`. */
 export interface GondolaDef { a: Point; b: Point; sag: number; drop: number; speed: number; slide: number; block?: { fire: number; at: number };
@@ -58,7 +60,7 @@ export interface GondolaDef { a: Point; b: Point; sag: number; drop: number; spe
   /** Mission id: `id` is done once it reached station b, `id:home` once it brought the animal back. */
   id?: string }
 
-/** Sumatra-only level data. Every mechanism is driven by the same water jet, Matter bodies and fires as Jawa. */
+/** Shared cave rescue data. Mechanisms use the same water jet, Matter bodies and fires as the rest of the campaign. */
 export interface SumatraDef {
   /** Rescue point. Once every id in `after` is done (gate open / mechanism finished) the animal walks along
    * the ground to the flag; it waits at closed gates, burning fires, gaps and loose rocks on its way. */
@@ -92,6 +94,7 @@ export interface SumatraDef {
   embers?: EmberDef;
   cart?: CartDef;
   nest?: NestDef;
+  springs?: SpringDeckDef[];
   gondola?: GondolaDef;
   /** Boss shield: up while any of these fires burns (it relights one every `relight` s once wounded) or any of these
    * ids is not done. `windows` [open, shut] s: once those are done the core opens and closes in turns. */
@@ -379,7 +382,7 @@ export const SUMATRA_LEVELS: LevelDef[] = [
   ...SUMATRA_TRIALS,
   {
     // Finale: the Cave Fire Keeper is shielded while its two braziers burn on its own ledges. Douse both, wear it down between volleys; once wounded it relights a brazier now and then.
-    ...cave, id: 35, code: '2-20', name: 'Duel Tekanan Goa Api', width: 3000,
+    ...cave, id: 35, code: '2-20', name: 'Duel Tekanan Goa Karst', width: 3000,
     supply: 200, waterBudget: 200, burnRate: .3, spreadDelay: 16,
     truckX: 230, driveMin: 160,
     lands: [
@@ -392,15 +395,15 @@ export const SUMATRA_LEVELS: LevelDef[] = [
     ],
     bridges: [{ x0: 888, x1: 1252, y: 540 }],
     rocks: [{ x0: 1300, x1: 1440, y0: 300, y1: 342 }],
-    // The package has no Penjaga Goa sprite (its 07 crop holds orangutans only), so the Jawa boss art and HUD return here.
-    boss: { x: 2265, y: 395, hp: 100, arena: 1650, name: 'Penjaga Goa Api', perches: [{ x: 2020, y: 470 }, { x: 2265, y: 395 }, { x: 2470, y: 330 }, { x: 2650, y: 430 }] },
+    boss: { x: 2265, y: 395, hp: 100, arena: 1650, name: 'Penjaga Goa Karst', perches: [{ x: 2020, y: 470 }, { x: 2265, y: 395 }, { x: 2470, y: 330 }, { x: 2650, y: 430 }] },
     fires: [
       { x: 1500, y: 520, start: .55, growth: .0050, lit: true },
       { x: 600, y: 548, start: .45, growth: .0045, lit: true },
       { x: 1960, y: 470, start: .6, growth: .004, lit: true, max: .9 },
       { x: 2400, y: 330, start: .6, growth: .004, lit: true, max: .9 },
     ],
-    props: [],
+    props: [{ kind: 'ice-block', x: 1370, y: 260 }],
+    mirrors: [{ x: 1820, y: 150, len: 110, angle: 42 }],
     decor: [
       { key: 'sm-palm-a', x: 60, y: 556, scale: 1 },
       { key: 'sm-coals', x: 1960, y: 476, scale: .5 },
@@ -411,8 +414,12 @@ export const SUMATRA_LEVELS: LevelDef[] = [
     sm: {
       rescue: { flagX: 2950, after: ['boss'] },
       shield: { fires: [2, 3], relight: 20 },
+      stalactites: [
+        { x: 2160, top: 40, len: 100, need: 10 },
+        { x: 2320, top: 30, len: 100, need: 10 },
+      ],
     },
-    animal: { key: 'orangutan-sit', name: 'Keluarga Orangutan', x: 2820, y: 430, scale: .62, flip: true },
-    tutorial: [6], brief: 'Penjaga Goa Api berlindung di balik perisai dari dua tungku api. Padamkan kedua tungku untuk meruntuhkan perisainya, lalu semprot tubuhnya sambil menahan bola api. Saat terluka ia menyalakan tungku lagi — padamkan lagi! Lepas semprotan 10 detik untuk mengisi cadangan.',
+    animal: { key: 'harimau', name: 'Harimau Sumatra', x: 2820, y: 430, scale: .68, flip: true, frames: ['sm-harimau-b', 'sm-harimau-c'] },
+    tutorial: [6], brief: 'Pertarungan Puncak Sumatra: Penjaga Goa Karst! Boss kebal selama dua tungku api menyala. Tembak stalaktit raksasa di langit-langit gua agar runtuh menimpa dan mematikan tungku, atau putar cermin kristal dengan tuas untuk memantulkan air ke celah tebing. Luncurkan balok es untuk memadamkan api jalur, lalu kalahkan Penjaga Goa untuk membebaskan Harimau Sumatra!',
   },
 ];

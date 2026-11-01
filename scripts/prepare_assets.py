@@ -49,6 +49,10 @@ FRAMES = [
     dict(key='tree-small', source='5.png', rect=[452, 401, 213, 235], folder='backgrounds/jawa', origin=[.5,1]),
     dict(key='bridge', source='13.png', rect=[929, 696, 417, 118], folder='terrain', origin=[0,0], polygon=[[0,16],[30,13],[52,6],[71,7],[91,15],[115,16],[131,8],[154,10],[162,15],[221,16],[246,10],[270,16],[330,15],[351,10],[374,15],[417,5],[417,118],[270,118],[270,112],[115,112],[115,118],[0,118]]),
     dict(key='foreground', source='13.png', rect=[0, 787, 1671, 154], folder='backgrounds/jawa', origin=[.5,1], polygon=[[0,63],[20,38],[29,0],[54,10],[67,30],[77,60],[110,37],[159,19],[189,26],[193,47],[215,52],[269,57],[300,69],[355,57],[380,72],[416,52],[441,25],[465,20],[492,36],[502,59],[554,47],[577,69],[608,72],[636,51],[665,68],[702,66],[733,77],[785,63],[815,88],[864,72],[897,37],[926,24],[954,43],[978,79],[1000,54],[1033,73],[1079,54],[1098,32],[1127,22],[1134,73],[1153,73],[1202,68],[1224,80],[1274,59],[1313,45],[1324,62],[1353,50],[1376,79],[1419,60],[1443,79],[1480,52],[1520,74],[1551,48],[1578,20],[1620,11],[1626,64],[1655,60],[1671,74],[1671,154],[0,154]]),
+    dict(key='papua-far', source='BaraRimba_Papua_Parallax_Backgrounds/01_BG_Far_Cave_Silhouette.png', rect=[0, 0, 2079, 185], folder='backgrounds/papua', origin=[.5,1], parallaxFactor=.08),
+    dict(key='papua-mid', source='BaraRimba_Papua_Parallax_Backgrounds/02_BG_Mid_Waterfalls_Rocks.png', rect=[0, 0, 2079, 181], folder='backgrounds/papua', origin=[.5,1], parallaxFactor=.24),
+    dict(key='papua-torch', source='BaraRimba_Papua_Parallax_Backgrounds/03_BG_Cave_Vines_Torchlight.png', rect=[0, 0, 2079, 181], folder='backgrounds/papua', origin=[.5,1], parallaxFactor=.48),
+    dict(key='papua-foreground', source='BaraRimba_Papua_Parallax_Backgrounds/04_BG_Foreground_Jungle_Silhouette.png', rect=[0, 0, 2079, 185], folder='backgrounds/papua', origin=[.5,1], parallaxFactor=.92),
 ]
 
 def main(only=None):
@@ -79,7 +83,7 @@ def main(only=None):
             exported+=1
         item['output']=dest.relative_to(ROOT/'public').as_posix()
         item['bytes']=dest.stat().st_size
-        item['animation']='transform only; no frame sequence'
+        item['animation']='parallax strip; tiled horizontally' if item['key'].startswith('papua-') else 'transform only; no frame sequence'
     manifest=dict(sourcePolicy='Originals remain unchanged. Crop rectangles measured on inspected sheets. Existing alpha preserved; explicit polygon masks recorded. No chroma-key.',files=files,sprites=FRAMES)
     (DOCS/'asset-manifest.json').write_text(json.dumps(manifest,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
     atlas=OUTPUT/'atlases';atlas.mkdir(exist_ok=True)

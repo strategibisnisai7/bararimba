@@ -214,9 +214,10 @@ export class WaterSystem {
   render() {
     const g = this.ribbon.clear();
     const N = this.pool.length;
+    const maxK = Math.min(N, 140);
     // Solid core jet: thick blue band with a bright inner line, tapering as the stream breaks up.
     for (const [w, color, alpha] of [[1, 0x1f8fe0, .95], [.62, 0x7fd3ff, .95], [.28, 0xf2fcff, .95]] as const) {
-      for (let k = 1; k < N; k++) {
+      for (let k = 1; k < maxK; k++) {
         const i = (this.head - k + N) % N, j = (i - 1 + N) % N;
         const a = this.pool[i], b = this.pool[j];
         if (a.life <= 0 || b.life <= 0 || a.flow > 0 || b.flow > 0 || a.age > .75) continue;

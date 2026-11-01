@@ -24,6 +24,8 @@ export const ASSETS: Record<string, string> = {
   truck: 'vehicle/truck', wheel: 'vehicle/wheel', 'cannon-base': 'cannon/cannon-base',
   'cannon-arm': 'cannon/cannon-arm', nozzle: 'cannon/nozzle',
   mountains: 'backgrounds/jawa/mountains', hills: 'backgrounds/jawa/hills',
+  'papua-far': 'backgrounds/papua/papua-far', 'papua-mid': 'backgrounds/papua/papua-mid',
+  'papua-torch': 'backgrounds/papua/papua-torch', 'papua-foreground': 'backgrounds/papua/papua-foreground',
   cloud: 'backgrounds/jawa/cloud', 'tree-large': 'backgrounds/jawa/tree-large',
   'tree-slender': 'backgrounds/jawa/tree-slender', 'tree-small': 'backgrounds/jawa/tree-small',
   'tree-a': 'backgrounds/jawa/tree-a', 'tree-b': 'backgrounds/jawa/tree-b', 'tree-c': 'backgrounds/jawa/tree-c',
@@ -66,6 +68,7 @@ export const ASSET_GROUPS: Record<string, string[]> = {
   earthy: Object.keys(ASSETS).filter(k => k.startsWith('et-')),
   sumatra: [...Object.keys(ASSETS).filter(k => k.startsWith('sm-')), 'anak-gajah', 'tapir', 'harimau', 'rusa-sumatra'],
   kalimantan: [...Object.keys(ASSETS).filter(k => k.startsWith('k-')), 'owa', 'pesut', 'kucing-bakau', 'kucing-merah', 'anak-gajah', ...KALIMANTAN_REUSE],
+  papua: Object.keys(ASSETS).filter(k => k.startsWith('sm-') || k.startsWith('papua-')),
 };
 export function assetsFor(theme?: string, boss?: boolean, earthy?: boolean, sumatra?: boolean, kalimantan?: boolean) {
   const grouped = new Set(Object.values(ASSET_GROUPS).flat());

@@ -5,13 +5,14 @@ import type { Fuel } from '../systems/FireSystem';
 import { Puzzles } from './Puzzles';
 import { Terrain } from './Terrain';
 import { SumatraWorld } from './Sumatra';
+import { PapuaWorld } from './Papua';
 
 interface ThemeStyle {
   sky: [number, number]; bed: [number, number]; far: number; mid: number; haze: number;
   top: string[]; fill: string; fillTint?: number; topScale: number; topLift: number;
   props: { key: string; scale: number; lift?: number }[]; particles?: 'embers' | 'snow';
   /** Replace the jungle backdrop with the volcanic parallax sheet layers. */
-  parallax?: 'volcano' | 'temple' | 'cave' | 'peat';
+  parallax?: 'volcano' | 'temple' | 'cave' | 'peat' | 'papua';
   /** Texture for pushable boulders. */
   boulder?: { key: string; scale: number };
 }
@@ -25,6 +26,8 @@ const THEMES: Record<string, ThemeStyle> = {
   // Sumatra karst cave (its grass strip's solid lip sits 50 px down, under sparse blades): mossy ledge stone, stalactite ceiling, waterfalls and rainforest beyond the cave mouth.
   cave: { sky: [0x1f3b36, 0x7fb3a0], bed: [0x46c2cf, 0x125468], far: 0x41675d, mid: 0x6d9a7c, haze: 0xa8d6c4, top: ['sm-top'], fill: 'sm-fill',
     topScale: .78, topLift: 52, props: [], parallax: 'cave', boulder: { key: 'sm-boulder', scale: .54 } },
+  papua: { sky: [0x07101a, 0x19232c], bed: [0x15414a, 0x030a11], far: 0x26343c, mid: 0x1e2f32, haze: 0x101a21, top: ['papua-top'], fill: 'papua-stone',
+    topScale: 1, topLift: 0, props: [], parallax: 'papua' },
   // Kalimantan peat swamp: tannin-black river, dark peat soil under moss, misty rainforest rows.
   peat: { sky: [0x3f6a5c, 0xc4dcc4], bed: [0x5a4226, 0x150e07], far: 0x47695a, mid: 0x6a8a62, haze: 0xc8dcc8, top: ['top-a', 'top-b'], fill: 'dirt', fillTint: 0x6e5444,
     topScale: .86, topLift: 16, props: [], parallax: 'peat' },
@@ -42,7 +45,7 @@ export class World {
   barrel?: { body: MatterJS.BodyType; sprite: Phaser.GameObjects.Image; surface: Surface; hp: number; rope?: MatterJS.ConstraintType;
     falling: number; landed: boolean; armed: boolean; load: 'barrel' | 'crate'; flightY?: number; door?: string; flung?: boolean;
     lob?: { x0: number; y0: number; x1: number; y1: number; t: number; T: number; h: number } };
-  seesaw?: { plank: MatterJS.BodyType; sprite: Phaser.GameObjects.Image; launched: boolean; hold?: MatterJS.ConstraintType; x: number; y: number; target: { x: number; y: number } };
+  seesaw?: { plank: MatterJS.BodyType; sprite: Phaser.GameObjects.Image; launched: boolean; hold?: MatterJS.ConstraintType; x: number; y: number; target: { x: number; y: number }; mode?: 'catapult' | 'ramp' };
   lever?: { button: Phaser.GameObjects.Image; fence: Phaser.GameObjects.Image; roof: Phaser.GameObjects.Image; pressed: boolean };
   private layers: Layer[] = [];
   private river: Phaser.GameObjects.Graphics;
@@ -60,10 +63,17 @@ export class World {
   };
   onButton?: () => void;
   wheel?: { cx: number; cy: number; r: number; w: number; spun: number; sprite: Phaser.GameObjects.Image; out?: { x: number; y: number; vx: number }; surface: Surface };
+  giantWheel?: { cx: number; cy: number; r: number; w: number; spun: number; sprite: Phaser.GameObjects.Image; out?: { x: number; y: number; vx: number }; surface: Surface; splashG: Phaser.GameObjects.Graphics };
+  ferry?: { x0: number; x1: number; y: number; w: number; x: number; vx: number; sprite: Phaser.GameObjects.Image; surface: Surface; body: MatterJS.BodyType };
+  lift?: { x: number; y0: number; y1: number; w: number; currentY: number; sprite: Phaser.GameObjects.Image; cableG: Phaser.GameObjects.Graphics; bucket: { x: number; y: number; need: number; hits: number; g: Phaser.GameObjects.Graphics; body: MatterJS.BodyType }; latched: boolean; surface: Surface; body: MatterJS.BodyType };
+  ropeBridges: { x0: number; x1: number; y: number; dip: number; sprite: Phaser.GameObjects.Image }[] = [];
+  shuttle?: { x0: number; x1: number; y: number; w: number; x: number; dir: number; speed: number; sprite: Phaser.GameObjects.Image; surface: Surface; body: MatterJS.BodyType };
+  truckCarryX = 0;
   puzzles!: Puzzles;
   terrain?: Terrain;
   /** Sumatra mechanisms and rescue flag. */
   sm?: SumatraWorld;
+  papua?: PapuaWorld;
   /** Emits free water (reservoirs, basin overflow); wired to the water system by the scene. */
   onPour?: (x: number, y: number, vx: number, vy: number) => void;
 
@@ -75,10 +85,11 @@ export class World {
     const T = this.theme;
     this.ensureDirt();
     if (T.parallax === 'cave') this.ensureCaveStone();
+    if (T.parallax === 'papua') this.ensurePapuaStone();
     const sky = scene.add.graphics().setDepth(0);
     sky.fillGradientStyle(T.sky[0], T.sky[0], T.sky[1], T.sky[1], 1).fillRect(-2400, -1200, W + 4800, 2400);
-    if (T.parallax !== 'cave' && T.parallax !== 'peat') sky.fillStyle(0xfff7d6, .25).fillCircle(980, 150, 80);
-    for (let i = 0; T.parallax !== 'cave' && i * 520 < W + 600; i++) {
+    if (T.parallax !== 'cave' && T.parallax !== 'papua' && T.parallax !== 'peat') sky.fillStyle(0xfff7d6, .25).fillCircle(980, 150, 80);
+    for (let i = 0; T.parallax !== 'cave' && T.parallax !== 'papua' && T.parallax !== 'peat' && i * 520 < W + 600; i++) {
       const c = scene.add.image(200 + i * 520, 110 + (i % 3) * 38, 'cloud').setScale(.45 + (i % 2) * .3).setAlpha(.85).setDepth(1);
       this.clouds.push(c); this.layers.push({ image: c, x: c.x, factor: .1 });
     }
@@ -90,6 +101,8 @@ export class World {
       for (let x = -700; x < span(.6); x += 1330) this.layer('vp-rocks', x + 665, 616, .8, 5, .6);
     } else if (T.parallax === 'cave') {
       this.caveBackdrop(span);
+    } else if (T.parallax === 'papua') {
+      this.papuaBackdrop(span);
     } else {
       if (T.parallax === 'temple') {
         // Distant Prambanan temple complex silhouetted behind the jungle.
@@ -141,6 +154,12 @@ export class World {
     for (const r of def.rocks ?? []) this.rock(r);
     for (const r of def.ramps ?? []) this.ramp(r);
     if (def.seesaw) this.makeSeesaw(def.seesaw);
+    if (def.giantWheel) this.makeGiantWheel(def.giantWheel);
+    if (def.ferry) this.makeFerry(def.ferry);
+    if (def.lift) this.makeLift(def.lift);
+    if (def.ropeBridge) this.makeRopeBridge(def.ropeBridge);
+    if (def.shuttle) this.makeShuttle(def.shuttle);
+    for (const m of def.mirrors ?? []) this.makeMirror(m);
     if (def.lever) this.makeLever(def.lever);
     if (def.basin) this.makeBasin(def.basin);
     if (def.boss?.waterfall) this.fall = scene.add.graphics().setDepth(12.5);
@@ -156,6 +175,7 @@ export class World {
     this.puzzles = new Puzzles(scene, this, def);
     this.puzzles.onPour = (x, y, vx, vy) => this.onPour?.(x, y, vx, vy);
     if (def.sm) { this.sm = new SumatraWorld(scene, this, def); this.sm.onPour = (x, y, vx, vy) => this.onPour?.(x, y, vx, vy); }
+    if (def.papua) this.papua = new PapuaWorld(scene, this, def.papua);
     if (T.props.length) {
       // Scatter themed props along walkable ground, away from fires and mechanisms.
       const busy = [...def.fires.map(f => f.x), ...(def.gates ?? []).map(g => g.x), ...(def.switches ?? []).map(w => w.x), ...(def.reservoirs ?? []).map(r => r.x1), def.animal.x, def.refill?.x ?? -999, def.seesaw?.x ?? -999, def.hang?.anchorX ?? -999, def.wheel?.x ?? -999];
@@ -176,6 +196,7 @@ export class World {
     }).setDepth(47);
     const fgSpan = W + 400;
     if (T.parallax === 'volcano') for (let x = -1400; x < fgSpan + 1000; x += 1400) scene.add.image(x + 700, 800, 'vp-front').setOrigin(.5, 1).setScale(.84).setDepth(49);
+    else if (T.parallax === 'papua') this.papuaForeground(fgSpan);
     else if (T.parallax === 'cave') {
       const fg = ['sm-jungle-bush', 'sm-fern-root', 'sm-fern-a', 'sm-palm-b', 'sm-bush-red'];
       for (let i = 0, x = -900; x < fgSpan + 900; i++, x += 300 + (i * 61) % 140) scene.add.image(x, 800, fg[i % fg.length]).setOrigin(.5, 1).setScale(.95 + (i % 3) * .12).setDepth(49);
@@ -220,6 +241,23 @@ export class World {
     ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = '#8f9a8c'; ctx.fillRect(0, 0, 300, 84);
     fill.refresh();
   }
+  /** Mineral shelves with pale seams instead of Sumatra's grassy cave ledges. */
+  private ensurePapuaStone() {
+    if (this.scene.textures.exists('papua-stone')) return;
+    const g = this.scene.make.graphics({ x: 0, y: 0 });
+    g.fillStyle(0x172c3b).fillRect(0, 0, 240, 96);
+    for (let row = 0; row < 3; row++) for (let col = -1; col < 4; col++) {
+      const x = col * 92 + (row % 2) * 43, y = row * 33;
+      g.fillStyle((row + col) % 2 ? 0x274555 : 0x203b4d).fillRoundedRect(x + 2, y + 2, 88, 29, 5);
+      g.lineStyle(1, 0x53888c, .4).lineBetween(x + 6, y + 3, x + 73, y + 3);
+    }
+    g.generateTexture('papua-stone', 240, 96); g.clear();
+    g.fillStyle(0x2b4d5b).fillRect(0, 0, 240, 34);
+    g.fillStyle(0x9ad6ca).fillRect(0, 0, 240, 4);
+    g.lineStyle(2, 0x598d93).lineBetween(0, 13, 240, 13);
+    for (let x = 15; x < 240; x += 47) g.lineBetween(x, 4, x + 9, 22);
+    g.generateTexture('papua-top', 240, 34); g.destroy();
+  }
   /** Karst cave: waterfalls and rainforest glimpsed past stalagmites, a stalactite ceiling hanging overhead. */
   private caveBackdrop(span: (f: number) => number) {
     const s = this.scene, T = this.theme;
@@ -245,6 +283,34 @@ export class World {
     const image = this.scene.add.image(x, y, key).setOrigin(.5, 1).setScale(scale).setDepth(depth).setAlpha(alpha);
     if (tint) image.setTint(tint);
     this.layers.push({ image, x, factor });
+  }
+  /** Papua's painted cave strips are tiled at different scroll speeds behind the playable ledges. */
+  private papuaBackdrop(span: (f: number) => number) {
+    const s = this.scene;
+    const rows = [
+      { key: 'papua-far', y: 600, scale: 6.5, depth: 1.5, factor: .08, alpha: .82 },
+      { key: 'papua-mid', y: 640, scale: 3.2, depth: 2.5, factor: .24, alpha: .68 },
+      { key: 'papua-torch', y: 590, scale: 2.2, depth: 4, factor: .48, alpha: .8 },
+    ];
+    for (const row of rows) {
+      const source = s.textures.get(row.key).getSourceImage() as HTMLImageElement, w = source.width * row.scale;
+      // Feather the top of the nearer painted strips so their rectangular edges disappear.
+      const key = `${row.key}-blend`;
+      if (!s.textures.exists(key)) {
+        const tex = s.textures.createCanvas(key, source.width, source.height)!, ctx = tex.getContext();
+        ctx.drawImage(source, 0, 0);
+        const fade = ctx.createLinearGradient(0, 0, 0, source.height * .65);
+        fade.addColorStop(0, 'rgba(255,255,255,0)'); fade.addColorStop(1, 'rgba(255,255,255,1)');
+        ctx.globalCompositeOperation = 'destination-in'; ctx.fillStyle = fade; ctx.fillRect(0, 0, source.width, source.height);
+        tex.refresh();
+      }
+      for (let x = -w / 2; x < span(row.factor); x += w) this.layer(key, x + w / 2, row.y, row.scale, row.depth, row.factor, row.alpha);
+    }
+  }
+  private papuaForeground(span: number) {
+    const source = this.scene.textures.get('papua-foreground').getSourceImage() as HTMLImageElement;
+    const scale = .82, w = source.width * scale;
+    for (let x = -w; x < span + w; x += w) this.layer('papua-foreground', x + w / 2, 720, scale, 49, .92);
   }
   private add(x: number, y: number, w: number, h: number, kind: Surface['kind'], dynamic?: Phaser.Types.Physics.Matter.MatterBodyConfig) {
     const body = this.scene.matter.add.rectangle(x, y, w, h, dynamic ?? { isStatic: true, label: kind });
@@ -299,6 +365,9 @@ export class World {
     } else if (kind === 'log') {
       body = s.matter.add.rectangle(x, y, 124, 64, { friction: .08, frictionAir: .06, density: .0009, chamfer: { radius: 20 }, label: 'prop' });
       sprite = s.add.image(x, y, 'log').setScale(.62);
+    } else if (kind === 'ice' || kind === 'ice-block') {
+      body = s.matter.add.rectangle(x, y, 64, 64, { friction: .003, frictionStatic: .005, frictionAir: .01, restitution: .05, density: .0008, label: 'prop' });
+      sprite = s.add.image(x, y, 'ice-block').setScale(1);
     } else {
       body = s.matter.add.rectangle(x, y, 68, 66, { friction: .06, frictionStatic: .12, frictionAir: .06, density: .001, label: 'prop' });
       sprite = s.add.image(x, y, kind).setScale(.53);
@@ -376,6 +445,21 @@ export class World {
     const g = s.add.graphics().setDepth(20.5);
     g.fillStyle(0x2b2f36, 1).fillCircle(r.x0, r.y0, 15).fillStyle(0x8a929c, 1).fillCircle(r.x0, r.y0, 10).fillStyle(0x2b2f36, 1).fillCircle(r.x0, r.y0, 4);
   }
+  private makeMirror(m: { x: number; y: number; len: number; angle: number }) {
+    const s = this.scene, a = (m.angle * Math.PI) / 180;
+    const body = s.matter.add.rectangle(m.x, m.y, m.len, 14, { isStatic: true, label: 'mirror' });
+    s.matter.body.setAngle(body, a);
+    this.surfaces.push({ body, kind: 'mirror', enabled: true });
+    const g = s.add.graphics().setDepth(20);
+    g.setPosition(m.x, m.y).setRotation(a);
+    g.fillStyle(0x2f3e4e, 1).fillRoundedRect(-m.len / 2 - 3, -8, m.len + 6, 16, 3);
+    g.fillStyle(0x89e2fe, .88).fillRoundedRect(-m.len / 2, -5, m.len, 10, 2);
+    g.lineStyle(2, 0xffffff, .9);
+    for (let x = -m.len / 2 + 12; x < m.len / 2 - 8; x += 26) {
+      g.beginPath().moveTo(x, -4).lineTo(x + 8, 4).strokePath();
+    }
+    g.fillStyle(0xd5e8f5, 1).fillCircle(-m.len / 2 + 4, 0, 2.5).fillCircle(m.len / 2 - 4, 0, 2.5);
+  }
   private makeSeesaw(d: NonNullable<LevelDef['seesaw']>) {
     const s = this.scene, M = s.matter;
     s.add.image(d.x, d.y + 32, 'pivot').setOrigin(.5, 1).setScale(.75).setDepth(19);
@@ -383,7 +467,12 @@ export class World {
     M.add.worldConstraint(plank, 0, 1, { pointA: { x: d.x, y: d.y }, pointB: { x: 0, y: 0 } });
     M.body.setAngle(plank, .18);
     const sprite = s.add.image(d.x, d.y, 'plank').setScale(250 / 251, .32).setDepth(20);
-    this.surfaces.push({ body: plank, kind: 'prop', enabled: true });
+    const surfaceKind = d.mode === 'ramp' ? 'ramp' : 'prop';
+    this.surfaces.push({ body: plank, kind: surfaceKind, enabled: true });
+    if (d.mode === 'ramp') {
+      this.seesaw = { plank, sprite, launched: true, x: d.x, y: d.y, target: d.target, mode: 'ramp' };
+      return;
+    }
     // Water barrel resting on the low (right) end.
     const bx = d.x + 100, by = d.y - 10;
     const body = M.add.rectangle(bx, by, 50, 62, { density: .0003, friction: .9, frictionAir: .01, label: 'barrel' });
@@ -394,10 +483,16 @@ export class World {
     // The barrel sits in a cradle on the plank end until the catapult fires.
     plank.collisionFilter.group = -7; body.collisionFilter.group = -7;
     const hold = M.add.constraint(plank, body, 0, .9, { pointA: { x: 100, y: -36 }, pointB: { x: 0, y: 0 } });
-    this.seesaw = { plank, sprite, launched: false, hold, x: d.x, y: d.y, target: d.target };
+    this.seesaw = { plank, sprite, launched: false, hold, x: d.x, y: d.y, target: d.target, mode: 'catapult' };
   }
   private updateSeesaw() {
     const sw = this.seesaw!, M = this.scene.matter.body, p = sw.plank;
+    if (sw.mode === 'ramp') {
+      if (p.angle > .45) { M.setAngle(p, .45); if (p.angularVelocity > 0) M.setAngularVelocity(p, 0); }
+      if (p.angle < -.45) { M.setAngle(p, -.45); if (p.angularVelocity < 0) M.setAngularVelocity(p, 0); }
+      sw.sprite.setPosition(p.position.x, p.position.y).setRotation(p.angle);
+      return;
+    }
     // Hinge stops: the plank can only tilt +-0.32 rad.
     if (p.angle > .32) { M.setAngle(p, .32); if (p.angularVelocity > 0) M.setAngularVelocity(p, 0); }
     if (p.angle < -.32) { M.setAngle(p, -.32); if (p.angularVelocity < 0) M.setAngularVelocity(p, 0); }
@@ -406,30 +501,158 @@ export class World {
     // A boulder tipping off the ledge drops almost straight onto the raised end instead of sailing past it.
     if (!sw.launched) for (const r of this.props) {
       const v = r.body.velocity;
-      if (!r.gone && r.kind === 'boulder' && v.y > .3 && r.body.position.x > sw.x - 135 && r.body.position.x < sw.x && r.body.position.y < sw.y - 40 && Math.abs(v.x) > .8)
+      if (!r.gone && v.y > .3 && r.body.position.x > sw.x - 135 && r.body.position.x < sw.x && r.body.position.y < sw.y - 30 && Math.abs(v.x) > .8)
         M.setVelocity(r.body, { x: Math.sign(v.x) * .8, y: v.y });
     }
     const slam = !sw.launched && this.props.find(r => {
-      if (r.gone || r.kind !== 'boulder') return false;
+      if (r.gone) return false;
       const { x, y } = r.body.position, dx = x - p.position.x;
       const surf = p.position.y + dx * Math.tan(p.angle) - 8;
-      return dx < -15 && dx > -135 && r.body.velocity.y > 1.5 && y + 40 >= surf - 10;
+      return dx < -15 && dx > -135 && r.body.velocity.y > 0.8 && y + 36 >= surf - 15;
     });
-    if (slam && b) {
+    const tiltSlam = !sw.launched && p.angle < -0.15;
+    if ((slam || tiltSlam) && b) {
       sw.launched = true; b.armed = true; b.falling = 0;
       M.setAngularVelocity(p, -.12);
-      M.setVelocity(slam.body, { x: slam.body.velocity.x * .3, y: slam.body.velocity.y * .2 });
+      if (slam) M.setVelocity(slam.body, { x: slam.body.velocity.x * .3, y: slam.body.velocity.y * .2 });
       this.scene.cameras.main.shake(160, .005);
       if (sw.hold) this.scene.matter.world.removeConstraint(sw.hold);
       // Scripted high lob onto the target: apex ~420 px above the launch point clears the cliff.
       const { x, y } = b.body.position;
       b.body.isSensor = true; b.flightY = sw.target.y;
-      b.lob = { x0: x, y0: y, x1: sw.target.x, y1: sw.target.y, t: 0, T: 1.9, h: 420 };
+      const h = Math.max(280, Math.abs(sw.target.x - x) * 0.42);
+      b.lob = { x0: x, y0: y, x1: sw.target.x, y1: sw.target.y, t: 0, T: 1.85, h };
       this.onLaunch?.();
     }
     sw.sprite.setPosition(p.position.x, p.position.y).setRotation(p.angle);
   }
   onLaunch?: () => void;
+  private makeGiantWheel(d: NonNullable<LevelDef['giantWheel']>) {
+    const s = this.scene, r = d.r ?? 140;
+    const sprite = s.add.image(d.x, d.y, 'hd-giant-wheel').setDisplaySize(r * 2, r * 2).setDepth(20);
+    const body = s.matter.add.circle(d.x, d.y, r, { isStatic: true, label: 'wheel' });
+    const surface: Surface = { body, kind: 'wheel', enabled: true };
+    this.surfaces.push(surface);
+    const splashG = s.add.graphics().setDepth(20.5);
+    this.giantWheel = { cx: d.x, cy: d.y, r, w: 0, spun: 0, sprite, out: d.out, surface, splashG };
+  }
+  private updateGiantWheel(dt: number) {
+    const gw = this.giantWheel!;
+    gw.spun += gw.w * dt;
+    gw.sprite.setRotation(gw.spun);
+    gw.w = Math.max(0, gw.w * (1 - 0.45 * dt));
+    const g = gw.splashG.clear();
+    if (gw.w > 0.35) {
+      if (gw.out && Math.random() < dt * 60) {
+        this.onPour?.(gw.out.x, gw.out.y, gw.out.vx, 10);
+      }
+      for (let i = 0; i < 4; i++) {
+        const a = gw.spun + i * (Math.PI / 2);
+        g.fillStyle(0xd8f5ff, 0.7).fillCircle(gw.cx + Math.cos(a) * gw.r, gw.cy + Math.sin(a) * gw.r, 3 + Math.random() * 3);
+      }
+    }
+  }
+  private makeFerry(d: NonNullable<LevelDef['ferry']>) {
+    const s = this.scene, w = d.w ?? 260;
+    const sprite = s.add.image(d.x0, d.y, 'hd-ferry-boat').setDisplaySize(w, 66).setDepth(18);
+    const body = s.matter.add.rectangle(d.x0, d.y + 12, w, 36, { isStatic: true, label: 'prop' });
+    const surface: Surface = { body, kind: 'prop', enabled: true };
+    this.surfaces.push(surface);
+    this.ferry = { x0: d.x0, x1: d.x1, y: d.y, w, x: d.x0, vx: 0, sprite, surface, body };
+  }
+  private updateFerry(dt: number) {
+    const f = this.ferry!;
+    const prevX = f.x;
+    if (this.truckOnFerry((this.scene as any).truck?.x ?? 0) && (this.scene as any).firing) {
+      f.vx = Math.min(140, f.vx + 320 * dt);
+    }
+    f.x = Math.max(f.x0, Math.min(f.x1, f.x + f.vx * dt));
+    this.truckCarryX = f.x - prevX;
+    f.vx = Math.max(0, f.vx * (1 - 0.75 * dt));
+    f.sprite.setPosition(f.x, f.y);
+    this.scene.matter.body.setPosition(f.body, { x: f.x, y: f.y + 12 });
+  }
+  truckOnFerry(tx: number) {
+    return !!this.ferry && Math.abs(tx - this.ferry.x) < this.ferry.w / 2 - 12;
+  }
+  private makeLift(d: NonNullable<LevelDef['lift']>) {
+    const s = this.scene, w = d.w ?? 230;
+    const sprite = s.add.image(d.x, d.y0, 'hd-lift-car').setDisplaySize(w, 70).setDepth(18);
+    const body = s.matter.add.rectangle(d.x, d.y0 + 15, w, 28, { isStatic: true, label: 'prop' });
+    const surface: Surface = { body, kind: 'prop', enabled: true };
+    this.surfaces.push(surface);
+    const cableG = s.add.graphics().setDepth(17);
+    const bk = d.bucket;
+    const bucketG = s.add.graphics().setDepth(20);
+    const bkBody = s.matter.add.rectangle(bk.x, bk.y, 48, 36, { isStatic: true, isSensor: true, label: 'prop' });
+    const bkSurface: Surface = { body: bkBody, kind: 'prop', enabled: true };
+    this.surfaces.push(bkSurface);
+    this.lift = {
+      x: d.x, y0: d.y0, y1: d.y1, w, currentY: d.y0, sprite, cableG,
+      bucket: { x: bk.x, y: bk.y, need: bk.need ?? 22, hits: 0, g: bucketG, body: bkBody },
+      latched: false, surface, body
+    };
+  }
+  private updateLift(dt: number) {
+    const lf = this.lift!;
+    const g = lf.cableG.clear();
+    // Vertical guide cables between min and max elevations
+    const topY = Math.min(lf.y0, lf.y1) - 60, botY = Math.max(lf.y0, lf.y1) + 35;
+    g.lineStyle(3, 0x3d434d, 0.9);
+    g.lineBetween(lf.x - lf.w / 2 + 15, topY, lf.x - lf.w / 2 + 15, botY);
+    g.lineBetween(lf.x + lf.w / 2 - 15, topY, lf.x + lf.w / 2 - 15, botY);
+    // Draw gantry beam & counterweight cable
+    const bk = lf.bucket;
+    g.lineStyle(4, 0x4a3828, 1).lineBetween(lf.x, topY, bk.x, topY);
+    g.lineStyle(2, 0x2d333b, 0.9).lineBetween(bk.x, topY, bk.x, bk.y - 14);
+    // Draw counterweight bucket
+    const bg = bk.g.clear();
+    bg.fillStyle(0x5a3e26, 1).fillRect(bk.x - 18, bk.y - 14, 36, 28);
+    bg.lineStyle(2, 0xd4a34b, 1).strokeRect(bk.x - 18, bk.y - 14, 36, 28);
+    const k = Math.min(1, bk.hits / bk.need);
+    if (k > 0) bg.fillStyle(0x38b6ff, 0.8).fillRect(bk.x - 16, bk.y + 12 - 24 * k, 32, 24 * k);
+
+    if (lf.latched) {
+      if (lf.y1 < lf.y0 && lf.currentY > lf.y1) {
+        lf.currentY = Math.max(lf.y1, lf.currentY - 110 * dt);
+        lf.sprite.setPosition(lf.x, lf.currentY);
+        this.scene.matter.body.setPosition(lf.body, { x: lf.x, y: lf.currentY + 15 });
+      } else if (lf.y1 > lf.y0 && lf.currentY < lf.y1) {
+        lf.currentY = Math.min(lf.y1, lf.currentY + 110 * dt);
+        lf.sprite.setPosition(lf.x, lf.currentY);
+        this.scene.matter.body.setPosition(lf.body, { x: lf.x, y: lf.currentY + 15 });
+      }
+    }
+  }
+  truckOnLift(tx: number) {
+    return !!this.lift && Math.abs(tx - this.lift.x) < this.lift.w / 2 - 10;
+  }
+  private makeRopeBridge(d: NonNullable<LevelDef['ropeBridge']>) {
+    const s = this.scene, w = d.x1 - d.x0, midX = (d.x0 + d.x1) / 2;
+    const sprite = s.add.image(midX, d.y + (d.dip ?? 12) / 2, 'hd-rope-bridge').setDisplaySize(w, 42).setDepth(13);
+    this.ropeBridges.push({ x0: d.x0, x1: d.x1, y: d.y, dip: d.dip ?? 12, sprite });
+  }
+  private makeShuttle(d: NonNullable<LevelDef['shuttle']>) {
+    const s = this.scene, w = d.w ?? 200;
+    const sprite = s.add.image(d.x0, d.y, 'hd-lift-car').setDisplaySize(w, 60).setDepth(18);
+    const body = s.matter.add.rectangle(d.x0, d.y + 12, w, 26, { isStatic: true, label: 'prop' });
+    const surface: Surface = { body, kind: 'prop', enabled: true };
+    this.surfaces.push(surface);
+    this.shuttle = { x0: d.x0, x1: d.x1, y: d.y, w, x: d.x0, dir: 1, speed: d.speed ?? 70, sprite, surface, body };
+  }
+  private updateShuttle(dt: number) {
+    const sh = this.shuttle!;
+    const prevX = sh.x;
+    sh.x += sh.dir * sh.speed * dt;
+    if (sh.x >= sh.x1) { sh.x = sh.x1; sh.dir = -1; }
+    else if (sh.x <= sh.x0) { sh.x = sh.x0; sh.dir = 1; }
+    this.truckCarryX = sh.x - prevX;
+    sh.sprite.setPosition(sh.x, sh.y);
+    this.scene.matter.body.setPosition(sh.body, { x: sh.x, y: sh.y + 12 });
+  }
+  truckOnShuttle(tx: number) {
+    return !!this.shuttle && Math.abs(tx - this.shuttle.x) < this.shuttle.w / 2 - 12;
+  }
   private makeLever(d: NonNullable<LevelDef['lever']>) {
     const s = this.scene, c = d.cage;
     const button = s.add.image(d.button.x, d.button.y + 6, 'button').setOrigin(.5, 1).setScale(.42).setDepth(14);
@@ -550,7 +773,33 @@ export class World {
   push(body: MatterJS.BodyType, at: { x: number; y: number }, vx: number, vy: number) {
     // Matter integrates force/mass * dt(ms)^2; ~0.04-0.1 px/step of velocity per droplet.
     const sw = this.seesaw;
-    if (sw && body === sw.plank) return;   // only the falling boulder works the catapult
+    if (this.ferry && this.truckOnFerry((this.scene as any).truck?.x ?? 0) && (body === this.ferry.body || Math.hypot(at.x - this.ferry.x, at.y - this.ferry.y) < this.ferry.w * 0.6)) {
+      this.ferry.vx = Math.min(120, this.ferry.vx + Math.abs(vx || vy) * 0.12);
+      return;
+    }
+    if (this.giantWheel && body === this.giantWheel.surface.body) {
+      const arm = at.x - this.giantWheel.cx;
+      this.giantWheel.w += Math.sign(arm || 1) * Math.abs(vy || vx) * 2.2e-4;
+      return;
+    }
+    if (this.lift && !this.lift.latched && (body === this.lift.bucket.body || Math.hypot(at.x - this.lift.bucket.x, at.y - this.lift.bucket.y) < 48)) {
+      this.lift.bucket.hits++;
+      if (this.lift.bucket.hits >= this.lift.bucket.need) {
+        this.lift.latched = true;
+        this.scene.cameras.main.shake(200, 0.006);
+      }
+      return;
+    }
+    if (sw && body === sw.plank) {
+      if (sw.mode === 'ramp') {
+        const f = 1.8e-4;
+        this.scene.matter.body.applyForce(body, at, { x: 0, y: Math.abs(vy || vx) * f });
+      } else if (!sw.launched && at.x < sw.x - 20) {
+        const f = 1.6e-4;
+        this.scene.matter.body.applyForce(body, at, { x: 0, y: Math.abs(vy || vx) * f });
+      }
+      return;
+    }
     const k = 4.6e-6 * Math.pow(body.mass, .75);
     this.scene.matter.body.applyForce(body, at, { x: vx * k, y: Math.min(0, vy) * k * .5 });
   }
@@ -563,6 +812,24 @@ export class World {
     if (t !== null) top = top === null ? t : Math.min(top, t);
     const m = this.sm?.surfaceAt(x) ?? null;
     if (m !== null) top = top === null ? m : Math.min(top, m);
+    const p = this.papua?.surfaceAt(x) ?? null;
+    if (p !== null) top = top === null ? p : Math.min(top, p);
+    if (this.ferry && x >= this.ferry.x - this.ferry.w / 2 && x <= this.ferry.x + this.ferry.w / 2) {
+      top = top === null ? this.ferry.y - 14 : Math.min(top, this.ferry.y - 14);
+    }
+    if (this.lift && x >= this.lift.x - this.lift.w / 2 && x <= this.lift.x + this.lift.w / 2) {
+      top = top === null ? this.lift.currentY - 14 : Math.min(top, this.lift.currentY - 14);
+    }
+    if (this.shuttle && x >= this.shuttle.x - this.shuttle.w / 2 && x <= this.shuttle.x + this.shuttle.w / 2) {
+      top = top === null ? this.shuttle.y - 12 : Math.min(top, this.shuttle.y - 12);
+    }
+    for (const rb of this.ropeBridges) {
+      if (x >= rb.x0 && x <= rb.x1) {
+        const u = (x - rb.x0) / (rb.x1 - rb.x0);
+        const y = rb.y + Math.sin(u * Math.PI) * rb.dip;
+        top = top === null ? y : Math.min(top, y);
+      }
+    }
     const fg = this.def.floatGap;
     if (top === null && fg && this.bridged && x > fg.x0 - 2 && x < fg.x1 + 2) top = this.surfaceAt(fg.x0 - 4) ?? 548;
     return top;
@@ -581,6 +848,7 @@ export class World {
     return 548;
   }
   update(dt: number, camCenter: number, reduced: boolean) {
+    this.truckCarryX = 0;
     this.time += dt;
     const shift = camCenter - 640;
     for (const l of this.layers) l.image.x = l.x + shift * (1 - l.factor);
@@ -588,7 +856,8 @@ export class World {
     this.river.clear();
     const left = camCenter - 2200, right = camCenter + 2200, lava = this.def.theme === 'volcanic';
     const peat = this.def.theme === 'peat';
-    const crest = lava ? 0xffe08a : peat ? 0xd8b888 : 0xe8fbff, glint = lava ? 0xfff2b0 : peat ? 0xffe8c0 : 0xffffff;
+    const papua = this.def.theme === 'papua';
+    const crest = lava ? 0xffe08a : peat ? 0xd8b888 : papua ? 0x5796a3 : 0xe8fbff, glint = lava ? 0xfff2b0 : peat ? 0xffe8c0 : papua ? 0x82c0c7 : 0xffffff;
     // Rolling surface: two layered waves along the river's top edge.
     for (const [amp, len, spd, y0, col, al, wdt] of [[3, 90, 1.4, 588, crest, .75, 3], [2, 55, -2.1, 595, glint, .45, 2]] as const) {
       this.river.lineStyle(wdt, col, al).beginPath();
@@ -603,7 +872,7 @@ export class World {
     for (let i = 0; i < n; i++) {
       const row = (i * 37) % 120, speed = 14 + (i % 4) * 8;
       const x = left + ((i * 211 + this.time * speed) % (right - left)), y = 602 + row;
-      const a = .14 + Math.sin(this.time * 2 + i) * .1;
+      const a = (papua ? .08 : .14) + Math.sin(this.time * 2 + i) * (papua ? .05 : .1);
       this.river.lineStyle(i % 3 === 0 ? 2 : 1, crest, Math.max(0, a));
       this.river.lineBetween(x, y + Math.sin(this.time * 3 + i) * 2, x + 22 + (i % 5) * 14, y + Math.sin(this.time * 3 + i + 1) * 2);
       if (i % 5 === 0) this.river.fillStyle(glint, Math.max(0, Math.sin(this.time * 4 + i * 1.7)) * .7).fillCircle(x + 10, y - 3, 1.8);
@@ -632,6 +901,7 @@ export class World {
     }
     if (this.basin) this.updateBasin(dt);
     this.puzzles.update(dt, this.wheel?.spun ?? 0);
+    this.papua?.update(dt);
     this.sm?.update(dt);
     const wf = this.def.boss?.waterfall;
     if (this.fall && wf) {
@@ -646,6 +916,10 @@ export class World {
     }
     if (this.seesaw) this.updateSeesaw();
     if (this.lever) this.updateLever();
+    if (this.giantWheel) this.updateGiantWheel(dt);
+    if (this.ferry) this.updateFerry(dt);
+    if (this.lift) this.updateLift(dt);
+    if (this.shuttle) this.updateShuttle(dt);
     this.ropeG.clear();
     const b = this.barrel;
     if (b?.lob && !b.landed) {

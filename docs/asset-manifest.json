@@ -153,18 +153,10 @@
       "width": 1536,
       "height": 1024,
       "format": "PNG",
-      "mode": "RGBA",
-      "bytes": 2591301,
-      "sha256": "589fd6849d9aead65fe903cda7af8a834d2df86fa62f007853c8449114cda658",
-      "alpha": {
-        "extrema": [
-          0,
-          254
-        ],
-        "transparentPixels": 486299,
-        "semitransparentPixels": 1086565,
-        "opaquePixels": 0
-      },
+      "mode": "RGB",
+      "bytes": 2637153,
+      "sha256": "c87b39faa8c024bcbc7c910b1961f9604adc369d7191be48f2ead532e6565424",
+      "alpha": null,
       "visual": "Tuas, katrol, engsel, platform dan mekanisme puzzle.",
       "type": "reference-sheet; not a regular animation atlas",
       "inspection": "contact sheet; not production-sliced"
@@ -422,6 +414,152 @@
       "inspection": "contact sheet; not production-sliced"
     },
     {
+      "path": "referensiasset/Colorful Cartoon Water Puzzle Level.png",
+      "width": 1672,
+      "height": 941,
+      "format": "PNG",
+      "mode": "RGB",
+      "bytes": 2023068,
+      "sha256": "89af871ce8ca7fef0705cd797ce113d28e201f6b77d5517dbb9ded9e0ade404e",
+      "alpha": null,
+      "visual": "Gameboard: menu, peta, level select, empat panel gameplay dan referensi sprite.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "full image and composite"
+    },
+    {
+      "path": "referensiasset/Colorful Cartoon Water Rescue Level.png",
+      "width": 1672,
+      "height": 941,
+      "format": "PNG",
+      "mode": "RGB",
+      "bytes": 2152869,
+      "sha256": "791c1413e5b312ce309a751973005d7d45d29347cbbfee587e345aa7da153dab",
+      "alpha": null,
+      "visual": "Gameboard: menu, peta, level select, empat panel gameplay dan referensi sprite.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "full image and composite"
+    },
+    {
+      "path": "referensiasset/Forest Fire Boss Battle.png",
+      "width": 1672,
+      "height": 941,
+      "format": "PNG",
+      "mode": "RGB",
+      "bytes": 2359687,
+      "sha256": "f4e4eff9f4eed1c11f29b0b5af10181f81ee468752c88207ca3e62266dfd376e",
+      "alpha": null,
+      "visual": "Gameboard: menu, peta, level select, empat panel gameplay dan referensi sprite.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "full image and composite"
+    },
+    {
+      "path": "referensiasset/Indonesia Adventure Map.png",
+      "width": 1672,
+      "height": 941,
+      "format": "PNG",
+      "mode": "RGB",
+      "bytes": 2730864,
+      "sha256": "fa26317a23005353be9cad8ec515566de5aa93bd673caf09db3778f56288c3e1",
+      "alpha": null,
+      "visual": "Gameboard: menu, peta, level select, empat panel gameplay dan referensi sprite.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "full image and composite"
+    },
+    {
+      "path": "referensiasset/Jungle Ruins Waterfall Puzzle.png",
+      "width": 1672,
+      "height": 941,
+      "format": "PNG",
+      "mode": "RGB",
+      "bytes": 2151786,
+      "sha256": "20d5ac8b21c069a7621a27be61cdf6e9ef1db7e554a391d649fc57031d56c6ae",
+      "alpha": null,
+      "visual": "Gameboard: menu, peta, level select, empat panel gameplay dan referensi sprite.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "full image and composite"
+    },
+    {
+      "path": "referensiasset/Modular Earthy Terrain Tile Collection.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 3227833,
+      "sha256": "438ae4bd652a9768b4cbb9f1663a41da72c34295c33533b1fdf83a7f893b670c",
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "transparentPixels": 737534,
+        "semitransparentPixels": 413438,
+        "opaquePixels": 421892
+      },
+      "visual": "Gameboard: menu, peta, level select, empat panel gameplay dan referensi sprite.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "full image and composite"
+    },
+    {
+      "path": "referensiasset/Mystic Waterfall Cavern Parallax Layers.png",
+      "width": 2079,
+      "height": 756,
+      "format": "PNG",
+      "mode": "RGB",
+      "bytes": 2229423,
+      "sha256": "dffa9812578b180ad7178330f7746cd0109c8be847ca93cc7975e25c272edaa8",
+      "alpha": null,
+      "visual": "Gameboard: menu, peta, level select, empat panel gameplay dan referensi sprite.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "full image and composite"
+    },
+    {
+      "path": "referensiasset/Prambanan Temple Ruins Tileset.png",
+      "width": 2172,
+      "height": 724,
+      "format": "PNG",
+      "mode": "RGB",
+      "bytes": 3183374,
+      "sha256": "39c1d8809e08dc24d9953d983f07161d22e2d1e19037ee2472205ff0661f71d6",
+      "alpha": null,
+      "visual": "Gameboard: menu, peta, level select, empat panel gameplay dan referensi sprite.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "full image and composite"
+    },
+    {
+      "path": "referensiasset/Volcanic Parallax Game Asset Sheet.png",
+      "width": 1671,
+      "height": 941,
+      "format": "PNG",
+      "mode": "RGBA",
+      "bytes": 2774591,
+      "sha256": "d1aed05f07702ce7c5bb484aaed30eca4a97b5fe049148ba5815f84c22bbce6a",
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "transparentPixels": 335377,
+        "semitransparentPixels": 1236444,
+        "opaquePixels": 590
+      },
+      "visual": "Gameboard: menu, peta, level select, empat panel gameplay dan referensi sprite.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "full image and composite"
+    },
+    {
+      "path": "referensiasset/Volcanic, Ice, and Ruins Tileset Sheet.png",
+      "width": 1536,
+      "height": 1024,
+      "format": "PNG",
+      "mode": "RGB",
+      "bytes": 3342180,
+      "sha256": "abeac4e123e6fa954da3d8b4ae1b82c9193e1c3e439cc66128668766f416b4dc",
+      "alpha": null,
+      "visual": "Gameboard: menu, peta, level select, empat panel gameplay dan referensi sprite.",
+      "type": "reference-sheet; not a regular animation atlas",
+      "inspection": "full image and composite"
+    },
+    {
       "path": "referensiasset/Game Board.png",
       "width": 1536,
       "height": 1024,
@@ -451,7 +589,7 @@
         1
       ],
       "output": "assets/vehicle/truck.webp",
-      "bytes": 61042,
+      "bytes": 44178,
       "animation": "transform only; no frame sequence"
     },
     {
@@ -526,24 +664,6 @@
       ],
       "output": "assets/cannon/nozzle.webp",
       "bytes": 7632,
-      "animation": "transform only; no frame sequence"
-    },
-    {
-      "key": "logo",
-      "source": "15.png",
-      "rect": [
-        0,
-        0,
-        644,
-        300
-      ],
-      "folder": "ui",
-      "origin": [
-        0.5,
-        0.5
-      ],
-      "output": "assets/ui/logo.webp",
-      "bytes": 82256,
       "animation": "transform only; no frame sequence"
     },
     {
@@ -711,7 +831,7 @@
         ]
       ],
       "output": "assets/backgrounds/jawa/mountains.webp",
-      "bytes": 59310,
+      "bytes": 45466,
       "animation": "transform only; no frame sequence"
     },
     {
@@ -927,7 +1047,7 @@
         ]
       ],
       "output": "assets/backgrounds/jawa/hills.webp",
-      "bytes": 96230,
+      "bytes": 69274,
       "animation": "transform only; no frame sequence"
     },
     {
@@ -1013,7 +1133,7 @@
         ]
       ],
       "output": "assets/backgrounds/jawa/tree-large.webp",
-      "bytes": 66478,
+      "bytes": 49830,
       "animation": "transform only; no frame sequence"
     },
     {
@@ -1050,146 +1170,6 @@
       ],
       "output": "assets/backgrounds/jawa/tree-small.webp",
       "bytes": 24410,
-      "animation": "transform only; no frame sequence"
-    },
-    {
-      "key": "bank",
-      "source": "13.png",
-      "rect": [
-        0,
-        639,
-        416,
-        160
-      ],
-      "folder": "terrain",
-      "origin": [
-        0,
-        0
-      ],
-      "polygon": [
-        [
-          0,
-          15
-        ],
-        [
-          95,
-          8
-        ],
-        [
-          155,
-          9
-        ],
-        [
-          171,
-          0
-        ],
-        [
-          221,
-          15
-        ],
-        [
-          289,
-          15
-        ],
-        [
-          302,
-          6
-        ],
-        [
-          343,
-          5
-        ],
-        [
-          373,
-          18
-        ],
-        [
-          402,
-          23
-        ],
-        [
-          416,
-          50
-        ],
-        [
-          416,
-          160
-        ],
-        [
-          0,
-          160
-        ]
-      ],
-      "output": "assets/terrain/bank.webp",
-      "bytes": 30458,
-      "animation": "transform only; no frame sequence"
-    },
-    {
-      "key": "right-bank",
-      "source": "13.png",
-      "rect": [
-        1344,
-        635,
-        327,
-        180
-      ],
-      "folder": "terrain",
-      "origin": [
-        0,
-        0
-      ],
-      "polygon": [
-        [
-          0,
-          55
-        ],
-        [
-          30,
-          29
-        ],
-        [
-          68,
-          31
-        ],
-        [
-          113,
-          24
-        ],
-        [
-          154,
-          29
-        ],
-        [
-          198,
-          12
-        ],
-        [
-          220,
-          20
-        ],
-        [
-          250,
-          16
-        ],
-        [
-          280,
-          32
-        ],
-        [
-          327,
-          28
-        ],
-        [
-          327,
-          180
-        ],
-        [
-          0,
-          180
-        ]
-      ],
-      "output": "assets/terrain/right-bank.webp",
-      "bytes": 23248,
       "animation": "transform only; no frame sequence"
     },
     {
@@ -1298,24 +1278,6 @@
       ],
       "output": "assets/terrain/bridge.webp",
       "bytes": 22078,
-      "animation": "transform only; no frame sequence"
-    },
-    {
-      "key": "cliff",
-      "source": "4.png",
-      "rect": [
-        14,
-        20,
-        595,
-        300
-      ],
-      "folder": "terrain",
-      "origin": [
-        0,
-        0
-      ],
-      "output": "assets/terrain/cliff.webp",
-      "bytes": 81590,
       "animation": "transform only; no frame sequence"
     },
     {
@@ -1575,62 +1537,84 @@
         ]
       ],
       "output": "assets/backgrounds/jawa/foreground.webp",
-      "bytes": 96580,
+      "bytes": 71078,
       "animation": "transform only; no frame sequence"
     },
     {
-      "key": "flame",
-      "source": "11.png",
+      "key": "papua-far",
+      "source": "BaraRimba_Papua_Parallax_Backgrounds/01_BG_Far_Cave_Silhouette.png",
       "rect": [
-        648,
-        10,
-        109,
-        187
+        0,
+        0,
+        2079,
+        185
       ],
-      "folder": "fire",
+      "folder": "backgrounds/papua",
       "origin": [
         0.5,
         1
       ],
-      "output": "assets/fire/flame.webp",
-      "bytes": 9302,
-      "animation": "transform only; no frame sequence"
+      "parallaxFactor": 0.08,
+      "output": "assets/backgrounds/papua/papua-far.webp",
+      "bytes": 32898,
+      "animation": "parallax strip; tiled horizontally"
     },
     {
-      "key": "smoke",
-      "source": "11.png",
+      "key": "papua-mid",
+      "source": "BaraRimba_Papua_Parallax_Backgrounds/02_BG_Mid_Waterfalls_Rocks.png",
       "rect": [
-        567,
-        342,
-        143,
-        174
+        0,
+        0,
+        2079,
+        181
       ],
-      "folder": "fire",
+      "folder": "backgrounds/papua",
       "origin": [
         0.5,
         1
       ],
-      "output": "assets/fire/smoke.webp",
-      "bytes": 9240,
-      "animation": "transform only; no frame sequence"
+      "parallaxFactor": 0.24,
+      "output": "assets/backgrounds/papua/papua-mid.webp",
+      "bytes": 49334,
+      "animation": "parallax strip; tiled horizontally"
     },
     {
-      "key": "embers",
-      "source": "11.png",
+      "key": "papua-torch",
+      "source": "BaraRimba_Papua_Parallax_Backgrounds/03_BG_Cave_Vines_Torchlight.png",
       "rect": [
-        13,
-        771,
-        141,
-        85
+        0,
+        0,
+        2079,
+        181
       ],
-      "folder": "fire",
+      "folder": "backgrounds/papua",
       "origin": [
         0.5,
         1
       ],
-      "output": "assets/fire/embers.webp",
-      "bytes": 8210,
-      "animation": "transform only; no frame sequence"
+      "parallaxFactor": 0.48,
+      "output": "assets/backgrounds/papua/papua-torch.webp",
+      "bytes": 58428,
+      "animation": "parallax strip; tiled horizontally"
+    },
+    {
+      "key": "papua-foreground",
+      "source": "BaraRimba_Papua_Parallax_Backgrounds/04_BG_Foreground_Jungle_Silhouette.png",
+      "rect": [
+        0,
+        0,
+        2079,
+        185
+      ],
+      "folder": "backgrounds/papua",
+      "origin": [
+        0.5,
+        1
+      ],
+      "parallaxFactor": 0.92,
+      "output": "assets/backgrounds/papua/papua-foreground.webp",
+      "bytes": 52936,
+      "animation": "parallax strip; tiled horizontally"
     }
   ]
 }

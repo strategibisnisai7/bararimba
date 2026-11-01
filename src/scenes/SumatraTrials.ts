@@ -314,6 +314,16 @@ export class SumatraTrials {
     else s.sprite.setPosition(d.x, ground + 6).setDisplaySize(120, 56);
     this.scene.cameras.main.shake(200, .007);
     for (let i = 0; i < 5; i++) fx?.dust(d.x + (Math.random() - .5) * 90, ground - 10);
+    // Extinguish nearby fires/braziers and damage boss if directly below
+    for (const f of this.ctx.hooks()?.fires.burning ?? []) {
+      if (Math.abs(d.x - f.def.x) < 85) { f.extinguish(); fx?.steam(f.def.x, f.def.y - 20, 8); }
+    }
+    const boss = (this.scene as unknown as { boss?: { hp: number; x: number; y: number; damage(n: number): void } }).boss;
+    if (boss && Math.abs(d.x - boss.x) < 160) {
+      boss.damage(35);
+      fx?.steam(boss.x, boss.y, 6);
+      this.ctx.event('BAM! Reruntuhan stalaktit menghantam Boss (35 damage)!');
+    }
     if (d.opens) { this.world.puzzles.openGate(d.opens); this.ctx.event('Reruntuhan menekan batu pemicu — pintu goa terangkat!'); }
     else if (pit) this.ctx.event('Lubang tertimbun reruntuhan — jalur tersambung!');
   }
